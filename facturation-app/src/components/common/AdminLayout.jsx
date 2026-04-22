@@ -19,13 +19,11 @@ import {
   useMediaQuery,
   Tooltip,
   Badge,
-  Chip,
   Fade,
   Zoom,
 } from '@mui/material';
 import {
   Dashboard,
-  People,
   Inventory,
   Category,
   Settings,
@@ -54,7 +52,6 @@ export default function AdminLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifAnchorEl, setNotifAnchorEl] = useState(null);
@@ -437,8 +434,18 @@ export default function AdminLayout({ children }) {
           </Box>
           
           <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <IconButton size="small" sx={{ color: '#94A3B8' }}>
-              <NotificationsNone sx={{ fontSize: 20 }} />
+            <IconButton
+              size="small"
+              onClick={(e) => setNotifAnchorEl(e.currentTarget)}
+              sx={{ color: '#94A3B8' }}
+            >
+              <Badge
+                badgeContent={notifications.length}
+                color="error"
+                sx={{ '& .MuiBadge-badge': { fontSize: 9, height: 14, minWidth: 14 } }}
+              >
+                <NotificationsNone sx={{ fontSize: 20 }} />
+              </Badge>
             </IconButton>
             <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0.5 }}>
               <Avatar sx={{
@@ -618,7 +625,16 @@ export default function AdminLayout({ children }) {
           </Box>
         ) : (
           notifications.map(notif => (
-            <MenuItem key={notif.id} sx={{ flexDirection: 'column', alignItems: 'flex-start', py: 1.5 }}>
+            <MenuItem
+              key={notif.id}
+              onClick={() => { setNotifAnchorEl(null); navigate('/admin/validate'); }}
+              sx={{
+                flexDirection: 'column', alignItems: 'flex-start', py: 1.5,
+                borderLeft: '3px solid',
+                borderLeftColor: notif.type === 'warning' ? '#EAB308' : '#6EE7B7',
+                '&:hover': { bgcolor: 'rgba(110,231,183,0.06)' },
+              }}
+            >
               <Typography sx={{ color: '#F1F5F9', fontSize: '0.8rem' }}>{notif.message}</Typography>
               <Typography sx={{ color: '#64748B', fontSize: '0.65rem', mt: 0.5 }}>{notif.time}</Typography>
             </MenuItem>

@@ -190,6 +190,52 @@ export const getFactures = async () => {
   return snapshot.val();
 };
 
+// Renvoie toutes les factures sous forme de tableau [{ id, ...data }]
+// en gérant à la fois la structure plate et la structure imbriquée par userId.
+export const getAllFacturesFlat = async () => {
+  try {
+    const snapshot = await get(ref(db, "factures"));
+    const raw = snapshot.val();
+    if (!raw) return [];
+
+    const isFacture = (v) =>
+      v && typeof v === "object" &&
+      ("statut" in v || "total_ttc" in v || "numero" in v || "date_creation" in v);
+
+    const entries = Object.entries(raw);
+    // Structure plate
+    if (entries.every(([, v]) => isFacture(v))) {
+      return entries.map(([id, v]) => ({ id, ...v }));
+    }
+    // Structure imbriquée par userId
+    const out = [];
+    entries.forEach(([userId, group]) => {
+      if (group && typeof group === "object" && !isFacture(group)) {
+        Object.entries(group).forEach(([id, v]) => {
+          if (isFacture(v)) out.push({ id, userId, _path: `factures/${userId}/${id}`, ...v });
+        });
+      } else if (isFacture(group)) {
+        out.push({ id: userId, _path: `factures/${userId}`, ...group });
+      }
+    });
+    return out;
+  } catch (error) {
+    console.error("Erreur récupération factures:", error);
+    return [];
+  }
+};
+
+// Met à jour une facture quelle que soit sa structure (plate ou imbriquée).
+export const updateFactureByPath = async (facture, data) => {
+  const path = facture._path || `factures/${facture.id}`;
+  await update(ref(db, path), data);
+};
+
+export const deleteFactureByPath = async (facture) => {
+  const path = facture._path || `factures/${facture.id}`;
+  await remove(ref(db, path));
+};
+
 export const updateFacture = async (id, data) => {
   await update(ref(db, `factures/${id}`), data);
 };

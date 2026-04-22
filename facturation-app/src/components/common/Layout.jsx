@@ -4,7 +4,7 @@ import {
   Menu, MenuItem, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Divider, useTheme, useMediaQuery, Tooltip,
 } from '@mui/material';
-import { Dashboard, Receipt, People, Inventory, Settings, Logout, Menu as MenuIcon, ChevronLeft, Person } from '@mui/icons-material';
+import { Dashboard, Receipt, People, Settings, Logout, Menu as MenuIcon, ChevronLeft, Person } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { logOut, auth } from '../../services/firebaseService';
 
@@ -25,7 +25,6 @@ export default function Layout({ children }) {
     { text: 'Tableau de bord', icon: <Dashboard />, path: '/app/dashboard' },
     { text: 'Factures', icon: <Receipt />, path: '/app/invoices' },
     { text: 'Clients', icon: <People />, path: '/app/clients' },
-    { text: 'Articles', icon: <Inventory />, path: '/app/articles' },
     { divider: true },
     { text: 'Paramètres', icon: <Settings />, path: '/app/settings' },
   ];

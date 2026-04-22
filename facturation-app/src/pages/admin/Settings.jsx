@@ -6,7 +6,6 @@ import {
   Grid,
   Card,
   CardContent,
-  CardHeader,
   Divider,
   Button,
   TextField,
@@ -14,38 +13,26 @@ import {
   FormControlLabel,
   FormGroup,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Slider,
   Alert,
   Snackbar,
   Avatar,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemSecondaryAction,
   Tab,
   Tabs,
   Chip,
   LinearProgress,
-  Tooltip,
 } from '@mui/material';
 import {
   Save,
-  Settings as SettingsIcon,
   Person,
   Security,
   Notifications,
   Palette,
-  Language,
   Backup,
-  Delete,
   AdminPanelSettings,
   VpnKey,
-  Email,
   Phone,
   LocationOn,
   Edit,
@@ -70,7 +57,6 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [tabValue, setTabValue] = useState(0);
-  const [darkMode, setDarkMode] = useState(true);
 
   // État du profil
   const [profile, setProfile] = useState({
@@ -109,6 +95,7 @@ export default function Settings() {
   // Charger les données utilisateur
   useEffect(() => {
     loadUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadUserData = async () => {

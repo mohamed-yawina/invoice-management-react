@@ -15,7 +15,9 @@ import ManageArticles from './pages/admin/ManageArticles';
 import ManageCategories from './pages/admin/ManageCategories';
 import AdminInvoices from './pages/admin/Invoices';
 import Settings from './pages/admin/Settings';
-import { CircularProgress, Box } from '@mui/material';
+import { CircularProgress, Box, CssBaseline } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import darkTheme from './theme/darkTheme';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -34,11 +36,29 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: '#0D0F14' }}><CircularProgress sx={{ color: '#6EE7B7' }} /></Box>;
-  if (!user) return <Routes><Route path="/" element={<Login />} /><Route path="/register" element={<Register />} /><Route path="*" element={<Navigate to="/" />} /></Routes>;
+  if (loading) return (
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: '#0D0F14' }}>
+        <CircularProgress sx={{ color: '#6EE7B7' }} />
+      </Box>
+    </ThemeProvider>
+  );
+  if (!user) return (
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </ThemeProvider>
+  );
 
   return (
-    <Routes>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <Routes>
       <Route path="/app" element={<Navigate to={isAdmin ? "/admin/dashboard" : "/app/dashboard"} />} />
       <Route path="/app/dashboard" element={<UserDashboard />} />
       <Route path="/app/clients" element={<Clients />} />
@@ -53,7 +73,8 @@ function App() {
       <Route path="/admin/validate" element={isAdmin ? <ValidateInvoices /> : <Navigate to="/app/dashboard" />} />
       <Route path="/admin/invoices" element={isAdmin ? <AdminInvoices /> : <Navigate to="/app/dashboard" />} /> 
       <Route path="/admin/settings" element={isAdmin ? <Settings /> : <Navigate to="/app/dashboard" />} />
-    </Routes>
+      </Routes>
+    </ThemeProvider>
   );
 }
 

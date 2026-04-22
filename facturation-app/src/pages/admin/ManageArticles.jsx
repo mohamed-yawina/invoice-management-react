@@ -1,68 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  IconButton,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Snackbar,
-  LinearProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Grid,
-  InputAdornment,
-  Tooltip,
-  Card,
-  CardContent,
+  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Button, IconButton, TextField, Dialog, DialogTitle,
+  DialogContent, DialogActions, Alert, Snackbar, LinearProgress,
+  FormControl, InputLabel, Select, MenuItem, Chip, Grid, InputAdornment,
+  Tooltip, Card, CardContent, TablePagination,
 } from '@mui/material';
 import {
-  Add,
-  Edit,
-  Delete,
-  Refresh,
-  Search,
-  Close,
-  Inventory,
-  Category,
-  AttachMoney,
+  Add, Edit, Delete, Refresh, Search, Close, Inventory, Category,
+  AttachMoney, QrCode2, Warning,
 } from '@mui/icons-material';
 import AdminLayout from '../../components/common/AdminLayout';
 import { jsonService } from '../../services/jsonService';
 
-// Composant StatCard
+// ─── StatCard ────────────────────────────────────────────────────────
 function StatCard({ icon, label, value, color, bg }) {
   return (
     <Card sx={{
-      bgcolor: '#0F1623',
-      border: '1px solid rgba(110,231,183,0.08)',
-      borderRadius: 3,
-      transition: 'transform 0.2s, box-shadow 0.2s',
+      bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)',
+      borderRadius: 3, transition: 'transform 0.2s, box-shadow 0.2s',
       '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 8px 32px ${color}18` },
     }}>
       <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: '16px !important' }}>
-        <Box sx={{ bgcolor: bg, borderRadius: '10px', p: 1.2, color, flexShrink: 0 }}>
-          {icon}
-        </Box>
+        <Box sx={{ bgcolor: bg, borderRadius: '10px', p: 1.2, color, flexShrink: 0 }}>{icon}</Box>
         <Box>
           <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {label}
           </Typography>
-          <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.75rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+          <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.55rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
             {value}
           </Typography>
         </Box>
@@ -71,172 +36,189 @@ function StatCard({ icon, label, value, color, bg }) {
   );
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────
+// Les IDs de db.json sont stockés en string : on compare toujours en string.
+const sameId = (a, b) => String(a) === String(b);
+
+const DEFAULT_FORM = {
+  designation: '',
+  prix_unitaire: '',
+  categorie_id: '',
+  reference: '',
+  stock: '',
+  description: '',
+};
+
 export default function ManageArticles() {
   const [loading, setLoading] = useState(true);
   const [articles, setArticles] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [filteredArticles, setFilteredArticles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  // Dialog pour ajouter/modifier
   const [openDialog, setOpenDialog] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({
-    designation: '',
-    prix_unitaire: '',
-    categorie_id: '',
-  });
+  const [form, setForm] = useState(DEFAULT_FORM);
+  const [saving, setSaving] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
-  // Dialog pour supprimer
   const [deleteDialog, setDeleteDialog] = useState({ open: false, article: null, loading: false });
 
-  // Charger les données
+  // ── Chargement ────────────────────────────────────────────────────
   const loadData = async () => {
     setLoading(true);
     try {
-      const [articlesData, categoriesData] = await Promise.all([
+      const [a, c] = await Promise.all([
         jsonService.getArticles(),
         jsonService.getCategories(),
       ]);
-      setArticles(articlesData);
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error('Erreur chargement:', error);
+      setArticles(a);
+      setCategories(c);
+    } catch (err) {
+      console.error(err);
       setSnackbar({ open: true, message: 'Erreur de chargement des données', severity: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
-  // Filtrer les articles
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredArticles(articles);
-      return;
+  // ── Filtrage ──────────────────────────────────────────────────────
+  const filteredArticles = useMemo(() => {
+    let list = articles;
+    if (categoryFilter) list = list.filter((a) => sameId(a.categorie_id, categoryFilter));
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase();
+      list = list.filter((a) =>
+        a.designation?.toLowerCase().includes(q) ||
+        a.reference?.toLowerCase().includes(q) ||
+        a.description?.toLowerCase().includes(q) ||
+        String(a.id ?? '').toLowerCase().includes(q)
+      );
     }
-    const term = searchTerm.toLowerCase();
-    setFilteredArticles(articles.filter(a =>
-      a.designation?.toLowerCase().includes(term) ||
-      a.id?.toString().includes(term)
-    ));
-  }, [searchTerm, articles]);
+    return list;
+  }, [articles, searchTerm, categoryFilter]);
 
-  // Sauvegarder (ajout ou modification)
+  const paginated = useMemo(
+    () => filteredArticles.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [filteredArticles, page, rowsPerPage]
+  );
+
+  // ── Stats ─────────────────────────────────────────────────────────
+  const stats = useMemo(() => {
+    const totalValue = articles.reduce((s, a) => s + (Number(a.prix_unitaire) || 0), 0);
+    const lowStock = articles.filter((a) => a.stock !== null && a.stock !== undefined && Number(a.stock) < 10).length;
+    return { totalValue, lowStock };
+  }, [articles]);
+
+  // ── Form ──────────────────────────────────────────────────────────
+  const resetForm = () => {
+    setForm(DEFAULT_FORM);
+    setEditId(null);
+    setFormErrors({});
+  };
+
+  const validateForm = () => {
+    const errs = {};
+    if (!form.designation.trim()) errs.designation = 'Champ requis';
+    if (form.prix_unitaire === '' || isNaN(Number(form.prix_unitaire)) || Number(form.prix_unitaire) < 0) {
+      errs.prix_unitaire = 'Prix invalide';
+    }
+    if (!form.categorie_id) errs.categorie_id = 'Choisissez une catégorie';
+    if (form.stock !== '' && (isNaN(Number(form.stock)) || Number(form.stock) < 0)) {
+      errs.stock = 'Stock invalide';
+    }
+    setFormErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handleSave = async () => {
-    if (!form.designation || !form.prix_unitaire || !form.categorie_id) {
-      setSnackbar({ open: true, message: 'Veuillez remplir tous les champs', severity: 'error' });
-      return;
-    }
-
+    if (!validateForm()) return;
+    setSaving(true);
     try {
-      const articleData = {
-        designation: form.designation,
-        prix_unitaire: parseFloat(form.prix_unitaire),
-        categorie_id: parseInt(form.categorie_id, 10),
+      const payload = {
+        designation: form.designation.trim(),
+        prix_unitaire: Number(form.prix_unitaire),
+        // on garde l'ID catégorie en string (cohérent avec db.json)
+        categorie_id: String(form.categorie_id),
+        reference: form.reference.trim() || null,
+        stock: form.stock === '' ? null : Number(form.stock),
+        description: form.description.trim() || null,
       };
 
       if (editId) {
-        await jsonService.updateArticle(editId, articleData);
+        await jsonService.updateArticle(editId, { id: String(editId), ...payload });
         setSnackbar({ open: true, message: 'Article modifié avec succès', severity: 'success' });
       } else {
-        const newId = Date.now();
-        await jsonService.addArticle({
-          id: newId,
-          ...articleData,
-        });
+        // Générer un ID string unique (cohérent avec db.json)
+        const newId = String(Date.now());
+        await jsonService.addArticle({ id: newId, ...payload });
         setSnackbar({ open: true, message: 'Article ajouté avec succès', severity: 'success' });
       }
       setOpenDialog(false);
       resetForm();
       loadData();
-    } catch (error) {
-      console.error('Erreur:', error);
+    } catch (err) {
+      console.error(err);
       setSnackbar({ open: true, message: "Erreur lors de l'enregistrement", severity: 'error' });
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Supprimer un article
   const handleDelete = async () => {
     const { article } = deleteDialog;
     if (!article) return;
-    
-    setDeleteDialog(d => ({ ...d, loading: true }));
+    setDeleteDialog((d) => ({ ...d, loading: true }));
     try {
       await jsonService.deleteArticle(article.id);
       setSnackbar({ open: true, message: `Article "${article.designation}" supprimé`, severity: 'success' });
       setDeleteDialog({ open: false, article: null, loading: false });
       loadData();
-    } catch (error) {
-      console.error('Erreur:', error);
+    } catch (err) {
+      console.error(err);
       setSnackbar({ open: true, message: 'Erreur lors de la suppression', severity: 'error' });
-      setDeleteDialog(d => ({ ...d, loading: false }));
+      setDeleteDialog((d) => ({ ...d, loading: false }));
     }
   };
 
-  // Réinitialiser le formulaire
-  const resetForm = () => {
-    setForm({ designation: '', prix_unitaire: '', categorie_id: '' });
-    setEditId(null);
-  };
-
-  // Ouvrir le dialog pour modifier
   const openEditDialog = (article) => {
     setEditId(article.id);
     setForm({
-      designation: article.designation,
-      prix_unitaire: article.prix_unitaire,
-      categorie_id: article.categorie_id,
+      designation: article.designation ?? '',
+      prix_unitaire: article.prix_unitaire ?? '',
+      categorie_id: String(article.categorie_id ?? ''),
+      reference: article.reference ?? '',
+      stock: article.stock ?? '',
+      description: article.description ?? '',
     });
+    setFormErrors({});
     setOpenDialog(true);
   };
 
-  // Obtenir le nom de la catégorie - VERSION CORRIGÉE
   const getCategoryName = (categorieId) => {
-    if (!categories || categories.length === 0) return 'Chargement...';
+    if (!categories.length) return 'Chargement...';
     if (categorieId === undefined || categorieId === null) return 'N/A';
-    
-    // Convertir en nombre pour la comparaison
-    const id = typeof categorieId === 'string' ? parseInt(categorieId, 10) : categorieId;
-    const category = categories.find(c => {
-      const catId = typeof c.id === 'string' ? parseInt(c.id, 10) : c.id;
-      return catId === id;
-    });
-    
-    return category ? category.nom : 'N/A';
+    const cat = categories.find((c) => sameId(c.id, categorieId));
+    return cat ? cat.nom : 'N/A';
   };
 
-  // Styles pour les champs
+  // ── Styles ────────────────────────────────────────────────────────
   const fieldSx = {
-    mb: 2,
     '& .MuiInputLabel-root': { color: '#64748B' },
     '& .MuiInputLabel-root.Mui-focused': { color: '#6EE7B7' },
     '& .MuiOutlinedInput-root': {
-      color: '#F1F5F9',
-      bgcolor: '#080C14',
-      borderRadius: '10px',
+      color: '#F1F5F9', bgcolor: '#080C14', borderRadius: '10px',
       '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
       '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
       '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
     },
+    '& .MuiFormHelperText-root': { color: '#EF4444' },
   };
-
-  const selectSx = {
-    color: '#F1F5F9',
-    bgcolor: '#080C14',
-    borderRadius: '10px',
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.08)' },
-    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(110,231,183,0.3)' },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6EE7B7' },
-    '& .MuiSvgIcon-root': { color: '#64748B' },
-  };
-
-  // Calculer la valeur totale du stock
-  const totalValue = articles.reduce((sum, a) => sum + (a.prix_unitaire || 0), 0);
 
   return (
     <AdminLayout>
@@ -246,37 +228,30 @@ export default function ManageArticles() {
           <Typography sx={{
             fontWeight: 800,
             background: 'linear-gradient(135deg, #6EE7B7 0%, #3B82F6 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-            mb: 0.5,
-            fontFamily: "'Syne', sans-serif",
-            letterSpacing: '-0.03em',
+            backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent',
+            mb: 0.5, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.03em',
             fontSize: { xs: '1.4rem', md: '1.9rem' },
           }}>
             Gestion des articles
           </Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>
-            Ajoutez, modifiez ou supprimez des articles
+            Ajoutez, modifiez ou supprimez des articles (JSON Server)
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5 }}>
           <Tooltip title="Actualiser la liste">
-            <IconButton
-              onClick={loadData}
-              disabled={loading}
-              sx={{
+            <span>
+              <IconButton onClick={loadData} disabled={loading} sx={{
                 color: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.08)',
                 border: '1px solid rgba(110,231,183,0.2)', borderRadius: '10px',
                 '&:hover': { bgcolor: 'rgba(110,231,183,0.16)' },
-              }}
-            >
-              <Refresh sx={{ fontSize: 20 }} />
-            </IconButton>
+              }}>
+                <Refresh sx={{ fontSize: 20, animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+              </IconButton>
+            </span>
           </Tooltip>
           <Button
-            variant="contained"
-            startIcon={<Add />}
+            variant="contained" startIcon={<Add />}
             onClick={() => { resetForm(); setOpenDialog(true); }}
             sx={{
               bgcolor: '#6EE7B7', color: '#080C14', fontWeight: 700,
@@ -290,216 +265,285 @@ export default function ManageArticles() {
         </Box>
       </Box>
 
-      {/* Cartes statistiques */}
+      {/* KPIs */}
       <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: { xs: 2, md: 3 } }}>
-        <Grid item xs={12} sm={4}>
-          <StatCard 
-            icon={<Inventory sx={{ fontSize: 26 }} />} 
-            label="Total articles" 
-            value={loading ? '—' : articles.length} 
-            color="#6EE7B7" 
-            bg="rgba(110,231,183,0.1)" 
-          />
+        <Grid item xs={6} sm={3}>
+          <StatCard icon={<Inventory sx={{ fontSize: 26 }} />} label="Total articles" value={loading ? '—' : articles.length} color="#6EE7B7" bg="rgba(110,231,183,0.1)" />
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <StatCard 
-            icon={<Category sx={{ fontSize: 26 }} />} 
-            label="Catégories" 
-            value={loading ? '—' : categories.length} 
-            color="#3B82F6" 
-            bg="rgba(59,130,246,0.1)" 
-          />
+        <Grid item xs={6} sm={3}>
+          <StatCard icon={<Category sx={{ fontSize: 26 }} />} label="Catégories" value={loading ? '—' : categories.length} color="#3B82F6" bg="rgba(59,130,246,0.1)" />
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <StatCard 
-            icon={<AttachMoney sx={{ fontSize: 26 }} />} 
-            label="Valeur totale du stock" 
-            value={loading ? '—' : `${totalValue.toLocaleString()} DH`} 
-            color="#EAB308" 
-            bg="rgba(234,179,8,0.1)" 
-          />
+        <Grid item xs={6} sm={3}>
+          <StatCard icon={<AttachMoney sx={{ fontSize: 26 }} />} label="Valeur catalogue" value={loading ? '—' : `${stats.totalValue.toLocaleString('fr-FR')} DH`} color="#EAB308" bg="rgba(234,179,8,0.1)" />
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <StatCard icon={<Warning sx={{ fontSize: 26 }} />} label="Stock faible (<10)" value={loading ? '—' : stats.lowStock} color="#EF4444" bg="rgba(239,68,68,0.1)" />
         </Grid>
       </Grid>
 
-      {/* Barre de recherche */}
+      {/* Barre de recherche & filtre */}
       <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: 2, mb: 3 }}>
-        <TextField
-          fullWidth
-          placeholder="Rechercher par nom ou ID..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          size="small"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search sx={{ color: '#64748B', fontSize: 20 }} />
-              </InputAdornment>
-            ),
-            endAdornment: searchTerm && (
-              <InputAdornment position="end">
-                <IconButton size="small" onClick={() => setSearchTerm('')} sx={{ color: '#64748B' }}>
-                  <Close sx={{ fontSize: 16 }} />
-                </IconButton>
-              </InputAdornment>
-            ),
-            sx: {
-              color: '#F1F5F9',
-              bgcolor: '#080C14',
-              borderRadius: '10px',
-              '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-              '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
-              '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
-              '& input': { color: '#F1F5F9' },
-              '& input::placeholder': { color: '#475569', opacity: 1 },
-            },
-          }}
-        />
-        {searchTerm && !loading && (
-          <Typography sx={{ color: '#64748B', fontSize: '0.78rem', mt: 1 }}>
-            {filteredArticles.length} résultat{filteredArticles.length !== 1 ? 's' : ''} pour « {searchTerm} »
+        <Grid container spacing={1.5} alignItems="center">
+          <Grid item xs={12} md={8}>
+            <TextField
+              fullWidth size="small" placeholder="Rechercher par nom, référence, description..."
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Search sx={{ color: '#64748B', fontSize: 20 }} /></InputAdornment>,
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearchTerm('')} sx={{ color: '#64748B' }}>
+                      <Close sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  color: '#F1F5F9', bgcolor: '#080C14', borderRadius: '10px',
+                  '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
+                  '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
+                  '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
+                  '& input::placeholder': { color: '#475569', opacity: 1 },
+                },
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <FormControl fullWidth size="small" sx={fieldSx}>
+              <InputLabel>Catégorie</InputLabel>
+              <Select
+                value={categoryFilter}
+                onChange={(e) => { setCategoryFilter(e.target.value); setPage(0); }}
+                label="Catégorie"
+                MenuProps={{ PaperProps: { sx: { bgcolor: '#0F1623' } } }}
+              >
+                <MenuItem value="">Toutes</MenuItem>
+                {categories.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>{c.nom}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+        {(searchTerm || categoryFilter) && !loading && (
+          <Typography sx={{ color: '#64748B', fontSize: '0.78rem', mt: 1.5 }}>
+            {filteredArticles.length} résultat{filteredArticles.length !== 1 ? 's' : ''} sur {articles.length}
           </Typography>
         )}
       </Paper>
 
-      {/* Tableau des articles */}
+      {/* Tableau */}
       <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, overflow: 'hidden' }}>
         {loading ? (
           <Box sx={{ p: 3 }}>
             <LinearProgress sx={{ bgcolor: '#1E2536', '& .MuiLinearProgress-bar': { bgcolor: '#6EE7B7' } }} />
           </Box>
         ) : (
-          <TableContainer sx={{ overflowX: 'auto' }}>
-            <Table sx={{ minWidth: 600 }}>
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
-                  <TableCell sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>ID</TableCell>
-                  <TableCell sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Désignation</TableCell>
-                  <TableCell sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Prix unitaire</TableCell>
-                  <TableCell sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Catégorie</TableCell>
-                  <TableCell sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredArticles.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} sx={{ py: 7, textAlign: 'center', borderBottom: 'none' }}>
-                      <Box sx={{ textAlign: 'center' }}>
+          <>
+            <TableContainer sx={{ overflowX: 'auto' }}>
+              <Table sx={{ minWidth: 900 }}>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
+                    {['Référence', 'Désignation', 'Prix unitaire', 'Stock', 'Catégorie', 'Actions'].map(h => (
+                      <TableCell key={h} sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {paginated.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} sx={{ py: 7, textAlign: 'center', borderBottom: 'none' }}>
                         <Inventory sx={{ color: '#1E293B', fontSize: 48, mb: 1 }} />
                         <Typography sx={{ color: '#64748B' }}>
-                          {searchTerm ? 'Aucun article ne correspond à votre recherche' : 'Aucun article trouvé'}
+                          {searchTerm || categoryFilter ? 'Aucun article ne correspond' : 'Aucun article trouvé'}
                         </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredArticles.map((article) => (
-                    <TableRow
-                      key={article.id}
-                      sx={{
-                        borderBottom: '1px solid rgba(255,255,255,0.03)',
-                        transition: 'background 0.15s',
-                        '&:hover': { bgcolor: 'rgba(110,231,183,0.03)' },
-                      }}
-                    >
-                      <TableCell sx={{ color: '#6EE7B7', fontFamily: 'monospace', fontWeight: 600 }}>{article.id}</TableCell>
-                      <TableCell sx={{ color: '#F1F5F9', fontWeight: 500 }}>{article.designation}</TableCell>
-                      <TableCell sx={{ color: '#F1F5F9', fontWeight: 600 }}>{article.prix_unitaire.toLocaleString()} DH</TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={getCategoryName(article.categorie_id)} 
-                          size="small" 
-                          sx={{ bgcolor: 'rgba(110,231,183,0.1)', color: '#6EE7B7' }} 
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <IconButton size="small" onClick={() => openEditDialog(article)} sx={{ color: '#3B82F6' }}>
-                          <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small" onClick={() => setDeleteDialog({ open: true, article, loading: false })} sx={{ color: '#EF4444' }}>
-                          <Delete fontSize="small" />
-                        </IconButton>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                  ) : paginated.map((article) => {
+                    const lowStock = article.stock !== null && article.stock !== undefined && Number(article.stock) < 10;
+                    return (
+                      <TableRow
+                        key={article.id}
+                        sx={{ borderBottom: '1px solid rgba(255,255,255,0.03)', '&:hover': { bgcolor: 'rgba(110,231,183,0.03)' } }}
+                      >
+                        <TableCell>
+                          {article.reference ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7 }}>
+                              <QrCode2 sx={{ color: '#64748B', fontSize: 16 }} />
+                              <Typography sx={{ color: '#6EE7B7', fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600 }}>
+                                {article.reference}
+                              </Typography>
+                            </Box>
+                          ) : (
+                            <Typography sx={{ color: '#64748B', fontFamily: 'monospace', fontSize: '0.78rem' }}>
+                              #{String(article.id).slice(0, 8)}
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell sx={{ color: '#F1F5F9', fontWeight: 500 }}>
+                          <Typography sx={{ fontWeight: 600 }}>{article.designation}</Typography>
+                          {article.description && (
+                            <Typography sx={{ color: '#64748B', fontSize: '0.75rem', mt: 0.3, maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {article.description}
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell sx={{ color: '#F1F5F9', fontWeight: 700 }}>
+                          {(Number(article.prix_unitaire) || 0).toLocaleString('fr-FR')} DH
+                        </TableCell>
+                        <TableCell>
+                          {article.stock === null || article.stock === undefined ? (
+                            <Chip label="N/A" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.04)', color: '#64748B', fontSize: '0.7rem' }} />
+                          ) : (
+                            <Chip
+                              label={`${article.stock} unit.`}
+                              size="small"
+                              icon={lowStock ? <Warning sx={{ fontSize: '14px !important' }} /> : undefined}
+                              sx={{
+                                bgcolor: lowStock ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.12)',
+                                color: lowStock ? '#EF4444' : '#22C55E',
+                                fontWeight: 600, fontSize: '0.72rem',
+                                '& .MuiChip-icon': { color: '#EF4444' },
+                              }}
+                            />
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={getCategoryName(article.categorie_id)} size="small"
+                            sx={{ bgcolor: 'rgba(110,231,183,0.1)', color: '#6EE7B7', fontWeight: 600, fontSize: '0.72rem' }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip title="Modifier">
+                            <IconButton size="small" onClick={() => openEditDialog(article)} sx={{ color: '#3B82F6' }}>
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Supprimer">
+                            <IconButton size="small" onClick={() => setDeleteDialog({ open: true, article, loading: false })} sx={{ color: '#EF4444' }}>
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              component="div"
+              count={filteredArticles.length}
+              page={page}
+              onPageChange={(_, p) => setPage(p)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              labelRowsPerPage="Par page :"
+              sx={{
+                color: '#94A3B8', borderTop: '1px solid rgba(255,255,255,0.05)',
+                '& .MuiSelect-icon, & .MuiIconButton-root': { color: '#94A3B8' },
+              }}
+            />
+          </>
         )}
       </Paper>
 
-      {/* Dialog Ajouter/Modifier */}
-      <Dialog 
-        open={openDialog} 
-        onClose={() => setOpenDialog(false)} 
-        maxWidth="sm" 
-        fullWidth 
+      {/* Dialog Ajout/Modification */}
+      <Dialog
+        open={openDialog} onClose={() => !saving && setOpenDialog(false)}
+        maxWidth="sm" fullWidth
         PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: '1px solid rgba(110,231,183,0.15)' } }}
       >
         <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, fontFamily: "'Syne', sans-serif" }}>
           {editId ? 'Modifier' : 'Ajouter'} un article
         </DialogTitle>
         <DialogContent sx={{ pt: '20px !important' }}>
-          <TextField
-            fullWidth
-            label="Désignation *"
-            value={form.designation}
-            onChange={(e) => setForm({ ...form, designation: e.target.value })}
-            sx={fieldSx}
-            placeholder="Nom de l'article"
-          />
-          <TextField
-            fullWidth
-            label="Prix unitaire (DH) *"
-            type="number"
-            value={form.prix_unitaire}
-            onChange={(e) => setForm({ ...form, prix_unitaire: e.target.value })}
-            sx={fieldSx}
-            placeholder="0"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">DH</InputAdornment>,
-            }}
-          />
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel sx={{ color: '#64748B', '&.Mui-focused': { color: '#6EE7B7' } }}>Catégorie *</InputLabel>
-            <Select
-              value={form.categorie_id}
-              onChange={(e) => setForm({ ...form, categorie_id: e.target.value })}
-              label="Catégorie *"
-              sx={selectSx}
-              MenuProps={{
-                PaperProps: {
-                  sx: { bgcolor: '#0F1623', backgroundImage: 'none' }
-                }
-              }}
-            >
-              <MenuItem value="">Sélectionner une catégorie</MenuItem>
-              {categories.map((cat) => (
-                <MenuItem key={cat.id} value={cat.id} sx={{ color: '#F1F5F9' }}>
-                  {cat.nom}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth label="Désignation *"
+                value={form.designation}
+                onChange={(e) => setForm({ ...form, designation: e.target.value })}
+                error={!!formErrors.designation} helperText={formErrors.designation}
+                placeholder="Nom de l'article" sx={fieldSx}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth label="Référence"
+                value={form.reference}
+                onChange={(e) => setForm({ ...form, reference: e.target.value })}
+                placeholder="Ex: DELL-XPS-15" sx={fieldSx}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth label="Prix unitaire (DH) *" type="number"
+                value={form.prix_unitaire}
+                onChange={(e) => setForm({ ...form, prix_unitaire: e.target.value })}
+                error={!!formErrors.prix_unitaire} helperText={formErrors.prix_unitaire}
+                placeholder="0" sx={fieldSx}
+                InputProps={{ endAdornment: <InputAdornment position="end" sx={{ '& .MuiTypography-root': { color: '#64748B' } }}>DH</InputAdornment> }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth sx={fieldSx} error={!!formErrors.categorie_id}>
+                <InputLabel>Catégorie *</InputLabel>
+                <Select
+                  value={form.categorie_id}
+                  onChange={(e) => setForm({ ...form, categorie_id: e.target.value })}
+                  label="Catégorie *"
+                  MenuProps={{ PaperProps: { sx: { bgcolor: '#0F1623' } } }}
+                >
+                  <MenuItem value="">Sélectionner</MenuItem>
+                  {categories.map((cat) => (
+                    <MenuItem key={cat.id} value={cat.id}>{cat.nom}</MenuItem>
+                  ))}
+                </Select>
+                {formErrors.categorie_id && (
+                  <Typography sx={{ color: '#EF4444', fontSize: '0.75rem', mt: 0.5, ml: 1.5 }}>
+                    {formErrors.categorie_id}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth label="Stock" type="number"
+                value={form.stock}
+                onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                error={!!formErrors.stock} helperText={formErrors.stock || 'Laisser vide pour services/formations'}
+                placeholder="0" sx={fieldSx}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth label="Description" multiline rows={2}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="Description courte de l'article" sx={fieldSx}
+              />
+            </Grid>
+          </Grid>
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', p: 2, gap: 1 }}>
-          <Button onClick={() => setOpenDialog(false)} sx={{ color: '#64748B' }}>Annuler</Button>
-          <Button 
-            onClick={handleSave} 
-            variant="contained" 
+          <Button onClick={() => setOpenDialog(false)} disabled={saving} sx={{ color: '#64748B' }}>Annuler</Button>
+          <Button
+            onClick={handleSave} disabled={saving} variant="contained"
             sx={{ bgcolor: '#6EE7B7', color: '#080C14', fontWeight: 700, '&:hover': { bgcolor: '#4ADE80' } }}
           >
-            {editId ? 'Modifier' : 'Ajouter'}
+            {saving ? 'Enregistrement...' : (editId ? 'Modifier' : 'Ajouter')}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Dialog Confirmation suppression */}
-      <Dialog 
-        open={deleteDialog.open} 
-        onClose={() => !deleteDialog.loading && setDeleteDialog({ open: false, article: null, loading: false })} 
-        maxWidth="xs" 
-        fullWidth 
+      {/* Dialog Suppression */}
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => !deleteDialog.loading && setDeleteDialog({ open: false, article: null, loading: false })}
+        maxWidth="xs" fullWidth
         PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.2)' } }}
       >
         <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2 }}>
@@ -509,48 +553,25 @@ export default function ManageArticles() {
           <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
             Êtes-vous sûr de vouloir supprimer l'article <strong>"{deleteDialog.article?.designation}"</strong> ?
           </Alert>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>
-            Cette action est irréversible.
-          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>Cette action est irréversible.</Typography>
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', p: 2, gap: 1 }}>
-          <Button 
-            onClick={() => setDeleteDialog({ open: false, article: null, loading: false })} 
-            disabled={deleteDialog.loading}
-            sx={{ color: '#64748B' }}
-          >
+          <Button onClick={() => setDeleteDialog({ open: false, article: null, loading: false })} disabled={deleteDialog.loading} sx={{ color: '#64748B' }}>
             Annuler
           </Button>
-          <Button 
-            onClick={handleDelete} 
-            variant="contained" 
-            disabled={deleteDialog.loading}
-            sx={{ bgcolor: '#EF4444', '&:hover': { bgcolor: '#DC2626' } }}
-          >
+          <Button onClick={handleDelete} variant="contained" disabled={deleteDialog.loading} sx={{ bgcolor: '#EF4444', '&:hover': { bgcolor: '#DC2626' } }}>
             {deleteDialog.loading ? 'Suppression...' : 'Supprimer'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar */}
-      <Snackbar 
-        open={snackbar.open} 
-        autoHideDuration={3000} 
-        onClose={() => setSnackbar(s => ({ ...s, open: false }))} 
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert 
-          severity={snackbar.severity} 
-          onClose={() => setSnackbar(s => ({ ...s, open: false }))}
-          sx={{
-            bgcolor: snackbar.severity === 'success' ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
-            color: snackbar.severity === 'success' ? '#22C55E' : '#EF4444',
-            border: `1px solid ${snackbar.severity === 'success' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
-          }}
-        >
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar((s) => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar((s) => ({ ...s, open: false }))} sx={{ borderRadius: 2 }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </AdminLayout>
   );
 }
