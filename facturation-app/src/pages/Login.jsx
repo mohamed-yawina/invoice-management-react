@@ -1,0 +1,86 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { Box, Button, TextField, Typography, InputAdornment, IconButton, Divider, Link, Alert, CircularProgress } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import GoogleIcon from "@mui/icons-material/Google";
+import { auth, logInWithEmail, signInWithGoogle, sendPasswordReset, getAuthErrorMessage, createOrUpdateUser } from "../services/firebaseService";
+
+const theme = createTheme({
+  palette: { mode: "dark", primary: { main: "#6EE7B7" }, background: { default: "#0D0F14", paper: "#161B26" }, text: { primary: "#F1F5F9", secondary: "#94A3B8" } },
+  typography: { fontFamily: "'DM Sans', sans-serif", h4: { fontFamily: "'Syne', sans-serif", fontWeight: 700 } },
+  shape: { borderRadius: 14 },
+  components: { MuiTextField: { styleOverrides: { root: { "& .MuiOutlinedInput-root": { backgroundColor: "#1E2536", "& fieldset": { borderColor: "#2D3748" }, "&:hover fieldset": { borderColor: "#6EE7B7" }, "&.Mui-focused fieldset": { borderColor: "#6EE7B7" } }, "& .MuiInputLabel-root.Mui-focused": { color: "#6EE7B7" } } } } }
+});
+
+export default function Login() {
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({ email: "", password: "" });
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => { if (user) navigate("/app/dashboard", { replace: true }); });
+    return () => unsub();
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!form.email || !form.password) { setError("Veuillez remplir tous les champs."); return; }
+    setLoading(true);
+    try {
+      const cred = await logInWithEmail(form.email, form.password);
+      await createOrUpdateUser(cred.user.uid, cred.user.email, cred.user.displayName);
+      navigate("/app/dashboard", { replace: true });
+    } catch (err) { setError(getAuthErrorMessage(err.code)); }
+    finally { setLoading(false); }
+  };
+
+  const handleGoogle = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const result = await signInWithGoogle();
+      const displayName = result.user.displayName || `${result.user.email.split('@')[0]}`;
+      await createOrUpdateUser(result.user.uid, result.user.email, displayName);
+      navigate("/app/dashboard", { replace: true });
+    } catch (err) { setError(getAuthErrorMessage(err.code)); }
+    finally { setLoading(false); }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!form.email.trim()) { setError("Indiquez votre email pour recevoir le lien."); return; }
+    setLoading(true);
+    try {
+      await sendPasswordReset(form.email.trim());
+      alert("Un email de réinitialisation a été envoyé.");
+    } catch (err) { setError(getAuthErrorMessage(err.code)); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", display: "flex", alignItems: "center", justifyContent: "center", p: 2, position: "relative", overflow: "hidden" }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ bgcolor: "background.paper", borderRadius: 4, p: { xs: 3, sm: 5 }, width: "100%", maxWidth: 440, boxShadow: "0 25px 60px rgba(0,0,0,0.5)", border: "1px solid #1E2D3D", zIndex: 1 }}>
+          <Box sx={{ width: 52, height: 52, borderRadius: "50%", bgcolor: "rgba(110,231,183,0.12)", display: "flex", alignItems: "center", justifyContent: "center", mb: 3, border: "1px solid rgba(110,231,183,0.3)" }}><LockOutlinedIcon sx={{ color: "primary.main", fontSize: 24 }} /></Box>
+          <Typography variant="h4" sx={{ mb: 0.5, color: "text.primary" }}>Bon retour 👋</Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>Connectez-vous à votre compte</Typography>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          <TextField fullWidth label="Email" name="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} sx={{ mb: 2 }} />
+          <TextField fullWidth label="Mot de passe" name="password" type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} sx={{ mb: 1 }} InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)} edge="end">{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }} />
+          <Box sx={{ textAlign: "right", mb: 3 }}><Link component="button" type="button" onClick={handleForgotPassword} underline="hover" sx={{ fontSize: "0.82rem", color: "primary.main" }}>Mot de passe oublié ?</Link></Box>
+          <Button type="submit" fullWidth variant="contained" disabled={loading} sx={{ py: 1.5, mb: 2, bgcolor: "primary.main", color: "#0D0F14", borderRadius: 3 }}>{loading ? <CircularProgress size={22} sx={{ color: "#0D0F14" }} /> : "Se connecter"}</Button>
+          <Divider sx={{ my: 2 }}>ou continuer avec</Divider>
+          <Button fullWidth variant="outlined" startIcon={<GoogleIcon />} disabled={loading} onClick={handleGoogle} sx={{ borderColor: "#2D3748", color: "text.primary", py: 1.2, borderRadius: 3, mb: 3 }}>Continuer avec Google</Button>
+          <Typography variant="body2" align="center" sx={{ color: "text.secondary" }}>Pas encore de compte ? <Link component={RouterLink} to="/register" underline="hover" sx={{ color: "primary.main", fontWeight: 600 }}>S'inscrire</Link></Typography>
+        </Box>
+      </Box>
+    </ThemeProvider>
+  );
+}
