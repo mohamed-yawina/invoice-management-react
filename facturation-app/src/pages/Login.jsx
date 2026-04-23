@@ -8,7 +8,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import GoogleIcon from "@mui/icons-material/Google";
-import { auth, logInWithEmail, signInWithGoogle, sendPasswordReset, getAuthErrorMessage, createOrUpdateUser } from "../services/firebaseService";
+import { auth, logInWithEmail, signInWithGoogle, sendPasswordReset, getAuthErrorMessage, createOrUpdateUser, getUserRole } from "../services/firebaseService";
 
 const theme = createTheme({
   palette: { mode: "dark", primary: { main: "#6EE7B7" }, background: { default: "#0D0F14", paper: "#161B26" }, text: { primary: "#F1F5F9", secondary: "#94A3B8" } },
@@ -24,10 +24,23 @@ export default function Login() {
   const [error, setError] = useState("");
   const [form, setForm] = useState({ email: "", password: "" });
 
+  const redirectByRole = async (uid) => {
+    try {
+      const role = await getUserRole(uid);
+      const target = role === "admin" ? "/admin/dashboard" : "/app/dashboard";
+      navigate(target, { replace: true });
+    } catch (e) {
+      navigate("/app/dashboard", { replace: true });
+    }
+  };
+
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => { if (user) navigate("/app/dashboard", { replace: true }); });
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) await redirectByRole(user.uid);
+    });
     return () => unsub();
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +50,7 @@ export default function Login() {
     try {
       const cred = await logInWithEmail(form.email, form.password);
       await createOrUpdateUser(cred.user.uid, cred.user.email, cred.user.displayName);
-      navigate("/app/dashboard", { replace: true });
+      await redirectByRole(cred.user.uid);
     } catch (err) { setError(getAuthErrorMessage(err.code)); }
     finally { setLoading(false); }
   };
@@ -49,7 +62,7 @@ export default function Login() {
       const result = await signInWithGoogle();
       const displayName = result.user.displayName || `${result.user.email.split('@')[0]}`;
       await createOrUpdateUser(result.user.uid, result.user.email, displayName);
-      navigate("/app/dashboard", { replace: true });
+      await redirectByRole(result.user.uid);
     } catch (err) { setError(getAuthErrorMessage(err.code)); }
     finally { setLoading(false); }
   };

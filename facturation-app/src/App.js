@@ -55,24 +55,42 @@ function App() {
     </ThemeProvider>
   );
 
+  const homePath = isAdmin ? "/admin/dashboard" : "/app/dashboard";
+
+  // Route user : un admin est automatiquement renvoyé vers son dashboard
+  const UserRoute = ({ children }) =>
+    isAdmin ? <Navigate to="/admin/dashboard" replace /> : children;
+
+  // Route admin : un user non-admin est renvoyé vers son dashboard
+  const AdminRoute = ({ children }) =>
+    isAdmin ? children : <Navigate to="/app/dashboard" replace />;
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <Routes>
-      <Route path="/app" element={<Navigate to={isAdmin ? "/admin/dashboard" : "/app/dashboard"} />} />
-      <Route path="/app/dashboard" element={<UserDashboard />} />
-      <Route path="/app/clients" element={<Clients />} />
-      <Route path="/app/invoices" element={<InvoiceHistory />} />
-      <Route path="/app/invoices/new" element={<CreateInvoice />} />
-      <Route path="/admin/dashboard" element={isAdmin ? <AdminDashboard /> : <Navigate to="/app/dashboard" />} />
-      <Route path="/admin/validate" element={isAdmin ? <ValidateInvoices /> : <Navigate to="/app/dashboard" />} />
-      <Route path="/admin/users" element={isAdmin ? <ManageUsers /> : <Navigate to="/app/dashboard" />} />
-      <Route path="*" element={<Navigate to={isAdmin ? "/admin/dashboard" : "/app/dashboard"} />} />
-      <Route path="/admin/articles" element={isAdmin ? <ManageArticles /> : <Navigate to="/app/dashboard" />} />
-      <Route path="/admin/categories" element={isAdmin ? <ManageCategories /> : <Navigate to="/app/dashboard" />} />
-      <Route path="/admin/validate" element={isAdmin ? <ValidateInvoices /> : <Navigate to="/app/dashboard" />} />
-      <Route path="/admin/invoices" element={isAdmin ? <AdminInvoices /> : <Navigate to="/app/dashboard" />} /> 
-      <Route path="/admin/settings" element={isAdmin ? <Settings /> : <Navigate to="/app/dashboard" />} />
+        {/* Racine et /app -> redirigent vers le bon dashboard selon le rôle */}
+        <Route path="/" element={<Navigate to={homePath} replace />} />
+        <Route path="/app" element={<Navigate to={homePath} replace />} />
+
+        {/* Routes USER (bloquées pour admin) */}
+        <Route path="/app/dashboard" element={<UserRoute><UserDashboard /></UserRoute>} />
+        <Route path="/app/clients" element={<UserRoute><Clients /></UserRoute>} />
+        <Route path="/app/invoices" element={<UserRoute><InvoiceHistory /></UserRoute>} />
+        <Route path="/app/invoices/new" element={<UserRoute><CreateInvoice /></UserRoute>} />
+
+        {/* Routes ADMIN (bloquées pour non-admin) */}
+        <Route path="/admin" element={<Navigate to={homePath} replace />} />
+        <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/admin/validate" element={<AdminRoute><ValidateInvoices /></AdminRoute>} />
+        <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
+        <Route path="/admin/articles" element={<AdminRoute><ManageArticles /></AdminRoute>} />
+        <Route path="/admin/categories" element={<AdminRoute><ManageCategories /></AdminRoute>} />
+        <Route path="/admin/invoices" element={<AdminRoute><AdminInvoices /></AdminRoute>} />
+        <Route path="/admin/settings" element={<AdminRoute><Settings /></AdminRoute>} />
+
+        {/* Catch-all -> home selon le rôle */}
+        <Route path="*" element={<Navigate to={homePath} replace />} />
       </Routes>
     </ThemeProvider>
   );
