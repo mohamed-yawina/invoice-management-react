@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
+import React, { useState } from "react";
 import { Box, Button, TextField, Typography, InputAdornment, IconButton, Divider, Link, Alert, CircularProgress, LinearProgress, Checkbox, FormControlLabel } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -10,7 +8,7 @@ import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
 import GoogleIcon from "@mui/icons-material/Google";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { auth, registerWithEmail, signInWithGoogle, getAuthErrorMessage, createOrUpdateUser } from "../services/firebaseService";
+import { registerWithEmail, signInWithGoogle, getAuthErrorMessage, createOrUpdateUser } from "../services/firebaseService";
 
 const theme = createTheme({
   palette: { mode: "dark", primary: { main: "#818CF8" }, background: { default: "#0D0F14", paper: "#161B26" }, text: { primary: "#F1F5F9", secondary: "#94A3B8" } },
@@ -36,19 +34,15 @@ const rules = [
   { label: "Un caractère spécial", test: (p) => /[^A-Za-z0-9]/.test(p) },
 ];
 
+// La redirection après inscription est gérée par <PublicOnly>/<HomeRedirect>
+// dans AppRoutes via AuthContext.
 export default function Register() {
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "", confirm: "" });
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => { if (user) navigate("/app/dashboard", { replace: true }); });
-    return () => unsub();
-  }, [navigate]);
 
   const strength = getPasswordStrength(form.password);
 
@@ -63,7 +57,6 @@ export default function Register() {
       const displayName = `${form.firstName} ${form.lastName}`.trim();
       const cred = await registerWithEmail(form.email, form.password, displayName);
       await createOrUpdateUser(cred.user.uid, form.email, displayName, 'user');
-      navigate("/app/dashboard", { replace: true });
     } catch (err) { setError(getAuthErrorMessage(err.code)); }
     finally { setLoading(false); }
   };
@@ -74,7 +67,6 @@ export default function Register() {
       const result = await signInWithGoogle();
       const displayName = result.user.displayName || `${result.user.email.split('@')[0]}`;
       await createOrUpdateUser(result.user.uid, result.user.email, displayName, 'user');
-      navigate("/app/dashboard", { replace: true });
     } catch (err) { setError(getAuthErrorMessage(err.code)); }
     finally { setLoading(false); }
   };

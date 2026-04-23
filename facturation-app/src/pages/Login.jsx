@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
+import React, { useState } from "react";
 import { Box, Button, TextField, Typography, InputAdornment, IconButton, Divider, Link, Alert, CircularProgress } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -8,7 +6,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import GoogleIcon from "@mui/icons-material/Google";
-import { auth, logInWithEmail, signInWithGoogle, sendPasswordReset, getAuthErrorMessage, createOrUpdateUser, getUserRole } from "../services/firebaseService";
+import { logInWithEmail, signInWithGoogle, sendPasswordReset, getAuthErrorMessage, createOrUpdateUser } from "../services/firebaseService";
 
 const theme = createTheme({
   palette: { mode: "dark", primary: { main: "#6EE7B7" }, background: { default: "#0D0F14", paper: "#161B26" }, text: { primary: "#F1F5F9", secondary: "#94A3B8" } },
@@ -17,30 +15,13 @@ const theme = createTheme({
   components: { MuiTextField: { styleOverrides: { root: { "& .MuiOutlinedInput-root": { backgroundColor: "#1E2536", "& fieldset": { borderColor: "#2D3748" }, "&:hover fieldset": { borderColor: "#6EE7B7" }, "&.Mui-focused fieldset": { borderColor: "#6EE7B7" } }, "& .MuiInputLabel-root.Mui-focused": { color: "#6EE7B7" } } } } }
 });
 
+// La redirection après auth est gérée par <HomeRedirect /> dans AppRoutes
+// (via AuthContext). On a plus besoin d'une navigation manuelle ici.
 export default function Login() {
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ email: "", password: "" });
-
-  const redirectByRole = async (uid) => {
-    try {
-      const role = await getUserRole(uid);
-      const target = role === "admin" ? "/admin/dashboard" : "/app/dashboard";
-      navigate(target, { replace: true });
-    } catch (e) {
-      navigate("/app/dashboard", { replace: true });
-    }
-  };
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (user) await redirectByRole(user.uid);
-    });
-    return () => unsub();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,7 +31,6 @@ export default function Login() {
     try {
       const cred = await logInWithEmail(form.email, form.password);
       await createOrUpdateUser(cred.user.uid, cred.user.email, cred.user.displayName);
-      await redirectByRole(cred.user.uid);
     } catch (err) { setError(getAuthErrorMessage(err.code)); }
     finally { setLoading(false); }
   };
@@ -62,7 +42,6 @@ export default function Login() {
       const result = await signInWithGoogle();
       const displayName = result.user.displayName || `${result.user.email.split('@')[0]}`;
       await createOrUpdateUser(result.user.uid, result.user.email, displayName);
-      await redirectByRole(result.user.uid);
     } catch (err) { setError(getAuthErrorMessage(err.code)); }
     finally { setLoading(false); }
   };
