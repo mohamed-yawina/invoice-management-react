@@ -1,38 +1,30 @@
 import React, { useState } from 'react';
 import {
-  AppBar, Toolbar, IconButton, Typography, Box, Avatar, Badge,
+  AppBar, Toolbar, IconButton, Typography, Box, Avatar,
   Menu, MenuItem, Divider, Fade,
 } from '@mui/material';
 import {
-  Menu as MenuIcon, NotificationsNone, Person, Logout,
+  Menu as MenuIcon, Person, Logout,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import NotificationBell from './NotificationBell';
 
 /**
  * Topbar mobile (affichée uniquement en < md). Gère :
  *  - bouton ouverture drawer mobile
- *  - badge de notifications (optionnel)
+ *  - cloche de notifications (NotificationBell)
  *  - menu utilisateur (profil / déconnexion)
  *
  * Props :
  *  - onMobileMenuOpen()
  *  - brand: { title, icon }
  *  - profilePath (ex: /admin/settings ou /app/settings)
- *  - notifications?: [{ id, message, type, time, onClick? }]
- *  - notifTargetPath?: string (chemin par défaut au clic d'une notif)
  */
-export default function Navbar({
-  onMobileMenuOpen,
-  brand,
-  profilePath,
-  notifications = [],
-  notifTargetPath,
-}) {
+export default function Navbar({ onMobileMenuOpen, brand, profilePath }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifAnchorEl, setNotifAnchorEl] = useState(null);
 
   const handleLogout = async () => {
     setAnchorEl(null);
@@ -71,16 +63,8 @@ export default function Navbar({
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            {notifications && (
-              <IconButton size="small" onClick={(e) => setNotifAnchorEl(e.currentTarget)}
-                sx={{ color: '#94A3B8' }}>
-                <Badge badgeContent={notifications.length} color="error"
-                  sx={{ '& .MuiBadge-badge': { fontSize: 9, height: 14, minWidth: 14 } }}>
-                  <NotificationsNone sx={{ fontSize: 20 }} />
-                </Badge>
-              </IconButton>
-            )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <NotificationBell compact iconSize={20} />
             <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0.5 }}>
               <Avatar sx={{
                 width: 32, height: 32,
@@ -126,51 +110,6 @@ export default function Navbar({
           Déconnexion
         </MenuItem>
       </Menu>
-
-      {/* Notifications */}
-      {notifications && (
-        <Menu anchorEl={notifAnchorEl} open={Boolean(notifAnchorEl)}
-          onClose={() => setNotifAnchorEl(null)}
-          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          TransitionComponent={Fade}
-          PaperProps={{ sx: {
-            bgcolor: '#0D1117', border: '1px solid rgba(110,231,183,0.15)',
-            borderRadius: '16px', mt: 1, minWidth: 280, maxWidth: 320,
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-          }}}>
-          <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <Typography sx={{ color: '#F1F5F9', fontSize: '0.85rem', fontWeight: 600 }}>
-              Notifications
-            </Typography>
-          </Box>
-          {notifications.length === 0 ? (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
-              <Typography sx={{ color: '#64748B', fontSize: '0.8rem' }}>
-                Aucune notification
-              </Typography>
-            </Box>
-          ) : (
-            notifications.map((n) => (
-              <MenuItem key={n.id} onClick={() => {
-                setNotifAnchorEl(null);
-                if (n.onClick) n.onClick();
-                else if (notifTargetPath) navigate(notifTargetPath);
-              }} sx={{
-                flexDirection: 'column', alignItems: 'flex-start', py: 1.5,
-                borderLeft: '3px solid',
-                borderLeftColor: n.type === 'warning' ? '#EAB308' : '#6EE7B7',
-                '&:hover': { bgcolor: 'rgba(110,231,183,0.06)' },
-              }}>
-                <Typography sx={{ color: '#F1F5F9', fontSize: '0.8rem' }}>{n.message}</Typography>
-                {n.time && (
-                  <Typography sx={{ color: '#64748B', fontSize: '0.65rem', mt: 0.5 }}>{n.time}</Typography>
-                )}
-              </MenuItem>
-            ))
-          )}
-        </Menu>
-      )}
     </>
   );
 }

@@ -3,9 +3,11 @@ import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
   Divider, Typography, Avatar, IconButton, Tooltip, Badge, Fade, Zoom,
 } from '@mui/material';
-import { ChevronLeft, ChevronRight, Logout, ExpandMore } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight, Logout } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import NotificationBell from './NotificationBell';
+import CompanySwitcher from './CompanySwitcher';
 
 /**
  * Sidebar générique pour User ET Admin.
@@ -130,6 +132,8 @@ export default function Sidebar({
         </Fade>
       )}
 
+      <CompanySwitcher collapsed={collapsed && !isMobile} />
+
       {/* Navigation */}
       <List sx={{ flex: 1, px: collapsed ? 1 : 1.5, py: 2, overflowY: 'auto', overflowX: 'hidden' }}>
         {menuItems.map((item, idx) => item.divider ? (
@@ -215,11 +219,14 @@ export default function Sidebar({
                   {user?.email || ''}
                 </Typography>
               </Box>
-              <IconButton size="small" sx={{ color: '#64748B', '&:hover': { color: '#6EE7B7' } }}>
-                <ExpandMore sx={{ fontSize: 18 }} />
-              </IconButton>
+              <NotificationBell iconSize={18} compact />
             </Box>
           </Fade>
+        )}
+        {collapsed && !isMobile && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+            <NotificationBell iconSize={20} compact />
+          </Box>
         )}
         <Tooltip title={collapsed ? 'Déconnexion' : ''} placement="right">
           <ListItemButton onClick={handleLogout} sx={{

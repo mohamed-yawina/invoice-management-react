@@ -88,7 +88,7 @@ export default function Register() {
           <Button type="submit" fullWidth variant="contained" disabled={loading} sx={{ py: 1.5, mb: 2, bgcolor: "primary.main", color: "#fff", borderRadius: 3 }}>{loading ? <CircularProgress size={22} /> : "Créer mon compte"}</Button>
           <Divider sx={{ my: 2 }}>ou s'inscrire avec</Divider>
           <Button fullWidth variant="outlined" startIcon={<GoogleIcon />} disabled={loading} onClick={handleGoogle} sx={{ borderColor: "#2D3748", color: "text.primary", py: 1.2, borderRadius: 3, mb: 3 }}>Continuer avec Google</Button>
-          <Typography variant="body2" align="center">Vous avez déjà un compte ? <Link component={RouterLink} to="/" underline="hover" sx={{ color: "primary.main", fontWeight: 600 }}>Se connecter</Link></Typography>
+          <Typography variant="body2" align="center">Vous avez déjà un compte ? <Link component={RouterLink} to="/login" underline="hover" sx={{ color: "primary.main", fontWeight: 600 }}>Se connecter</Link></Typography>
         </Box>
       </Box>
     </ThemeProvider>

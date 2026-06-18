@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.0.0",
@@ -18,20 +19,27 @@
     "formik": "^2.4.9",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
+    "notistack": "^3.0.2",
+    "qrcode": "^1.5.4",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.14.2",
     "react-scripts": "5.0.1",
+    "react-signature-canvas": "^1.1.0-alpha.2",
     "recharts": "^3.8.1",
     "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5",
     "yup": "^1.7.1"
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:mobile": "powershell -ExecutionPolicy Bypass -File scripts/tunnel-mobile.ps1",
+    "tunnel": "powershell -ExecutionPolicy Bypass -File scripts/tunnel-mobile.ps1",
+    "firewall": "powershell -ExecutionPolicy Bypass -File scripts/open-firewall.ps1",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "json-server": "json-server --watch db.json --port 3001"
+    "json-server": "json-server --watch articles.json --port 3001"
   },
   "eslintConfig": {
     "extends": [

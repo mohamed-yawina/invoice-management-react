@@ -9,7 +9,9 @@ import {
   Warning, Refresh, TrendingUp, TrendingDown, TrendingFlat, BugReport,
 } from '@mui/icons-material';
 import { db, ref, get } from '../../services/firebaseService';
+import { getInvoiceAmountMad, formatMoney } from '../../utils/currency';
 import AdminLayout from '../../components/common/AdminLayout';
+import { useCompany } from '../../contexts/CompanyContext';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
@@ -114,11 +116,13 @@ function extractFactures(snapshot) {
 export default function AdminDashboard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { filterItems } = useCompany();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [allFactures, setAllFactures] = useState([]);
 
   const [stats, setStats] = useState({
     totalFactures: 0, totalEncaisse: 0, facturesEnAttente: 0,
@@ -154,12 +158,25 @@ export default function AdminDashboard() {
       }
 
       setDebugInfo(null);
+      setAllFactures(factures);
+
+    } catch (err) {
+      console.error('Erreur chargement dashboard:', err);
+      setError(`Erreur Firebase : ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const factures = filterItems(allFactures);
+    if (allFactures.length === 0) return;
 
       // ── KPIs ──────────────────────────────────────────────────────────────
       const facturesPayees    = factures.filter(f => f.statut === 'Payée');
       const facturesEnAttente = factures.filter(f => f.statut === 'En attente');
       const facturesRejetees  = factures.filter(f => f.statut === 'Rejetée');
-      const totalEncaisse     = facturesPayees.reduce((s, f) => s + (Number(f.total_ttc) || 0), 0);
+      const totalEncaisse     = facturesPayees.reduce((s, f) => s + getInvoiceAmountMad(f), 0);
 
       setStats({
         totalFactures: factures.length,
@@ -176,8 +193,8 @@ export default function AdminDashboard() {
       const prevMK = toMK(new Date(now.getFullYear(), now.getMonth() - 1));
       const calcTrend = (cur, prev) => prev > 0 ? ((cur - prev) / prev) * 100 : null;
 
-      const curEnc  = facturesPayees.filter(f => toMK(f.date_creation) === curMK).reduce((s, f) => s + (Number(f.total_ttc) || 0), 0);
-      const prevEnc = facturesPayees.filter(f => toMK(f.date_creation) === prevMK).reduce((s, f) => s + (Number(f.total_ttc) || 0), 0);
+      const curEnc  = facturesPayees.filter(f => toMK(f.date_creation) === curMK).reduce((s, f) => s + getInvoiceAmountMad(f), 0);
+      const prevEnc = facturesPayees.filter(f => toMK(f.date_creation) === prevMK).reduce((s, f) => s + getInvoiceAmountMad(f), 0);
       const curCnt  = factures.filter(f => toMK(f.date_creation) === curMK).length;
       const prevCnt = factures.filter(f => toMK(f.date_creation) === prevMK).length;
 
@@ -193,9 +210,9 @@ export default function AdminDashboard() {
           monthlyMap.set(mk, { month: label, key: mk, ca: 0, nombreFactures: 0, encaisse: 0, enAttente: 0 });
         }
         const e = monthlyMap.get(mk);
-        e.ca += Number(f.total_ttc) || 0;
+        e.ca += getInvoiceAmountMad(f);
         e.nombreFactures++;
-        if (f.statut === 'Payée')      e.encaisse  += Number(f.total_ttc) || 0;
+        if (f.statut === 'Payée')      e.encaisse  += getInvoiceAmountMad(f);
         if (f.statut === 'En attente') e.enAttente++;
       });
 
@@ -219,14 +236,7 @@ export default function AdminDashboard() {
           .sort((a, b) => new Date(b.date_creation) - new Date(a.date_creation))
           .slice(0, 6)
       );
-
-    } catch (err) {
-      console.error('Erreur chargement dashboard:', err);
-      setError(`Erreur Firebase : ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  }, [allFactures, filterItems]);
 
   useEffect(() => { loadDashboardData(); }, [loadDashboardData]);
 
@@ -237,7 +247,7 @@ export default function AdminDashboard() {
 
   const kpiCards = [
     { title: 'Total Factures',      value: stats.totalFactures,                                 icon: <ReceiptLong />, color: '#3B82F6', bg: 'rgba(59,130,246,0.12)',  trend: trends.count },
-    { title: 'Total Encaissé',      value: `${stats.totalEncaisse.toLocaleString('fr-FR')} DH`, icon: <Paid />,        color: '#22C55E', bg: 'rgba(34,197,94,0.12)',   trend: trends.encaisse },
+    { title: 'Total Encaissé',      value: formatMoney(stats.totalEncaisse, 'MAD'), icon: <Paid />,        color: '#22C55E', bg: 'rgba(34,197,94,0.12)',   trend: trends.encaisse },
     { title: 'En attente',          value: stats.facturesEnAttente,                             icon: <Pending />,     color: '#EAB308', bg: 'rgba(234,179,8,0.12)' },
     { title: 'Factures rejetées',   value: stats.facturesRejetees,                              icon: <Cancel />,      color: '#EF4444', bg: 'rgba(239,68,68,0.12)' },
   ];
@@ -352,7 +362,7 @@ export default function AdminDashboard() {
                   <Box>
                     <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>Montant moyen / Facture</Typography>
                     <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.35rem', letterSpacing: '-0.02em' }}>
-                      {Math.round(stats.montantMoyenParFacture).toLocaleString('fr-FR')} DH
+                      {formatMoney(Math.round(stats.montantMoyenParFacture), 'MAD')}
                     </Typography>
                   </Box>
                 </Box>
@@ -535,7 +545,7 @@ export default function AdminDashboard() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      {['N° Facture', 'Date', 'Montant TTC', 'Statut', 'Validation'].map(h => (
+                      {['N° Facture', 'Date', 'Devise', 'Montant TTC', 'Statut', 'Validation'].map(h => (
                         <th key={h} style={{ textAlign: 'left', padding: '9px 12px', color: '#64748B', fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                           {h}
                         </th>
@@ -557,8 +567,11 @@ export default function AdminDashboard() {
                           <td style={{ padding: '11px 12px', color: '#64748B', fontSize: '0.8rem' }}>
                             {invoice.date_creation ? new Date(invoice.date_creation).toLocaleDateString('fr-FR') : '—'}
                           </td>
+                          <td style={{ padding: '11px 12px', color: '#64748B', fontSize: '0.8rem' }}>
+                            {invoice.currency || 'MAD'}
+                          </td>
                           <td style={{ padding: '11px 12px', color: '#F1F5F9', fontSize: '0.8rem', fontWeight: 600 }}>
-                            {(Number(invoice.total_ttc) || 0).toLocaleString('fr-FR')} DH
+                            {formatMoney(invoice.total_ttc, invoice.currency)}
                           </td>
                           <td style={{ padding: '11px 12px' }}>
                             <span style={{ display: 'inline-block', padding: '2px 9px', borderRadius: 20, fontSize: '0.7rem', fontWeight: 600, backgroundColor: s.bg, color: s.color }}>

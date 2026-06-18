@@ -15,8 +15,7 @@ const theme = createTheme({
   components: { MuiTextField: { styleOverrides: { root: { "& .MuiOutlinedInput-root": { backgroundColor: "#1E2536", "& fieldset": { borderColor: "#2D3748" }, "&:hover fieldset": { borderColor: "#6EE7B7" }, "&.Mui-focused fieldset": { borderColor: "#6EE7B7" } }, "& .MuiInputLabel-root.Mui-focused": { color: "#6EE7B7" } } } } }
 });
 
-// La redirection après auth est gérée par <HomeRedirect /> dans AppRoutes
-// (via AuthContext). On a plus besoin d'une navigation manuelle ici.
+// La redirection après auth est gérée par AuthContext + AppRoutes
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -71,6 +70,7 @@ export default function Login() {
           <Divider sx={{ my: 2 }}>ou continuer avec</Divider>
           <Button fullWidth variant="outlined" startIcon={<GoogleIcon />} disabled={loading} onClick={handleGoogle} sx={{ borderColor: "#2D3748", color: "text.primary", py: 1.2, borderRadius: 3, mb: 3 }}>Continuer avec Google</Button>
           <Typography variant="body2" align="center" sx={{ color: "text.secondary" }}>Pas encore de compte ? <Link component={RouterLink} to="/register" underline="hover" sx={{ color: "primary.main", fontWeight: 600 }}>S'inscrire</Link></Typography>
+          <Typography variant="body2" align="center" sx={{ color: "text.secondary", mt: 2 }}><Link component={RouterLink} to="/" underline="hover" sx={{ color: "text.secondary", fontSize: "0.82rem" }}>← Retour à l'accueil</Link></Typography>
         </Box>
       </Box>
     </ThemeProvider>

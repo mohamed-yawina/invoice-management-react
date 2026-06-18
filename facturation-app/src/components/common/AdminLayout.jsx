@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, useTheme, useMediaQuery } from '@mui/material';
 import {
   Dashboard, Inventory, Category, Settings,
-  AdminPanelSettings, CheckCircle, ManageAccounts, Receipt,
+  AdminPanelSettings, CheckCircle, ManageAccounts, Receipt, Archive, Business,
 } from '@mui/icons-material';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
@@ -24,24 +24,15 @@ export default function AdminLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
-  const [notifications, setNotifications] = useState([]);
 
-  // Factures en attente pour le badge + les notifications
+  // Badge "À valider" : nombre de factures en attente
   useEffect(() => {
     const load = async () => {
       try {
         const snap = await get(ref(db, 'factures'));
         if (!snap.exists()) return;
-        const pending = Object.values(snap.val()).filter(f => f.statut === 'En attente').length;
+        const pending = Object.values(snap.val()).filter(f => f.statut === 'En attente' && !f.archived).length;
         setPendingCount(pending);
-        if (pending > 0) {
-          setNotifications([{
-            id: 1,
-            message: `${pending} facture(s) en attente de validation`,
-            type: 'warning',
-            time: 'maintenant',
-          }]);
-        }
       } catch (e) {
         console.error('Erreur chargement factures:', e);
       }
@@ -52,9 +43,11 @@ export default function AdminLayout({ children }) {
   const menuItems = [
     { text: 'Tableau de bord', icon: <Dashboard />, path: '/admin/dashboard', exact: true },
     { text: 'Factures', icon: <Receipt />, path: '/admin/invoices' },
+    { text: 'Archivage annuel', icon: <Archive />, path: '/admin/archives' },
     { text: 'À valider', icon: <CheckCircle />, path: '/admin/validate', badge: true, badgeCount: pendingCount },
     { divider: true },
     { text: 'Utilisateurs', icon: <ManageAccounts />, path: '/admin/users' },
+    { text: 'Sociétés', icon: <Business />, path: '/admin/companies' },
     { text: 'Articles', icon: <Inventory />, path: '/admin/articles' },
     { text: 'Catégories', icon: <Category />, path: '/admin/categories' },
     { divider: true },
@@ -69,8 +62,6 @@ export default function AdminLayout({ children }) {
         onMobileMenuOpen={() => setMobileOpen(true)}
         brand={adminBrand}
         profilePath="/admin/settings"
-        notifications={notifications}
-        notifTargetPath="/admin/validate"
       />
 
       <Sidebar

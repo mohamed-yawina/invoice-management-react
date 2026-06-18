@@ -12,7 +12,9 @@ import { useNavigate } from 'react-router-dom';
 import { db, ref, get, getAllFacturesFlat, auth } from '../../services/firebaseService';
 import { generateInvoicePDF } from '../../services/pdfService';
 import Layout from '../../components/common/Layout';
+import { useCompany } from '../../contexts/CompanyContext';
 import { palette, gradients } from '../../theme/darkTheme';
+import { formatMoney, getInvoiceAmountMad } from '../../utils/currency';
 
 const STATUT_STYLES = {
   'Payée': { bg: 'rgba(34,197,94,0.15)', color: '#22C55E' },
@@ -20,7 +22,8 @@ const STATUT_STYLES = {
   'En attente': { bg: 'rgba(234,179,8,0.15)', color: '#EAB308' },
 };
 
-const fmtMoney = (n) => `${(Number(n) || 0).toLocaleString('fr-FR')} DH`;
+const fmtMoney = (n) => formatMoney(n, 'MAD');
+const fmtInv = (n, inv) => formatMoney(n, inv?.currency);
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—');
 
 // Sparkline SVG léger (sans dépendance)
@@ -49,6 +52,7 @@ function Sparkline({ values = [], color = '#6EE7B7', height = 40, width = 120 })
 
 export default function UserDashboard() {
   const navigate = useNavigate();
+  const { filterItems } = useCompany();
   const [loading, setLoading] = useState(true);
   const [factures, setFactures] = useState([]);
   const [clientsMap, setClientsMap] = useState({});
@@ -74,51 +78,53 @@ export default function UserDashboard() {
     finally { setLoading(false); }
   };
 
+  const scopedFactures = useMemo(() => filterItems(factures), [factures, filterItems]);
+
   const stats = useMemo(() => {
-    const total = factures.length;
-    const payees = factures.filter((f) => f.statut === 'Payée');
-    const enAttente = factures.filter((f) => f.statut === 'En attente');
-    const rejetees = factures.filter((f) => f.statut === 'Rejetée');
-    const encaisse = payees.reduce((s, f) => s + (f.total_ttc || 0), 0);
-    const montantAttente = enAttente.reduce((s, f) => s + (f.total_ttc || 0), 0);
-    const moyenne = total ? factures.reduce((s, f) => s + (f.total_ttc || 0), 0) / total : 0;
+    const total = scopedFactures.length;
+    const payees = scopedFactures.filter((f) => f.statut === 'Payée');
+    const enAttente = scopedFactures.filter((f) => f.statut === 'En attente');
+    const rejetees = scopedFactures.filter((f) => f.statut === 'Rejetée');
+    const encaisse = payees.reduce((s, f) => s + getInvoiceAmountMad(f), 0);
+    const montantAttente = enAttente.reduce((s, f) => s + getInvoiceAmountMad(f), 0);
+    const moyenne = total ? scopedFactures.reduce((s, f) => s + getInvoiceAmountMad(f), 0) / total : 0;
     const nbClients = Object.keys(clientsMap).length;
 
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
-    const caMois = factures
+    const caMois = scopedFactures
       .filter((f) => {
         if (!f.date_creation) return false;
         const d = new Date(f.date_creation);
         return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       })
-      .reduce((s, f) => s + (f.total_ttc || 0), 0);
+      .reduce((s, f) => s + getInvoiceAmountMad(f), 0);
 
     // 6 derniers mois pour sparkline
     const monthly = Array.from({ length: 6 }, (_, idx) => {
       const d = new Date(currentYear, currentMonth - (5 - idx), 1);
       const mm = d.getMonth(); const yy = d.getFullYear();
-      return factures
+      return scopedFactures
         .filter((f) => {
           if (!f.date_creation) return false;
           const fd = new Date(f.date_creation);
           return fd.getMonth() === mm && fd.getFullYear() === yy;
         })
-        .reduce((s, f) => s + (f.total_ttc || 0), 0);
+        .reduce((s, f) => s + getInvoiceAmountMad(f), 0);
     });
 
     return {
       total, encaisse, enAttente: enAttente.length, rejetees: rejetees.length,
       montantAttente, moyenne, nbClients, caMois, nbPayees: payees.length, monthly,
     };
-  }, [factures, clientsMap]);
+  }, [scopedFactures, clientsMap]);
 
   const recentInvoices = useMemo(
-    () => factures.slice()
+    () => scopedFactures.slice()
       .sort((a, b) => new Date(b.date_creation || 0) - new Date(a.date_creation || 0))
       .slice(0, 5),
-    [factures]
+    [scopedFactures]
   );
 
   const getClientName = (inv) => {
@@ -132,10 +138,10 @@ export default function UserDashboard() {
       sx={{ bgcolor: style.bg, color: style.color, fontWeight: 600 }} />;
   };
 
-  const handleDownloadPDF = (inv) => {
+  const handleDownloadPDF = async (inv) => {
     try {
       const client = clientsMap[inv.client_id] || null;
-      generateInvoicePDF(inv, client, { autoSave: true });
+      await generateInvoicePDF(inv, client, { autoSave: true });
     } catch (e) { console.error(e); }
   };
 
@@ -435,7 +441,7 @@ export default function UserDashboard() {
                         </Box>
                       </TableCell>
                       <TableCell align="right" sx={{ color: palette.text.primary, fontWeight: 700 }}>
-                        {fmtMoney(inv.total_ttc)}
+                        {fmtInv(inv.total_ttc, inv)}
                       </TableCell>
                       <TableCell>{getStatusChip(inv.statut)}</TableCell>
                       <TableCell align="center">

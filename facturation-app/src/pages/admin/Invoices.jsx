@@ -4,23 +4,29 @@ import {
   TableContainer, TableHead, TableRow, Chip, IconButton, TextField,
   MenuItem, FormControl, InputLabel, Select, Grid, InputAdornment,
   LinearProgress, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions,
-  Snackbar, Alert, Card, CardContent, Divider, Avatar, TablePagination,
+  Snackbar, Alert, Card, CardContent, Divider, Avatar, TablePagination, FormControlLabel, Switch,
 } from '@mui/material';
 import {
   Search, FilterList, CheckCircle, Cancel, Visibility, Refresh,
   PictureAsPdf, Delete, Receipt, Person, Event,
-  TaskAlt, HourglassEmpty, DoNotDisturb, Download, Close,
+  TaskAlt, HourglassEmpty, DoNotDisturb, Download, Close, TableView,
 } from '@mui/icons-material';
 import AdminLayout from '../../components/common/AdminLayout';
+import { useCompany } from '../../contexts/CompanyContext';
+import { getCompanyDisplayName } from '../../services/companyService';
 import {
   auth, db, ref, get,
   getAllFacturesFlat, updateFactureByPath, deleteFactureByPath,
 } from '../../services/firebaseService';
 import { generateInvoicePDF, generateInvoicesReportPDF } from '../../services/pdfService';
+import { exportInvoicesToExcel } from '../../services/excelService';
+import { postValidateInvoiceActions } from '../../services/invoiceValidationService';
+import { formatMoney, getInvoiceAmountMad, normalizeCurrency } from '../../utils/currency';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—');
 const fmtMoney = (n) => (Number(n) || 0).toLocaleString('fr-FR');
+const fmtInv = (n, f) => formatMoney(n, f?.currency);
 
 const STATUS_META = {
   'Payée':      { color: '#22C55E', bg: 'rgba(34,197,94,0.15)', icon: <TaskAlt sx={{ fontSize: '14px !important' }} /> },
@@ -54,12 +60,14 @@ function StatCard({ icon, label, value, color, bg }) {
 
 // ─── Page ────────────────────────────────────────────────────────────
 export default function Invoices() {
+  const { filterItems } = useCompany();
   const [loading, setLoading] = useState(true);
   const [factures, setFactures] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -91,9 +99,12 @@ export default function Invoices() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  const scopedFactures = useMemo(() => filterItems(factures), [factures, filterItems]);
+
   // ── Filtrage ──────────────────────────────────────────────────────
   const filtered = useMemo(() => {
-    return factures.filter((f) => {
+    return scopedFactures.filter((f) => {
+      if (!showArchived && f.archived) return false;
       if (statusFilter && (f.statut || 'En attente') !== statusFilter) return false;
       if (dateFrom && new Date(f.date_creation) < new Date(dateFrom)) return false;
       if (dateTo && new Date(f.date_creation) > new Date(dateTo + 'T23:59:59')) return false;
@@ -106,7 +117,9 @@ export default function Invoices() {
       }
       return true;
     });
-  }, [factures, search, statusFilter, dateFrom, dateTo]);
+  }, [scopedFactures, search, statusFilter, dateFrom, dateTo, showArchived]);
+
+  const activeFactures = useMemo(() => scopedFactures.filter((f) => !f.archived), [scopedFactures]);
 
   const paginated = useMemo(
     () => filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
@@ -115,22 +128,22 @@ export default function Invoices() {
 
   // ── Stats ─────────────────────────────────────────────────────────
   const stats = useMemo(() => {
-    const total = factures.length;
-    const payees = factures.filter((f) => f.statut === 'Payée');
-    const enAttente = factures.filter((f) => (f.statut || 'En attente') === 'En attente').length;
-    const rejetees = factures.filter((f) => f.statut === 'Rejetée').length;
+    const total = activeFactures.length;
+    const payees = activeFactures.filter((f) => f.statut === 'Payée');
+    const enAttente = activeFactures.filter((f) => (f.statut || 'En attente') === 'En attente').length;
+    const rejetees = activeFactures.filter((f) => f.statut === 'Rejetée').length;
     const ca = payees.reduce((s, f) => s + (Number(f.total_ttc) || 0), 0);
     return { total, payees: payees.length, enAttente, rejetees, ca };
-  }, [factures]);
+  }, [activeFactures]);
 
   // ── Actions ───────────────────────────────────────────────────────
   const resetFilters = () => {
     setSearch(''); setStatusFilter(''); setDateFrom(''); setDateTo(''); setPage(0);
   };
 
-  const handlePdf = (facture) => {
+  const handlePdf = async (facture) => {
     try {
-      generateInvoicePDF(facture, {
+      await generateInvoicePDF(facture, {
         nom: facture.client_nom, email: facture.client_email,
         tel: facture.client_tel, adresse: facture.client_adresse,
       });
@@ -149,6 +162,17 @@ export default function Invoices() {
     setSnackbar({ open: true, message: `Rapport exporté (${filtered.length} factures)`, severity: 'success' });
   };
 
+  const handleExportExcel = () => {
+    if (filtered.length === 0) {
+      setSnackbar({ open: true, message: 'Aucune facture à exporter', severity: 'warning' });
+      return;
+    }
+    const ok = exportInvoicesToExcel(filtered, `factures_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    if (ok) {
+      setSnackbar({ open: true, message: `Export Excel (${filtered.length} factures)`, severity: 'success' });
+    }
+  };
+
   const handleValidate = async (facture) => {
     setActionLoading(true);
     try {
@@ -157,8 +181,10 @@ export default function Invoices() {
         validated_at: new Date().toISOString(),
         validated_by: auth.currentUser?.email || 'admin',
       });
-      setSnackbar({ open: true, message: 'Facture validée', severity: 'success' });
       setConfirmDialog({ open: false, facture: null, action: null });
+
+      const { message, severity } = await postValidateInvoiceActions(facture);
+      setSnackbar({ open: true, message, severity });
       loadData();
     } catch (e) {
       console.error(e);
@@ -244,6 +270,17 @@ export default function Invoices() {
               </IconButton>
             </span>
           </Tooltip>
+          <Button
+            variant="outlined" startIcon={<TableView />}
+            onClick={handleExportExcel} disabled={loading || filtered.length === 0}
+            sx={{
+              color: '#6EE7B7', borderColor: 'rgba(110,231,183,0.4)', fontWeight: 600,
+              borderRadius: '10px', textTransform: 'none', px: 2,
+              '&:hover': { borderColor: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.08)' },
+            }}
+          >
+            Excel
+          </Button>
           <Button
             variant="contained" startIcon={<Download />}
             onClick={handleExportAll} disabled={loading || filtered.length === 0}
@@ -339,6 +376,18 @@ export default function Invoices() {
               Réinitialiser
             </Button>
           </Grid>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showArchived}
+                  onChange={(e) => { setShowArchived(e.target.checked); setPage(0); }}
+                  sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#6EE7B7' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#6EE7B7' } }}
+                />
+              }
+              label={<Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>Afficher les factures archivées</Typography>}
+            />
+          </Grid>
         </Grid>
         {(search || statusFilter || dateFrom || dateTo) && !loading && (
           <Typography sx={{ color: '#64748B', fontSize: '0.78rem', mt: 1.5 }}>
@@ -359,7 +408,7 @@ export default function Invoices() {
               <Table sx={{ minWidth: 900 }}>
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
-                    {['N° Facture', 'Date', 'Client', 'Montant TTC', 'Statut', 'Validation', 'Actions'].map(h => (
+                    {['N° Facture', 'Date', 'Client', 'Société', 'Devise', 'Montant TTC', 'Statut', 'Validation', 'Actions'].map(h => (
                       <TableCell key={h} sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</TableCell>
                     ))}
                   </TableRow>
@@ -367,7 +416,7 @@ export default function Invoices() {
                 <TableBody>
                   {paginated.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} sx={{ py: 7, textAlign: 'center', borderBottom: 'none' }}>
+                      <TableCell colSpan={9} sx={{ py: 7, textAlign: 'center', borderBottom: 'none' }}>
                         <Receipt sx={{ color: '#1E293B', fontSize: 48, mb: 1 }} />
                         <Typography sx={{ color: '#64748B' }}>Aucune facture trouvée</Typography>
                       </TableCell>
@@ -391,7 +440,11 @@ export default function Invoices() {
                             {f.client_nom || '—'}
                           </Box>
                         </TableCell>
-                        <TableCell sx={{ color: '#F1F5F9', fontWeight: 700 }}>{fmtMoney(f.total_ttc)} DH</TableCell>
+                        <TableCell sx={{ color: '#94A3B8', fontSize: '0.82rem' }}>
+                          {getCompanyDisplayName(f)}
+                        </TableCell>
+                        <TableCell sx={{ color: '#94A3B8', fontWeight: 600 }}>{normalizeCurrency(f.currency)}</TableCell>
+                        <TableCell sx={{ color: '#F1F5F9', fontWeight: 700 }}>{fmtInv(f.total_ttc, f)}</TableCell>
                         <TableCell>
                           <Chip
                             label={f.statut || 'En attente'} size="small" icon={st.icon}
@@ -544,8 +597,8 @@ export default function Invoices() {
                         <TableRow key={i}>
                           <TableCell sx={{ color: '#F1F5F9' }}>{a.designation || a.nom || '—'}</TableCell>
                           <TableCell align="center" sx={{ color: '#94A3B8' }}>{q}</TableCell>
-                          <TableCell align="right" sx={{ color: '#94A3B8' }}>{fmtMoney(pu)} DH</TableCell>
-                          <TableCell align="right" sx={{ color: '#F1F5F9', fontWeight: 600 }}>{fmtMoney(q * pu)} DH</TableCell>
+                          <TableCell align="right" sx={{ color: '#94A3B8' }}>{fmtInv(pu, detailDialog.facture)}</TableCell>
+                          <TableCell align="right" sx={{ color: '#F1F5F9', fontWeight: 600 }}>{fmtInv(q * pu, detailDialog.facture)}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -560,13 +613,13 @@ export default function Invoices() {
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 2, alignItems: 'flex-end' }}>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-                  Total HT : <strong style={{ color: '#F1F5F9' }}>{fmtMoney(detailDialog.facture.total_ht)} DH</strong>
+                  Total HT : <strong style={{ color: '#F1F5F9' }}>{fmtInv(detailDialog.facture.total_ht, detailDialog.facture)}</strong>
                 </Typography>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-                  TVA : <strong style={{ color: '#F1F5F9' }}>{fmtMoney(detailDialog.facture.tva)} DH</strong>
+                  TVA : <strong style={{ color: '#F1F5F9' }}>{fmtInv(detailDialog.facture.tva, detailDialog.facture)}</strong>
                 </Typography>
                 <Typography sx={{ color: '#6EE7B7', fontSize: '1.2rem', fontWeight: 800 }}>
-                  TTC : {fmtMoney(detailDialog.facture.total_ttc)} DH
+                  TTC : {fmtInv(detailDialog.facture.total_ttc, detailDialog.facture)}
                 </Typography>
               </Box>
             </Box>
@@ -603,7 +656,7 @@ export default function Invoices() {
           {confirmDialog.facture && (
             <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
               Client : <strong style={{ color: '#F1F5F9' }}>{confirmDialog.facture.client_nom || '—'}</strong><br />
-              Montant TTC : <strong style={{ color: '#6EE7B7' }}>{fmtMoney(confirmDialog.facture.total_ttc)} DH</strong>
+              Montant TTC : <strong style={{ color: '#6EE7B7' }}>{fmtInv(confirmDialog.facture.total_ttc, confirmDialog.facture)}</strong>
             </Typography>
           )}
         </DialogContent>

@@ -12,6 +12,7 @@ import {
 } from '@mui/icons-material';
 import AdminLayout from '../../components/common/AdminLayout';
 import { jsonService } from '../../services/jsonService';
+import { formatMoney } from '../../utils/currency';
 
 // ─── StatCard ────────────────────────────────────────────────────────
 function StatCard({ icon, label, value, color, bg }) {
@@ -274,7 +275,7 @@ export default function ManageArticles() {
           <StatCard icon={<Category sx={{ fontSize: 26 }} />} label="Catégories" value={loading ? '—' : categories.length} color="#3B82F6" bg="rgba(59,130,246,0.1)" />
         </Grid>
         <Grid item xs={6} sm={3}>
-          <StatCard icon={<AttachMoney sx={{ fontSize: 26 }} />} label="Valeur catalogue" value={loading ? '—' : `${stats.totalValue.toLocaleString('fr-FR')} DH`} color="#EAB308" bg="rgba(234,179,8,0.1)" />
+          <StatCard icon={<AttachMoney sx={{ fontSize: 26 }} />} label="Valeur catalogue" value={loading ? '—' : formatMoney(stats.totalValue, 'MAD')} color="#EAB308" bg="rgba(234,179,8,0.1)" />
         </Grid>
         <Grid item xs={6} sm={3}>
           <StatCard icon={<Warning sx={{ fontSize: 26 }} />} label="Stock faible (<10)" value={loading ? '—' : stats.lowStock} color="#EF4444" bg="rgba(239,68,68,0.1)" />
@@ -389,7 +390,7 @@ export default function ManageArticles() {
                           )}
                         </TableCell>
                         <TableCell sx={{ color: '#F1F5F9', fontWeight: 700 }}>
-                          {(Number(article.prix_unitaire) || 0).toLocaleString('fr-FR')} DH
+                          {formatMoney(article.prix_unitaire, 'MAD')}
                         </TableCell>
                         <TableCell>
                           {article.stock === null || article.stock === undefined ? (

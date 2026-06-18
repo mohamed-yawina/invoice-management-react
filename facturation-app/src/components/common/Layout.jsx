@@ -35,7 +35,6 @@ export default function Layout({ children }) {
         onMobileMenuOpen={() => setMobileOpen(true)}
         brand={userBrand}
         profilePath="/app/settings"
-        notifications={[]}
       />
 
       <Sidebar

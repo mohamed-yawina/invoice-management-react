@@ -8,15 +8,19 @@ import {
 import {
   Visibility, PictureAsPdf, Add, Search, TrackChanges, Receipt as ReceiptIcon,
   Paid, Pending, Cancel, Close, CalendarMonth, AccountBalance, Delete,
-  FilterList, Description,
+  FilterList, Description, TableView,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import {
   db, ref, get, getAllFacturesFlat, updateFactureByPath, deleteFactureByPath,
 } from '../../services/firebaseService';
 import Layout from '../../components/common/Layout';
+import { useCompany } from '../../contexts/CompanyContext';
 import { generateInvoicePDF } from '../../services/pdfService';
+import { exportInvoicesToExcel } from '../../services/excelService';
+import { getPublicAppOrigin, isLocalhostOrigin } from '../../utils/appOrigin';
 import { palette, gradients } from '../../theme/darkTheme';
+import { formatMoney, getInvoiceAmountMad } from '../../utils/currency';
 
 const STATUT_STYLES = {
   'Payée': { bg: 'rgba(34,197,94,0.15)', color: '#22C55E', icon: <Paid sx={{ fontSize: 14 }} /> },
@@ -27,10 +31,11 @@ const STATUT_STYLES = {
 const TYPE_VIREMENTS = ['Virement bancaire', 'Chèque', 'Espèces', 'Carte bancaire', 'Prélèvement', 'Autre'];
 
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—');
-const fmtMoney = (n) => `${(Number(n) || 0).toLocaleString('fr-FR')} DH`;
+const fmtInv = (n, inv) => formatMoney(n, inv?.currency);
 
 export default function InvoiceHistory() {
   const navigate = useNavigate();
+  const { filterItems } = useCompany();
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [clientsMap, setClientsMap] = useState({});
@@ -59,9 +64,9 @@ export default function InvoiceHistory() {
         getAllFacturesFlat(),
         get(ref(db, 'clients')),
       ]);
-      const sorted = list.sort(
-        (a, b) => new Date(b.date_creation || 0) - new Date(a.date_creation || 0)
-      );
+      const sorted = list
+        .filter((f) => !f.archived)
+        .sort((a, b) => new Date(b.date_creation || 0) - new Date(a.date_creation || 0));
       setInvoices(sorted);
       const cmap = {};
       if (clientsSnap.exists()) {
@@ -82,9 +87,11 @@ export default function InvoiceHistory() {
     return c ? c.nom : (inv.client_id || '—');
   };
 
+  const scopedInvoices = useMemo(() => filterItems(invoices), [invoices, filterItems]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return invoices.filter((inv) => {
+    return scopedInvoices.filter((inv) => {
       if (statusTab !== 'all' && inv.statut !== statusTab) return false;
       if (!q) return true;
       const cname = (getClientName(inv) || '').toLowerCase();
@@ -95,16 +102,16 @@ export default function InvoiceHistory() {
       );
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invoices, search, statusTab, clientsMap]);
+  }, [scopedInvoices, search, statusTab, clientsMap]);
 
   const kpis = useMemo(() => {
-    const total = invoices.length;
-    const encaisse = invoices.filter((f) => f.statut === 'Payée')
-      .reduce((s, f) => s + (f.total_ttc || 0), 0);
-    const enAttente = invoices.filter((f) => f.statut === 'En attente').length;
-    const rejetees = invoices.filter((f) => f.statut === 'Rejetée').length;
+    const total = scopedInvoices.length;
+    const encaisse = scopedInvoices.filter((f) => f.statut === 'Payée')
+      .reduce((s, f) => s + getInvoiceAmountMad(f), 0);
+    const enAttente = scopedInvoices.filter((f) => f.statut === 'En attente').length;
+    const rejetees = scopedInvoices.filter((f) => f.statut === 'Rejetée').length;
     return { total, encaisse, enAttente, rejetees };
-  }, [invoices]);
+  }, [scopedInvoices]);
 
   const handleViewDetail = (inv) => { setDetailInv(inv); setDetailOpen(true); };
 
@@ -143,15 +150,42 @@ export default function InvoiceHistory() {
     }
   };
 
-  const handleDownloadPDF = (inv) => {
+  const handleDownloadPDF = async (inv) => {
     try {
+      if (isLocalhostOrigin()) {
+        setToast({
+          open: true,
+          msg: 'QR localhost — Paramètres → URL publique QR : http://VOTRE_IP:3000 puis regénérez le PDF',
+          severity: 'warning',
+        });
+      }
       const client = clientsMap[inv.client_id] || null;
-      generateInvoicePDF(inv, client, { autoSave: true });
-      setToast({ open: true, msg: 'PDF généré', severity: 'success' });
+      await generateInvoicePDF(inv, client, { autoSave: true });
+      const origin = getPublicAppOrigin();
+      setToast({
+        open: true,
+        msg: isLocalhostOrigin(origin)
+          ? 'PDF généré — configurez l\'URL publique QR dans Paramètres'
+          : `PDF généré — QR : ${origin}/verify-invoice/...`,
+        severity: isLocalhostOrigin(origin) ? 'warning' : 'success',
+      });
     } catch (error) {
       console.error(error);
       setToast({ open: true, msg: 'Erreur génération PDF', severity: 'error' });
     }
+  };
+
+  const handleExportExcel = () => {
+    if (filtered.length === 0) {
+      setToast({ open: true, msg: 'Aucune facture à exporter', severity: 'warning' });
+      return;
+    }
+    const enriched = filtered.map((inv) => ({
+      ...inv,
+      client_nom: getClientName(inv),
+    }));
+    exportInvoicesToExcel(enriched, `mes_factures_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    setToast({ open: true, msg: `Export Excel (${filtered.length} factures)`, severity: 'success' });
   };
 
   const handleDelete = async () => {
@@ -189,7 +223,7 @@ export default function InvoiceHistory() {
       iconBg: 'rgba(59,130,246,0.15)', iconColor: '#3B82F6',
     },
     {
-      title: 'Encaissé', value: fmtMoney(kpis.encaisse), icon: <Paid />,
+      title: 'Encaissé', value: formatMoney(kpis.encaisse, 'MAD'), icon: <Paid />,
       gradient: gradients.success,
       iconBg: 'rgba(34,197,94,0.15)', iconColor: '#22C55E',
     },
@@ -294,6 +328,17 @@ export default function InvoiceHistory() {
             sx={{ minWidth: 280, flex: 1 }}
             InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: palette.text.muted }} /></InputAdornment> }}
           />
+          <Button
+            variant="outlined" size="small" startIcon={<TableView />}
+            onClick={handleExportExcel} disabled={loading || filtered.length === 0}
+            sx={{
+              color: palette.accent.mint, borderColor: 'rgba(110,231,183,0.4)',
+              textTransform: 'none', fontWeight: 600, whiteSpace: 'nowrap',
+              '&:hover': { borderColor: palette.accent.mint, bgcolor: 'rgba(110,231,183,0.08)' },
+            }}
+          >
+            Export Excel
+          </Button>
           <Tabs
             value={statusTab} onChange={(_, v) => setStatusTab(v)}
             sx={{
@@ -369,7 +414,7 @@ export default function InvoiceHistory() {
                     <TableCell sx={{ color: palette.text.secondary, fontSize: 13 }}>{fmtDate(inv.date_encaissement)}</TableCell>
                     <TableCell sx={{ color: palette.text.secondary, fontSize: 13 }}>{inv.type_virement || '—'}</TableCell>
                     <TableCell align="right" sx={{ color: palette.text.primary, fontWeight: 700 }}>
-                      {fmtMoney(inv.total_ttc)}
+                      {fmtInv(inv.total_ttc, inv)}
                     </TableCell>
                     <TableCell>{getStatusChip(inv.statut)}</TableCell>
                     <TableCell align="center">
@@ -517,9 +562,9 @@ export default function InvoiceHistory() {
                         <TableRow key={i}>
                           <TableCell sx={{ color: palette.text.primary }}>{a.designation}</TableCell>
                           <TableCell align="right" sx={{ color: palette.text.secondary }}>{a.qte}</TableCell>
-                          <TableCell align="right" sx={{ color: palette.text.secondary }}>{fmtMoney(a.prix)}</TableCell>
+                          <TableCell align="right" sx={{ color: palette.text.secondary }}>{fmtInv(a.prix, detailInv)}</TableCell>
                           <TableCell align="right" sx={{ color: palette.text.secondary }}>{a.remise || 0}%</TableCell>
-                          <TableCell align="right" sx={{ color: palette.text.primary, fontWeight: 600 }}>{fmtMoney(totalHT)}</TableCell>
+                          <TableCell align="right" sx={{ color: palette.text.primary, fontWeight: 600 }}>{fmtInv(totalHT, detailInv)}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -531,17 +576,17 @@ export default function InvoiceHistory() {
                 <Box sx={{ minWidth: 280, p: 2, bgcolor: palette.bg.card, borderRadius: 2, border: `1px solid ${palette.line.subtle}` }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
                     <Typography sx={{ color: palette.text.secondary }}>Total HT</Typography>
-                    <Typography sx={{ color: palette.text.primary, fontWeight: 600 }}>{fmtMoney(detailInv.total_ht)}</Typography>
+                    <Typography sx={{ color: palette.text.primary, fontWeight: 600 }}>{fmtInv(detailInv.total_ht, detailInv)}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
                     <Typography sx={{ color: palette.text.secondary }}>TVA</Typography>
-                    <Typography sx={{ color: palette.text.primary, fontWeight: 600 }}>{fmtMoney(detailInv.tva)}</Typography>
+                    <Typography sx={{ color: palette.text.primary, fontWeight: 600 }}>{fmtInv(detailInv.tva, detailInv)}</Typography>
                   </Box>
                   <Divider sx={{ my: 1 }} />
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
                     <Typography sx={{ color: palette.accent.mint, fontWeight: 700, fontSize: 16 }}>Total TTC</Typography>
                     <Typography sx={{ color: palette.accent.mint, fontWeight: 800, fontSize: 18 }}>
-                      {fmtMoney(detailInv.total_ttc)}
+                      {fmtInv(detailInv.total_ttc, detailInv)}
                     </Typography>
                   </Box>
                 </Box>

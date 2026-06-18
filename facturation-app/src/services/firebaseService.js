@@ -1,5 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, push, set, get, update, remove } from "firebase/database";
+import { getDatabase, ref, push, set, get, update, remove, onValue, off, query, orderByChild, limitToLast } from "firebase/database";
+import {
+  getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject,
+} from "firebase/storage";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -27,6 +30,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Messages d'erreur
@@ -60,7 +64,11 @@ export const sendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
 export const logOut = () => signOut(auth);
 
 // Exports Firebase
-export { db, ref, get, set, push, update, remove, auth };
+export {
+  db, ref, get, set, push, update, remove, onValue, off, query, orderByChild, limitToLast,
+  auth,
+  storage, storageRef, uploadBytes, getDownloadURL, deleteObject,
+};
 
 // ==================== UTILISATEURS ====================
 export const createOrUpdateUser = async (userId, email, displayName, role = 'user') => {
@@ -242,4 +250,140 @@ export const updateFacture = async (id, data) => {
 
 export const deleteFacture = async (id) => {
   await remove(ref(db, `factures/${id}`));
+};
+
+// ==================== VÉRIFICATION QR (tokens sécurisés) ====================
+
+/** Génère un token aléatoire unique pour la vérification de facture. */
+export const generateSecureToken = (length = 12) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const arr = new Uint8Array(length);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, (b) => chars[b % chars.length]).join('');
+};
+
+/** Chemin Firebase d'une facture (structure plate ou imbriquée). */
+export const getFactureRefPath = (facture) =>
+  facture?._path || (facture?.id ? `factures/${facture.id}` : null);
+
+/** Clé Firebase pour l'index public de vérification QR. */
+const verifyKey = (numeroOrId) =>
+  String(numeroOrId || '').trim().replace(/[.#$[\]/]/g, '_');
+
+/** Données publiques (lecture sans auth) pour la page /verify-invoice. */
+const buildPublicVerifyPayload = (facture, token) => ({
+  numero: facture.numero || facture.id,
+  secureToken: token,
+  statut: facture.statut || 'En attente',
+  total_ttc: facture.total_ttc ?? 0,
+  currency: facture.currency || 'MAD',
+  exchange_rate_to_mad: facture.exchange_rate_to_mad ?? null,
+  date_creation: facture.date_creation || null,
+  date_encaissement: facture.date_encaissement || null,
+  client_nom: facture.client_nom || facture.client_snapshot?.nom || null,
+  societe_nom: facture.societe_snapshot?.nom || null,
+  societe_ice: facture.societe_snapshot?.ice || null,
+  signature: facture.signature?.startsWith?.('data:image') ? facture.signature : null,
+  updatedAt: new Date().toISOString(),
+});
+
+/** Publie une entrée lisible sans connexion (nœud verify/ dans Firebase). */
+export const syncPublicVerifyRecord = async (facture, token) => {
+  const key = verifyKey(facture?.numero || facture?.id);
+  if (!key || !token) return;
+  await set(ref(db, `verify/${key}`), buildPublicVerifyPayload(facture, token));
+};
+
+/** Lecture publique pour la page de vérification QR. */
+export const getPublicVerifyRecord = async (invoiceId) => {
+  if (!invoiceId) return null;
+  const raw = String(invoiceId).trim();
+  const keys = [verifyKey(raw), raw];
+  for (const key of keys) {
+    if (!key) continue;
+    try {
+      const snap = await get(ref(db, `verify/${key}`));
+      if (snap.exists()) return snap.val();
+    } catch (e) {
+      if (e?.message?.includes('Permission')) throw e;
+    }
+  }
+  return null;
+};
+
+/** Écoute temps réel du nœud verify/ (page publique). */
+export const subscribePublicVerify = (invoiceId, callback) => {
+  const key = verifyKey(invoiceId) || String(invoiceId).trim();
+  if (!key) return () => {};
+  const r = ref(db, `verify/${key}`);
+  const handler = (snap) => {
+    if (snap.exists()) callback(snap.val());
+  };
+  onValue(r, handler);
+  return () => off(r, 'value', handler);
+};
+
+/**
+ * Recherche une facture par clé Firebase ou par numéro (ex. F-436808).
+ */
+export const getInvoiceById = async (invoiceId) => {
+  if (!invoiceId) return null;
+  const key = String(invoiceId).trim();
+  const all = await getAllFacturesFlat();
+  return all.find((f) => f.id === key || f.numero === key) || null;
+};
+
+/** Construit l'URL relative de vérification (/verify-invoice/:id?token=...). */
+export const buildInvoiceVerificationPath = (facture, token) => {
+  const slug = encodeURIComponent(facture?.numero || facture?.id || '');
+  return `/verify-invoice/${slug}?token=${encodeURIComponent(token)}`;
+};
+
+/** Enregistre secureToken + verificationUrl sur une facture existante. */
+export const updateInvoiceSecureToken = async (invoiceId, token) => {
+  const facture = await getInvoiceById(invoiceId);
+  if (!facture) throw new Error('Facture introuvable');
+  const verificationUrl = buildInvoiceVerificationPath(facture, token);
+  await updateFactureByPath(facture, {
+    secureToken: token,
+    verificationUrl,
+    secureTokenCreatedAt: new Date().toISOString(),
+  });
+  await syncPublicVerifyRecord({ ...facture, secureToken: token }, token);
+  return { ...facture, secureToken: token, verificationUrl };
+};
+
+/**
+ * Garantit qu'une facture possède un secureToken (création si absent).
+ * Accepte un objet facture ou un invoiceId / numero.
+ */
+export const ensureInvoiceSecureToken = async (invoiceIdOrFacture) => {
+  let facture = typeof invoiceIdOrFacture === 'object' && invoiceIdOrFacture !== null
+    ? invoiceIdOrFacture
+    : await getInvoiceById(invoiceIdOrFacture);
+
+  if (!facture) throw new Error('Facture introuvable');
+  if (facture.secureToken) {
+    await syncPublicVerifyRecord(facture, facture.secureToken);
+    return facture;
+  }
+
+  const token = generateSecureToken();
+  const verificationUrl = buildInvoiceVerificationPath(facture, token);
+  await updateFactureByPath(facture, {
+    secureToken: token,
+    verificationUrl,
+    secureTokenCreatedAt: new Date().toISOString(),
+  });
+  await syncPublicVerifyRecord({ ...facture, secureToken: token }, token);
+  return { ...facture, secureToken: token, verificationUrl };
+};
+
+/** Écoute les changements d'une facture en temps réel (statut, etc.). */
+export const subscribeInvoice = (facture, callback) => {
+  const path = getFactureRefPath(facture);
+  if (!path) return () => {};
+  return onValue(ref(db, path), (snap) => {
+    if (snap.exists()) callback({ ...facture, ...snap.val() });
+  });
 };

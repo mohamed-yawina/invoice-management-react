@@ -7,10 +7,11 @@ import {
 import {
   Add, Delete, Save, PictureAsPdf, CheckCircle, CalendarMonth, AccountBalance,
   Person, Receipt as ReceiptIcon, Calculate, Inventory2, Description,
-  ArrowBack, Info,
+  ArrowBack, Info, Draw, Edit,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/common/Layout';
+import SignaturePad from '../../components/common/SignaturePad';
 import { db, ref, get, push } from '../../services/firebaseService';
 import { jsonService } from '../../services/jsonService';
 import {
@@ -19,11 +20,19 @@ import {
 } from '../../utils/calculations';
 import { generateInvoicePDF } from '../../services/pdfService';
 import { palette, gradients } from '../../theme/darkTheme';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNotifications } from '../../contexts/NotificationContext';
+import { getUserSignature } from '../../services/signatureService';
+import {
+  createNotificationForUsers, getAdminUserIds, createNotification,
+} from '../../services/notificationService';
+import CurrencySelect from '../../components/common/CurrencySelect';
+import CompanySelect from '../../components/common/CompanySelect';
+import { useCompany } from '../../contexts/CompanyContext';
+import { buildCompanySnapshot } from '../../services/companyService';
+import { formatMoney, enrichInvoiceCurrency, DEFAULT_CURRENCY, convertToMad, convertBetweenCurrencies, catalogPriceToInvoice, CATALOG_CURRENCY, normalizeCurrency } from '../../utils/currency';
 
 const TYPE_VIREMENTS = ['Virement bancaire', 'Chèque', 'Espèces', 'Carte bancaire', 'Prélèvement', 'Autre'];
-
-const fmtMoney = (n) =>
-  `${(Number(n) || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} DH`;
 
 // Badge de section illustrée
 const SectionHeader = ({ icon, title, subtitle, color = palette.accent.mint }) => (
@@ -50,6 +59,9 @@ const SectionHeader = ({ icon, title, subtitle, color = palette.accent.mint }) =
 
 export default function CreateInvoice() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast: notifyToast } = useNotifications();
+  const { companies, activeCompanyId } = useCompany();
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState([]);
   const [articles, setArticles] = useState([]);
@@ -63,18 +75,56 @@ export default function CreateInvoice() {
     date_depot: '',
     type_virement: '',
     notes: '',
+    currency: DEFAULT_CURRENCY,
+    societeId: '',
   });
+
+  useEffect(() => {
+    if (activeCompanyId && !form.societeId) {
+      setForm((f) => ({ ...f, societeId: activeCompanyId }));
+    }
+  }, [activeCompanyId, form.societeId]);
+
+  const fmtForm = (n) => formatMoney(n, form.currency);
+
+  const handleCurrencyChange = (newCurrency) => {
+    const next = normalizeCurrency(newCurrency);
+    const prev = form.currency;
+    if (next === prev) return;
+    setForm((f) => ({ ...f, currency: next }));
+    setItems((prevItems) =>
+      prevItems.map((item) => {
+        const prix = Number(item.prix) || 0;
+        return prix > 0
+          ? { ...item, prix: convertBetweenCurrencies(prix, prev, next) }
+          : item;
+      })
+    );
+  };
 
   const [items, setItems] = useState([
     { articleId: '', designation: '', qte: 1, prix: 0, remise: 0, categorie_id: null },
   ]);
   const [result, setResult] = useState({ totalHT: 0, tva: 0, totalTTC: 0 });
 
+  // Signature (par défaut depuis profil, modifiable par facture)
+  const [defaultSignature, setDefaultSignature] = useState(null);
+  const [signature, setSignature] = useState(null);
+  const [sigPadOpen, setSigPadOpen] = useState(false);
+
   const [toast, setToast] = useState({ open: false, msg: '', severity: 'success' });
   const [successOpen, setSuccessOpen] = useState(false);
   const [createdInvoice, setCreatedInvoice] = useState(null);
 
   useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    if (!user?.uid) return;
+    (async () => {
+      const s = await getUserSignature(user.uid);
+      setDefaultSignature(s);
+      setSignature(s);
+    })();
+  }, [user?.uid]);
 
   useEffect(() => {
     calculateTotals();
@@ -145,7 +195,7 @@ export default function CreateInvoice() {
         ...next[idx],
         articleId: article.id,
         designation: article.designation,
-        prix: Number(article.prix_unitaire) || 0,
+        prix: catalogPriceToInvoice(Number(article.prix_unitaire) || 0, form.currency),
         categorie_id: article.categorie_id ?? null,
       };
     }
@@ -155,6 +205,7 @@ export default function CreateInvoice() {
   const validate = () => {
     if (!form.clientId) return 'Veuillez sélectionner un client';
     if (!form.numero.trim()) return 'Le numéro de facture est requis';
+    if (!form.societeId) return 'Veuillez sélectionner une société émettrice';
     const valid = items.filter((i) => i.designation && Number(i.qte) > 0 && Number(i.prix) > 0);
     if (valid.length === 0) return 'Ajoutez au moins un article (désignation, quantité et prix)';
     return null;
@@ -169,6 +220,8 @@ export default function CreateInvoice() {
     setLoading(true);
     try {
       const client = clients.find((c) => c.id === form.clientId) || null;
+      const selectedCompany = companies.find((c) => c.id === form.societeId);
+      const societeSnapshot = buildCompanySnapshot(selectedCompany);
       const cleanItems = items
         .filter((i) => i.designation && Number(i.qte) > 0 && Number(i.prix) > 0)
         .map((i) => ({
@@ -180,7 +233,7 @@ export default function CreateInvoice() {
           categorie_id: i.categorie_id ?? null,
         }));
 
-      const invoice = {
+      const invoice = enrichInvoiceCurrency({
         numero: form.numero,
         date_creation: new Date().toISOString(),
         client_id: form.clientId,
@@ -199,12 +252,45 @@ export default function CreateInvoice() {
         date_encaissement: null,
         type_virement: form.type_virement || null,
         notes: form.notes || '',
-      };
+        signature: signature || null,
+        created_by: user?.uid || null,
+        created_by_email: user?.email || null,
+        societe_id: form.societeId,
+        societe_snapshot: societeSnapshot,
+      }, form.currency);
 
       const newRef = await push(ref(db, 'factures'), invoice);
       const saved = { id: newRef.key, _path: `factures/${newRef.key}`, ...invoice };
       setCreatedInvoice({ invoice: saved, client });
       setSuccessOpen(true);
+      notifyToast(`Facture ${invoice.numero} créée et envoyée pour validation`, 'success');
+
+      // Notification au créateur (persistée)
+      if (user?.uid) {
+        await createNotification(user.uid, {
+          type: 'info',
+          title: 'Facture créée',
+          message: `Votre facture ${invoice.numero} (${formatMoney(invoice.total_ttc, invoice.currency)}) a été envoyée pour validation.`,
+          link: '/app/invoices',
+          meta: { factureId: newRef.key, factureNumero: invoice.numero },
+        });
+      }
+
+      // Notification à tous les admins
+      try {
+        const adminIds = await getAdminUserIds();
+        if (adminIds.length > 0) {
+          await createNotificationForUsers(adminIds, {
+            type: 'warning',
+            title: 'Nouvelle facture à valider',
+            message: `${user?.displayName || user?.email || 'Un utilisateur'} a créé la facture ${invoice.numero} (${formatMoney(invoice.total_ttc, invoice.currency)}).`,
+            link: '/admin/validate',
+            meta: { factureId: newRef.key, factureNumero: invoice.numero },
+          });
+        }
+      } catch (e) {
+        console.warn('Notif admin échouée:', e);
+      }
     } catch (error) {
       console.error(error);
       setToast({ open: true, msg: 'Erreur lors de la création', severity: 'error' });
@@ -213,10 +299,10 @@ export default function CreateInvoice() {
     }
   };
 
-  const handleDownloadCreatedPDF = () => {
+  const handleDownloadCreatedPDF = async () => {
     if (!createdInvoice) return;
     try {
-      generateInvoicePDF(createdInvoice.invoice, createdInvoice.client, { autoSave: true });
+      await generateInvoicePDF(createdInvoice.invoice, createdInvoice.client, { autoSave: true });
     } catch (error) {
       console.error(error);
       setToast({ open: true, msg: 'Erreur PDF', severity: 'error' });
@@ -285,7 +371,7 @@ export default function CreateInvoice() {
               title="Informations générales"
               subtitle="Client et paramètres de la facture"
             />
-            <Grid container spacing={2}>
+        <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
                   select fullWidth label="Client *" value={form.clientId}
@@ -328,6 +414,19 @@ export default function CreateInvoice() {
                 <TextField
                   fullWidth label="N° Facture *" value={form.numero}
                   onChange={(e) => setForm({ ...form, numero: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <CompanySelect
+                  companies={companies}
+                  value={form.societeId}
+                  onChange={(societeId) => setForm({ ...form, societeId })}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <CurrencySelect
+                  value={form.currency}
+                  onChange={handleCurrencyChange}
                 />
               </Grid>
               <Grid item xs={12} md={form.method === 'globalDiscount' ? 4 : 6}>
@@ -429,14 +528,24 @@ export default function CreateInvoice() {
                           <TextField {...params} label="Article (catalogue)" size="small"
                             placeholder="Rechercher..." />
                         )}
-                        renderOption={(props, option) => (
-                          <Box component="li" {...props} sx={{ display: 'flex', justifyContent: 'space-between !important' }}>
-                            <Typography sx={{ fontSize: 13 }}>{option.designation}</Typography>
-                            <Typography sx={{ fontSize: 12, color: palette.accent.mint, fontWeight: 600 }}>
-                              {fmtMoney(option.prix_unitaire)}
-                            </Typography>
-                          </Box>
-                        )}
+                        renderOption={(props, option) => {
+                          const converted = catalogPriceToInvoice(option.prix_unitaire, form.currency);
+                          return (
+                            <Box component="li" {...props} sx={{ display: 'flex', justifyContent: 'space-between !important', alignItems: 'center', gap: 1 }}>
+                              <Typography sx={{ fontSize: 13 }}>{option.designation}</Typography>
+                              <Box sx={{ textAlign: 'right' }}>
+                                <Typography sx={{ fontSize: 12, color: palette.accent.mint, fontWeight: 600 }}>
+                                  {formatMoney(converted, form.currency)}
+                                </Typography>
+                                {form.currency !== CATALOG_CURRENCY && (
+                                  <Typography sx={{ fontSize: 10, color: palette.text.muted }}>
+                                    {formatMoney(option.prix_unitaire, CATALOG_CURRENCY)} cat.
+                                  </Typography>
+                                )}
+                              </Box>
+                            </Box>
+                          );
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} md={3}>
@@ -448,7 +557,7 @@ export default function CreateInvoice() {
                         onChange={(e) => updateItem(idx, 'qte', parseFloat(e.target.value) || 0)} />
                     </Grid>
                     <Grid item xs={6} md={1.5}>
-                      <TextField fullWidth size="small" type="number" label="Prix U." value={item.prix}
+                      <TextField fullWidth size="small" type="number" label={`Prix U. (${form.currency})`} value={item.prix}
                         onChange={(e) => updateItem(idx, 'prix', parseFloat(e.target.value) || 0)} />
                     </Grid>
                     {form.method === 'lineDiscount' && (
@@ -472,7 +581,7 @@ export default function CreateInvoice() {
                       <Box sx={{ textAlign: 'right' }}>
                         <Typography sx={{ color: palette.text.muted, fontSize: 10, textTransform: 'uppercase' }}>Total HT</Typography>
                         <Typography sx={{ color: palette.accent.mint, fontWeight: 700, fontSize: 13 }}>
-                          {fmtMoney(afterRemise)}
+                          {fmtForm(afterRemise)}
                         </Typography>
                       </Box>
                       <Tooltip title={items.length === 1 ? 'Au moins un article requis' : 'Supprimer'}>
@@ -560,11 +669,11 @@ export default function CreateInvoice() {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.75 }}>
                   <Typography sx={{ color: palette.text.secondary }}>Total HT</Typography>
-                  <Typography sx={{ color: palette.text.primary, fontWeight: 600 }}>{fmtMoney(result.totalHT)}</Typography>
+                  <Typography sx={{ color: palette.text.primary, fontWeight: 600 }}>{formatMoney(result.totalHT, form.currency)}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.75 }}>
                   <Typography sx={{ color: palette.text.secondary }}>TVA</Typography>
-                  <Typography sx={{ color: palette.text.primary, fontWeight: 600 }}>{fmtMoney(result.tva)}</Typography>
+                  <Typography sx={{ color: palette.text.primary, fontWeight: 600 }}>{formatMoney(result.tva, form.currency)}</Typography>
                 </Box>
                 <Divider sx={{ my: 1.5 }} />
                 <Box sx={{
@@ -578,13 +687,75 @@ export default function CreateInvoice() {
                     WebkitTextFillColor: 'transparent',
                     fontWeight: 800, fontSize: 22,
                   }}>
-                    {fmtMoney(result.totalTTC)}
+                    {formatMoney(result.totalTTC, form.currency)}
                   </Typography>
                 </Box>
+                {form.currency !== 'MAD' && (
+                  <Typography sx={{ color: palette.text.muted, fontSize: 11, mt: 1, textAlign: 'right' }}>
+                    ≈ {formatMoney(convertToMad(result.totalTTC, form.currency), 'MAD')}
+                  </Typography>
+                )}
 
                 <Alert severity="info" icon={<Info fontSize="small" />} sx={{ mt: 2, fontSize: 12 }}>
                   Statut initial : <strong>En attente</strong>. Mettez à jour le suivi après paiement.
                 </Alert>
+              </CardContent>
+            </Card>
+
+            {/* Signature numérique */}
+            <Card sx={{ borderRadius: 3, mb: 2, background: gradients.card, border: '1px solid rgba(110,231,183,0.12)' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <Draw sx={{ color: palette.accent.mint, fontSize: 18 }} />
+                  <Typography sx={{ color: palette.text.muted, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Signature numérique
+                  </Typography>
+                </Box>
+                {signature ? (
+                  <Box>
+                    <Box sx={{
+                      bgcolor: '#FFFFFF', p: 1.5, borderRadius: 2,
+                      display: 'flex', justifyContent: 'center', alignItems: 'center',
+                      minHeight: 80, mb: 1.2,
+                    }}>
+                      <img src={signature} alt="Signature"
+                        style={{ maxWidth: '100%', maxHeight: 70, objectFit: 'contain' }} />
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button size="small" startIcon={<Edit fontSize="small" />} onClick={() => setSigPadOpen(true)}
+                        sx={{ flex: 1, color: palette.accent.mint, fontSize: 12 }}>
+                        Modifier
+                      </Button>
+                      {defaultSignature && signature !== defaultSignature && (
+                        <Button size="small" onClick={() => setSignature(defaultSignature)}
+                          sx={{ color: palette.text.muted, fontSize: 12 }}>
+                          Réinitialiser
+                        </Button>
+                      )}
+                      <Button size="small" onClick={() => setSignature(null)}
+                        sx={{ color: '#EF4444', fontSize: 12 }}>
+                        Retirer
+                      </Button>
+                    </Box>
+                  </Box>
+                ) : (
+                  <Box>
+                    <Button fullWidth variant="outlined" startIcon={<Draw />} onClick={() => setSigPadOpen(true)}
+                      sx={{
+                        color: palette.accent.mint, borderColor: 'rgba(110,231,183,0.3)', borderStyle: 'dashed',
+                        py: 1.2,
+                        '&:hover': { bgcolor: 'rgba(110,231,183,0.06)', borderColor: palette.accent.mint },
+                      }}>
+                      Ajouter une signature
+                    </Button>
+                    {defaultSignature && (
+                      <Button size="small" fullWidth onClick={() => setSignature(defaultSignature)}
+                        sx={{ mt: 0.8, color: palette.text.muted, fontSize: 12 }}>
+                        Utiliser ma signature enregistrée
+                      </Button>
+                    )}
+                  </Box>
+                )}
               </CardContent>
             </Card>
 
@@ -641,7 +812,7 @@ export default function CreateInvoice() {
             WebkitTextFillColor: 'transparent',
             fontWeight: 800,
           }}>
-            {fmtMoney(createdInvoice?.invoice?.total_ttc)}
+            {formatMoney(createdInvoice?.invoice?.total_ttc, createdInvoice?.invoice?.currency)}
           </Typography>
         </Box>
         <DialogContent>
@@ -675,6 +846,14 @@ export default function CreateInvoice() {
           {toast.msg}
         </Alert>
       </Snackbar>
+
+      <SignaturePad
+        open={sigPadOpen}
+        onClose={() => setSigPadOpen(false)}
+        onSave={(dataUrl) => setSignature(dataUrl)}
+        initialValue={signature}
+        title="Signature pour cette facture"
+      />
     </Layout>
   );
 }

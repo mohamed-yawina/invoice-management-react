@@ -41,6 +41,8 @@ import {
   LightMode,
 } from '@mui/icons-material';
 import AdminLayout from '../../components/common/AdminLayout';
+import QrPublicUrlCard from '../../components/common/QrPublicUrlCard';
+import EmailConfigStatusCard from '../../components/common/EmailConfigStatusCard';
 import { auth, db, ref, get, update } from '../../services/firebaseService';
 
 // Composant d'onglets
@@ -204,6 +206,12 @@ export default function Settings() {
           Gérez vos préférences et paramètres du compte
         </Typography>
       </Box>
+
+      <EmailConfigStatusCard />
+
+      <QrPublicUrlCard
+        onNotify={(message, severity) => setSnackbar({ open: true, message, severity })}
+      />
 
       {/* Onglets */}
       <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, overflow: 'hidden' }}>

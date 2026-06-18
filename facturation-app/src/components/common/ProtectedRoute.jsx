@@ -10,7 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
  *  - <ProtectedRoute requireRole="user">...</ProtectedRoute>  -> nécessite user (pas admin)
  *
  * Redirections :
- *  - pas auth -> /
+ *  - pas auth -> /login
  *  - mauvais rôle -> son dashboard naturel
  */
 export default function ProtectedRoute({ children, requireRole }) {
@@ -27,7 +27,7 @@ export default function ProtectedRoute({ children, requireRole }) {
     );
   }
 
-  if (!user) return <Navigate to="/" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
   if (requireRole === 'admin' && !isAdmin) {
     return <Navigate to="/app/dashboard" replace />;

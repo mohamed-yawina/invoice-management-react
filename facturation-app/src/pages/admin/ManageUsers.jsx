@@ -5,7 +5,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Alert, Snackbar, Skeleton, Chip, Avatar, TextField,
   FormControl, InputLabel, Select, MenuItem, Tooltip,
-  Card, CardContent, Grid, InputAdornment,
+  Card, CardContent, Grid, InputAdornment, Checkbox, ListItemText, OutlinedInput,
 } from '@mui/material';
 import {
   AdminPanelSettings, Person, Delete, Edit, Refresh,
@@ -14,6 +14,7 @@ import {
 import {
   getAllUsers, updateUserRole, deleteUser, addUserToDB,
 } from '../../services/firebaseService';
+import { getAllCompanies, updateUserCompanies } from '../../services/companyService';
 import AdminLayout from '../../components/common/AdminLayout';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -157,7 +158,8 @@ export default function ManageUsers() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [stats, setStats] = useState({ total: 0, admins: 0, users: 0 });
 
-  const [roleDialog, setRoleDialog]   = useState({ open: false, user: null, newRole: 'user' });
+  const [roleDialog, setRoleDialog]   = useState({ open: false, user: null, newRole: 'user', societeIds: [] });
+  const [allCompanies, setAllCompanies] = useState([]);
   const [addDialog, setAddDialog]     = useState({ open: false, loading: false });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null, loading: false });
   const [newUser, setNewUser]         = useState({ email: '', displayName: '', role: 'user' });
@@ -184,6 +186,10 @@ export default function ManageUsers() {
 
   useEffect(() => { loadUsers(); }, [loadUsers]);
 
+  useEffect(() => {
+    getAllCompanies().then(setAllCompanies).catch(console.error);
+  }, []);
+
   // ── Filtrage ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!searchTerm.trim()) { setFilteredUsers(users); return; }
@@ -197,13 +203,16 @@ export default function ManageUsers() {
 
   // ── Modifier rôle ────────────────────────────────────────────────────────────
   const handleRoleChange = async () => {
-    const { user, newRole } = roleDialog;
+    const { user, newRole, societeIds } = roleDialog;
     if (!user || !newRole) return;
     try {
       const success = await updateUserRole(user.id, newRole);
+      if (newRole !== 'admin' && societeIds?.length) {
+        await updateUserCompanies(user.id, societeIds);
+      }
       if (success) {
         showSnack(`${user.email} est maintenant ${newRole === 'admin' ? 'Administrateur' : 'Utilisateur'}`);
-        setRoleDialog({ open: false, user: null, newRole: 'user' });
+        setRoleDialog({ open: false, user: null, newRole: 'user', societeIds: [] });
         loadUsers(true);
       } else {
         showSnack('Erreur lors de la mise à jour du rôle', 'error');
@@ -472,7 +481,12 @@ export default function ManageUsers() {
                         <Tooltip title="Modifier le rôle">
                           <IconButton
                             size="small"
-                            onClick={() => setRoleDialog({ open: true, user, newRole: user.role || 'user' })}
+                            onClick={() => setRoleDialog({
+                              open: true,
+                              user,
+                              newRole: user.role || 'user',
+                              societeIds: Array.isArray(user.societe_ids) ? user.societe_ids : [],
+                            })}
                             sx={{ color: '#6EE7B7', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(110,231,183,0.12)' } }}
                           >
                             <Edit sx={{ fontSize: 17 }} />
@@ -569,6 +583,28 @@ export default function ManageUsers() {
               </MenuItem>
             </Select>
           </FormControl>
+
+          {roleDialog.newRole !== 'admin' && (
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel sx={{ color: '#64748B', '&.Mui-focused': { color: '#6EE7B7' } }}>Sociétés autorisées</InputLabel>
+              <Select
+                multiple
+                value={roleDialog.societeIds || []}
+                onChange={(e) => setRoleDialog((d) => ({ ...d, societeIds: e.target.value }))}
+                input={<OutlinedInput label="Sociétés autorisées" />}
+                renderValue={(selected) => allCompanies.filter((c) => selected.includes(c.id)).map((c) => c.nom).join(', ')}
+                sx={selectSx}
+                MenuProps={menuPaperSx}
+              >
+                {allCompanies.map((c) => (
+                  <MenuItem key={c.id} value={c.id} sx={{ color: '#F1F5F9' }}>
+                    <Checkbox checked={(roleDialog.societeIds || []).includes(c.id)} sx={{ color: '#6EE7B7' }} />
+                    <ListItemText primary={c.nom} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
           <Alert
             severity={roleDialog.newRole === 'admin' ? 'warning' : 'info'}

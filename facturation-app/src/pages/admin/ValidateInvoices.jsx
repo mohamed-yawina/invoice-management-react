@@ -8,18 +8,25 @@ import {
 } from '@mui/material';
 import {
   CheckCircle, Cancel, Visibility, Refresh, Search, Close,
-  Receipt, Event, Person, PictureAsPdf, TaskAlt, HourglassEmpty,
+  Receipt, Event, Person, PictureAsPdf, TaskAlt, HourglassEmpty, Email,
 } from '@mui/icons-material';
 import AdminLayout from '../../components/common/AdminLayout';
+import { useCompany } from '../../contexts/CompanyContext';
 import {
   auth, db, ref, get,
   getAllFacturesFlat, updateFactureByPath,
 } from '../../services/firebaseService';
 import { generateInvoicePDF } from '../../services/pdfService';
+import { createNotification } from '../../services/notificationService';
+import { postValidateInvoiceActions } from '../../services/invoiceValidationService';
+import { isEmailJSConfigured, resolveClientContact } from '../../services/emailService';
+import { useNotifications } from '../../contexts/NotificationContext';
+import { formatMoney, getInvoiceAmountMad, normalizeCurrency } from '../../utils/currency';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—');
 const fmtMoney = (n) => (Number(n) || 0).toLocaleString('fr-FR');
+const fmtInv = (n, f) => formatMoney(n, f?.currency);
 
 // ─── StatCard ────────────────────────────────────────────────────────
 function StatCard({ icon, label, value, color, bg }) {
@@ -83,6 +90,21 @@ function PendingInvoiceCard({ facture, onView, onValidate, onReject, onPdf, load
           </Box>
         )}
 
+        {(facture.client_email || facture.client_snapshot?.email) ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mb: 1 }}>
+            <Email sx={{ fontSize: 15, color: '#3B82F6' }} />
+            <Typography sx={{ fontSize: '0.78rem', color: '#3B82F6' }}>
+              {facture.client_email || facture.client_snapshot?.email}
+            </Typography>
+          </Box>
+        ) : (
+          <Chip
+            label="Pas d'email client — envoi impossible"
+            size="small"
+            sx={{ mb: 1, bgcolor: 'rgba(234,179,8,0.12)', color: '#EAB308', fontSize: '0.68rem', height: 22 }}
+          />
+        )}
+
         {facture.date_depot && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mb: 1, color: '#94A3B8' }}>
             <Event sx={{ fontSize: 15 }} />
@@ -93,9 +115,12 @@ function PendingInvoiceCard({ facture, onView, onValidate, onReject, onPdf, load
         <Divider sx={{ my: 1.5, borderColor: 'rgba(255,255,255,0.05)' }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <Typography sx={{ color: '#64748B', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total TTC</Typography>
+          <Box>
+            <Typography sx={{ color: '#64748B', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total TTC</Typography>
+            <Chip label={normalizeCurrency(facture.currency)} size="small" sx={{ mt: 0.5, height: 18, fontSize: '0.65rem', bgcolor: 'rgba(59,130,246,0.12)', color: '#3B82F6' }} />
+          </Box>
           <Typography sx={{ color: '#6EE7B7', fontWeight: 800, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
-            {fmtMoney(facture.total_ttc)} DH
+            {fmtInv(facture.total_ttc, facture)}
           </Typography>
         </Box>
       </CardContent>
@@ -135,11 +160,14 @@ function PendingInvoiceCard({ facture, onView, onValidate, onReject, onPdf, load
 
 // ─── Page ────────────────────────────────────────────────────────────
 export default function ValidateInvoices() {
+  const { filterItems } = useCompany();
   const [loading, setLoading] = useState(true);
   const [factures, setFactures] = useState([]);
   const [search, setSearch] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [actionLoading, setActionLoading] = useState(false);
+  const { toast } = useNotifications();
+  const emailJsReady = isEmailJSConfigured();
 
   const [detailDialog, setDetailDialog] = useState({ open: false, facture: null });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, facture: null, action: null });
@@ -154,7 +182,14 @@ export default function ValidateInvoices() {
       const clients = clientsSnap.val() || {};
       const enriched = list.map((f) => {
         const c = f.client_id && clients[f.client_id];
-        return c ? { ...f, client_nom: c.nom, client_email: c.email, client_tel: c.tel, client_adresse: c.adresse } : f;
+        const snap = f.client_snapshot || {};
+        return {
+          ...f,
+          client_nom: c?.nom || snap.nom || f.client_nom,
+          client_email: c?.email || snap.email || f.client_email,
+          client_tel: c?.tel || snap.tel || f.client_tel,
+          client_adresse: c?.adresse || snap.adresse || f.client_adresse,
+        };
       });
       setFactures(enriched);
     } catch (e) {
@@ -167,9 +202,11 @@ export default function ValidateInvoices() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  const scopedFactures = useMemo(() => filterItems(factures), [factures, filterItems]);
+
   // ── Liste des factures en attente filtrées ────────────────────────
   const pending = useMemo(() => {
-    const list = factures.filter((f) => (f.statut || 'En attente') === 'En attente' && !f.validated_by_admin);
+    const list = scopedFactures.filter((f) => (f.statut || 'En attente') === 'En attente' && !f.validated_by_admin && !f.archived);
     if (!search.trim()) return list;
     const q = search.toLowerCase();
     return list.filter((f) =>
@@ -177,19 +214,22 @@ export default function ValidateInvoices() {
       (f.client_nom || '').toLowerCase().includes(q) ||
       String(f.total_ttc || '').includes(q)
     );
-  }, [factures, search]);
+  }, [scopedFactures, search]);
 
   const stats = useMemo(() => {
-    const enAttente = factures.filter((f) => (f.statut || 'En attente') === 'En attente');
-    const validees = factures.filter((f) => f.validated_by_admin || f.statut === 'Payée');
-    const rejetees = factures.filter((f) => f.statut === 'Rejetée');
-    const montantEnAttente = enAttente.reduce((s, f) => s + (Number(f.total_ttc) || 0), 0);
+    const enAttente = scopedFactures.filter((f) => (f.statut || 'En attente') === 'En attente');
+    const validees = scopedFactures.filter((f) => f.validated_by_admin || f.statut === 'Payée');
+    const rejetees = scopedFactures.filter((f) => f.statut === 'Rejetée');
+    const montantEnAttente = enAttente.reduce((s, f) => s + getInvoiceAmountMad(f), 0);
     return { enAttente: enAttente.length, validees: validees.length, rejetees: rejetees.length, montantEnAttente };
-  }, [factures]);
+  }, [scopedFactures]);
 
   // ── Actions ───────────────────────────────────────────────────────
   const handleValidate = async (facture) => {
     setActionLoading(true);
+    let snackMessage = '';
+    let snackSeverity = 'success';
+
     try {
       await updateFactureByPath(facture, {
         statut: 'Payée',
@@ -197,8 +237,14 @@ export default function ValidateInvoices() {
         validated_at: new Date().toISOString(),
         validated_by: auth.currentUser?.email || 'admin',
       });
-      setSnackbar({ open: true, message: `Facture ${facture.numero || ''} validée`, severity: 'success' });
       setConfirmDialog({ open: false, facture: null, action: null });
+
+      const result = await postValidateInvoiceActions(facture);
+      snackMessage = result.message;
+      snackSeverity = result.severity;
+      toast(snackMessage, snackSeverity);
+
+      setSnackbar({ open: true, message: snackMessage, severity: snackSeverity });
       loadData();
     } catch (e) {
       console.error(e);
@@ -219,6 +265,18 @@ export default function ValidateInvoices() {
       });
       setSnackbar({ open: true, message: `Facture ${facture.numero || ''} rejetée`, severity: 'warning' });
       setConfirmDialog({ open: false, facture: null, action: null });
+
+      // Notification au créateur
+      if (facture.created_by) {
+        await createNotification(facture.created_by, {
+          type: 'error',
+          title: 'Facture rejetée',
+          message: `Votre facture ${facture.numero || ''} a été rejetée par l'admin.`,
+          link: '/app/invoices',
+          meta: { factureId: facture.id, factureNumero: facture.numero },
+        });
+      }
+
       loadData();
     } catch (e) {
       console.error(e);
@@ -228,9 +286,9 @@ export default function ValidateInvoices() {
     }
   };
 
-  const handlePdf = (facture) => {
+  const handlePdf = async (facture) => {
     try {
-      generateInvoicePDF(facture, {
+      await generateInvoicePDF(facture, {
         nom: facture.client_nom,
         email: facture.client_email,
         tel: facture.client_tel,
@@ -254,11 +312,11 @@ export default function ValidateInvoices() {
             mb: 0.5, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.03em',
             fontSize: { xs: '1.4rem', md: '1.9rem' },
           }}>
-            Validation des factures
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>
+          Validation des factures
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#64748B' }}>
             Validez ou rejetez les factures en attente de traitement
-          </Typography>
+        </Typography>
         </Box>
         <Tooltip title="Actualiser">
           <span>
@@ -285,7 +343,7 @@ export default function ValidateInvoices() {
           <StatCard icon={<Cancel sx={{ fontSize: 26 }} />} label="Rejetées" value={loading ? '—' : stats.rejetees} color="#EF4444" bg="rgba(239,68,68,0.1)" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard icon={<Receipt sx={{ fontSize: 26 }} />} label="Montant en attente" value={loading ? '—' : `${fmtMoney(stats.montantEnAttente)} DH`} color="#3B82F6" bg="rgba(59,130,246,0.1)" />
+          <StatCard icon={<Receipt sx={{ fontSize: 26 }} />} label="Montant en attente (MAD)" value={loading ? '—' : formatMoney(stats.montantEnAttente, 'MAD')} color="#3B82F6" bg="rgba(59,130,246,0.1)" />
         </Grid>
       </Grid>
 
@@ -333,7 +391,7 @@ export default function ValidateInvoices() {
           </Typography>
           <Typography sx={{ color: '#64748B' }}>
             {search ? 'Essayez un autre terme de recherche.' : 'Toutes les factures ont été traitées.'}
-          </Typography>
+                  </Typography>
         </Paper>
       ) : (
         <Grid container spacing={2}>
@@ -347,9 +405,9 @@ export default function ValidateInvoices() {
                 onValidate={(fac) => setConfirmDialog({ open: true, facture: fac, action: 'validate' })}
                 onReject={(fac) => setConfirmDialog({ open: true, facture: fac, action: 'reject' })}
               />
-            </Grid>
-          ))}
-        </Grid>
+          </Grid>
+        ))}
+      </Grid>
       )}
 
       {/* Dialog de détail */}
@@ -407,8 +465,8 @@ export default function ValidateInvoices() {
                         <TableRow key={i}>
                           <TableCell sx={{ color: '#F1F5F9' }}>{a.designation || a.nom || '—'}</TableCell>
                           <TableCell align="center" sx={{ color: '#94A3B8' }}>{q}</TableCell>
-                          <TableCell align="right" sx={{ color: '#94A3B8' }}>{fmtMoney(pu)} DH</TableCell>
-                          <TableCell align="right" sx={{ color: '#F1F5F9', fontWeight: 600 }}>{fmtMoney(q * pu)} DH</TableCell>
+                          <TableCell align="right" sx={{ color: '#94A3B8' }}>{fmtInv(pu, detailDialog.facture)}</TableCell>
+                          <TableCell align="right" sx={{ color: '#F1F5F9', fontWeight: 600 }}>{fmtInv(q * pu, detailDialog.facture)}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -423,13 +481,13 @@ export default function ValidateInvoices() {
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 2, alignItems: 'flex-end' }}>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-                  Total HT : <strong style={{ color: '#F1F5F9' }}>{fmtMoney(detailDialog.facture.total_ht)} DH</strong>
+                  Total HT : <strong style={{ color: '#F1F5F9' }}>{fmtInv(detailDialog.facture.total_ht, detailDialog.facture)}</strong>
                 </Typography>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-                  TVA : <strong style={{ color: '#F1F5F9' }}>{fmtMoney(detailDialog.facture.tva)} DH</strong>
+                  TVA : <strong style={{ color: '#F1F5F9' }}>{fmtInv(detailDialog.facture.tva, detailDialog.facture)}</strong>
                 </Typography>
                 <Typography sx={{ color: '#6EE7B7', fontSize: '1.1rem', fontWeight: 800 }}>
-                  TTC : {fmtMoney(detailDialog.facture.total_ttc)} DH
+                  TTC : {fmtInv(detailDialog.facture.total_ttc, detailDialog.facture)}
                 </Typography>
               </Box>
             </Box>
@@ -477,9 +535,29 @@ export default function ValidateInvoices() {
           {confirmDialog.facture && (
             <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
               Client : <strong style={{ color: '#F1F5F9' }}>{confirmDialog.facture.client_nom || '—'}</strong><br />
-              Montant TTC : <strong style={{ color: '#6EE7B7' }}>{fmtMoney(confirmDialog.facture.total_ttc)} DH</strong>
+              Montant TTC : <strong style={{ color: '#6EE7B7' }}>{fmtInv(confirmDialog.facture.total_ttc, confirmDialog.facture)}</strong>
             </Typography>
           )}
+          {confirmDialog.action === 'validate' && confirmDialog.facture && (() => {
+            const contact = resolveClientContact(confirmDialog.facture);
+            return (
+            <Alert
+              severity="info"
+              sx={{ mt: 2, borderRadius: 2, bgcolor: 'rgba(59,130,246,0.08)',
+                color: '#94A3B8', border: '1px solid rgba(59,130,246,0.2)',
+                '& .MuiAlert-icon': { color: '#3B82F6' } }}
+              icon={<Email fontSize="small" />}
+            >
+              <Typography sx={{ fontSize: '0.82rem' }}>
+                {contact.email
+                  ? (emailJsReady
+                    ? <>Email sera envoyé à <strong style={{ color: '#3B82F6' }}>{contact.email}</strong> via EmailJS.</>
+                    : <>Mode mailto : Outlook s'ouvrira pour <strong style={{ color: '#3B82F6' }}>{contact.email}</strong>.</>)
+                  : <>⚠️ Le client <strong>{contact.nom || '—'}</strong> n'a pas d'email — aucun envoi automatique.</>}
+              </Typography>
+            </Alert>
+            );
+          })()}
         </DialogContent>
         <DialogActions sx={{ p: 2, gap: 1 }}>
           <Button disabled={actionLoading} onClick={() => setConfirmDialog({ open: false, facture: null, action: null })} sx={{ color: '#64748B' }}>Annuler</Button>
