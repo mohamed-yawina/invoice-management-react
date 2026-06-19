@@ -20,11 +20,11 @@ export default function CompanySelect({ companies = [], value, onChange, size = 
       ) : companies.map((c) => (
         <MenuItem key={c.id} value={c.id}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Business sx={{ fontSize: 16, color: '#6EE7B7' }} />
+            <Business sx={{ fontSize: 16, color: '#2563EB' }} />
             <Box>
               <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{c.nom}</Typography>
               {c.ice && (
-                <Typography sx={{ fontSize: 11, color: '#64748B' }}>ICE {c.ice}</Typography>
+                <Typography sx={{ fontSize: 11, color: 'var(--app-text-secondary)' }}>ICE {c.ice}</Typography>
               )}
             </Box>
           </Box>

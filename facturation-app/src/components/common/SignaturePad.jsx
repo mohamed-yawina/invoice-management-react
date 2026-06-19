@@ -54,7 +54,7 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#0D1117';
+    ctx.fillStyle = '#FFFFFF';
     ctx.font = "italic 60px 'Brush Script MT', cursive, serif";
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -85,21 +85,21 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth
-      PaperProps={{ sx: { bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.1)' } }}>
+      PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.1)' } }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{
             width: 38, height: 38, borderRadius: 2,
-            bgcolor: 'rgba(110,231,183,0.12)', display: 'flex',
+            bgcolor: 'rgba(37,99,235,0.12)', display: 'flex',
             alignItems: 'center', justifyContent: 'center',
           }}>
-            <Edit sx={{ color: '#6EE7B7', fontSize: 20 }} />
+            <Edit sx={{ color: '#2563EB', fontSize: 20 }} />
           </Box>
-          <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.05rem' }}>
+          <Typography sx={{ fontWeight: 700, color: 'var(--app-text-primary)', fontSize: '1.05rem' }}>
             {title || 'Signature numérique'}
           </Typography>
         </Box>
-        <IconButton onClick={onClose} size="small" sx={{ color: '#64748B' }}>
+        <IconButton onClick={onClose} size="small" sx={{ color: 'var(--app-text-secondary)' }}>
           <Close />
         </IconButton>
       </DialogTitle>
@@ -107,8 +107,8 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
       <DialogContent>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2,
           '& .MuiTab-root': { color: '#94A3B8', textTransform: 'none', fontWeight: 600 },
-          '& .Mui-selected': { color: '#6EE7B7 !important' },
-          '& .MuiTabs-indicator': { backgroundColor: '#6EE7B7' },
+          '& .Mui-selected': { color: '#2563EB !important' },
+          '& .MuiTabs-indicator': { backgroundColor: '#2563EB' },
         }}>
           <Tab icon={<Edit sx={{ fontSize: 18 }} />} iconPosition="start" label="Dessiner" />
           <Tab icon={<TextFields sx={{ fontSize: 18 }} />} iconPosition="start" label="Taper mon nom" />
@@ -117,12 +117,12 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
         {tab === 0 && (
           <Box>
             <Box sx={{
-              border: '2px dashed rgba(110,231,183,0.3)', borderRadius: 2,
-              bgcolor: '#FFFFFF', position: 'relative', overflow: 'hidden',
+              border: '2px dashed rgba(37,99,235,0.3)', borderRadius: 2,
+              bgcolor: 'var(--app-bg-card)', position: 'relative', overflow: 'hidden',
             }}>
               <SignatureCanvas
                 ref={sigRef}
-                penColor="#0D1117"
+                penColor="#FFFFFF"
                 canvasProps={{
                   width: 500, height: 180,
                   style: { display: 'block', width: '100%', height: 180 },
@@ -162,13 +162,13 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
             />
             {typedName.trim() && (
               <Box sx={{
-                mt: 2, p: 3, bgcolor: '#FFFFFF', borderRadius: 2,
+                mt: 2, p: 3, bgcolor: 'var(--app-bg-card)', borderRadius: 2,
                 textAlign: 'center', minHeight: 120,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <Typography sx={{
                   fontFamily: "'Brush Script MT', cursive, serif",
-                  fontSize: '2.5rem', color: '#0D1117', fontStyle: 'italic',
+                  fontSize: '2.5rem', color: '#FFFFFF', fontStyle: 'italic',
                 }}>
                   {typedName.trim()}
                 </Typography>
@@ -185,7 +185,7 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
           startIcon={<Save />}
           disabled={!canSave}
           onClick={handleSave}
-          sx={{ bgcolor: '#6EE7B7', color: '#0D1117', '&:hover': { bgcolor: '#5DD9A6' } }}
+          sx={{ bgcolor: '#2563EB', color: '#FFFFFF', '&:hover': { bgcolor: '#1D4ED8' } }}
         >
           Enregistrer la signature
         </Button>

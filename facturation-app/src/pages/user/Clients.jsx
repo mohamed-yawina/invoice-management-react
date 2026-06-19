@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box, Button, Card, CardContent, Typography, Grid, IconButton, Dialog,
   DialogTitle, DialogContent, DialogActions, TextField, Alert, LinearProgress,
@@ -11,14 +11,14 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { db, ref, get, push, set, remove, getAllFacturesFlat } from '../../services/firebaseService';
 import Layout from '../../components/common/Layout';
-import { palette, gradients } from '../../theme/darkTheme';
+import { useThemeMode } from '../../contexts/ThemeModeContext';
 
 const EMPTY = { nom: '', email: '', tel: '', adresse: '' };
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Palette pour avatars — couleurs variables selon la 1ère lettre
 const AVATAR_GRADIENTS = [
-  'linear-gradient(135deg, #6EE7B7, #3B82F6)',
+  'linear-gradient(135deg, #2563EB, #475569)',
   'linear-gradient(135deg, #A855F7, #EC4899)',
   'linear-gradient(135deg, #F97316, #EF4444)',
   'linear-gradient(135deg, #14B8A6, #3B82F6)',
@@ -32,6 +32,7 @@ const getAvatarGradient = (str = '') => {
 };
 
 export default function Clients() {
+  const { palette, gradients } = useThemeMode();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState([]);
@@ -178,7 +179,7 @@ export default function Clients() {
           position: 'relative', overflow: 'hidden', borderRadius: 4,
           p: { xs: 3, md: 4 }, mb: 3,
           background: gradients.hero,
-          border: '1px solid rgba(110,231,183,0.15)',
+          border: '1px solid rgba(37,99,235,0.15)',
           '&::before': {
             content: '""', position: 'absolute', top: -60, right: -40,
             width: 240, height: 240, borderRadius: '50%',
@@ -187,7 +188,7 @@ export default function Clients() {
           '&::after': {
             content: '""', position: 'absolute', bottom: -40, left: 200,
             width: 160, height: 160, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(110,231,183,0.1), transparent 60%)',
+            background: 'radial-gradient(circle, rgba(37,99,235,0.1), transparent 60%)',
           },
         }}
       >
@@ -242,7 +243,7 @@ export default function Clients() {
         <Grid item xs={4}>
           <Card sx={{ borderRadius: 3, background: gradients.card }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
-              <Box sx={{ bgcolor: 'rgba(110,231,183,0.12)', borderRadius: 2, p: 1.25, color: palette.accent.mint, display: 'flex' }}>
+              <Box sx={{ bgcolor: 'rgba(37,99,235,0.12)', borderRadius: 2, p: 1.25, color: palette.accent.mint, display: 'flex' }}>
                 <Description />
               </Box>
               <Box>
@@ -322,7 +323,7 @@ export default function Clients() {
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    borderColor: 'rgba(110,231,183,0.3)',
+                    borderColor: 'rgba(37,99,235,0.3)',
                     boxShadow: '0 16px 40px rgba(0,0,0,0.3)',
                   },
                 }}>
@@ -332,10 +333,10 @@ export default function Clients() {
                       label={`${nbFactures} facture${nbFactures > 1 ? 's' : ''}`}
                       sx={{
                         position: 'absolute', top: 12, right: 12, zIndex: 2,
-                        bgcolor: 'rgba(110,231,183,0.15)',
+                        bgcolor: 'rgba(37,99,235,0.15)',
                         color: palette.accent.mint,
                         fontWeight: 700, fontSize: 11,
-                        border: '1px solid rgba(110,231,183,0.25)',
+                        border: '1px solid rgba(37,99,235,0.25)',
                       }}
                     />
                   )}
@@ -396,7 +397,7 @@ export default function Clients() {
                       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                         <Box sx={{
                           width: 28, height: 28, borderRadius: '50%',
-                          bgcolor: 'rgba(110,231,183,0.12)', color: palette.accent.mint,
+                          bgcolor: 'rgba(37,99,235,0.12)', color: palette.accent.mint,
                           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                         }}>
                           <Home sx={{ fontSize: 14 }} />
@@ -413,8 +414,8 @@ export default function Clients() {
                         onClick={() => navigate('/app/invoices/new')}
                         sx={{
                           color: palette.accent.mint,
-                          bgcolor: 'rgba(110,231,183,0.05)',
-                          '&:hover': { bgcolor: 'rgba(110,231,183,0.12)' },
+                          bgcolor: 'rgba(37,99,235,0.06)',
+                          '&:hover': { bgcolor: 'rgba(37,99,235,0.12)' },
                         }}>
                         Facturer
                       </Button>
@@ -449,7 +450,7 @@ export default function Clients() {
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth
         PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}>
         <DialogTitle sx={{
-          background: 'linear-gradient(135deg, rgba(168,85,247,0.1), rgba(110,231,183,0.05))',
+          background: 'linear-gradient(135deg, rgba(168,85,247,0.1), rgba(37,99,235,0.06))',
           borderBottom: `1px solid ${palette.line.subtle}`,
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>

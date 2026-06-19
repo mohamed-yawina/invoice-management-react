@@ -25,7 +25,7 @@ export default function CurrencySelect({ value, onChange, size = 'small', fullWi
         <MenuItem key={c.code} value={c.code}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: 2 }}>
             <Typography>{c.label}</Typography>
-            <Typography sx={{ color: '#64748B', fontFamily: 'monospace' }}>{c.code}</Typography>
+            <Typography sx={{ color: 'var(--app-text-secondary)', fontFamily: 'monospace' }}>{c.code}</Typography>
           </Box>
         </MenuItem>
       ))}

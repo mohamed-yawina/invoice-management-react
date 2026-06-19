@@ -48,23 +48,23 @@ export default function QrPublicUrlCard({ onNotify }) {
 
   return (
     <Paper sx={{
-      p: 3, mb: 3, bgcolor: '#0F1623',
-      border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3,
+      p: 3, mb: 3, bgcolor: 'var(--app-bg-card)',
+      border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3,
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
         <Box sx={{
           width: 36, height: 36, borderRadius: 2,
-          background: 'linear-gradient(135deg, rgba(110,231,183,0.15), rgba(59,130,246,0.15))',
-          border: '1px solid rgba(110,231,183,0.25)',
+          background: 'linear-gradient(135deg, rgba(37,99,235,0.15), rgba(59,130,246,0.15))',
+          border: '1px solid rgba(37,99,235,0.25)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <QrCode2 sx={{ color: '#6EE7B7', fontSize: 20 }} />
+          <QrCode2 sx={{ color: '#2563EB', fontSize: 20 }} />
         </Box>
         <Box>
-          <Typography sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '1.05rem' }}>
+          <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '1.05rem' }}>
             URL publique pour le QR code
           </Typography>
-          <Typography sx={{ color: '#64748B', fontSize: '0.75rem' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.75rem' }}>
             Collez ici l&apos;URL du tunnel ou l&apos;IP locale, puis regénérez le PDF
           </Typography>
         </Box>
@@ -107,7 +107,7 @@ export default function QrPublicUrlCard({ onNotify }) {
           variant="contained"
           startIcon={<Save />}
           onClick={handleSave}
-          sx={{ bgcolor: '#6EE7B7', color: '#0D1117', whiteSpace: 'nowrap', '&:hover': { bgcolor: '#5DD9A6' } }}
+          sx={{ bgcolor: '#2563EB', color: '#FFFFFF', whiteSpace: 'nowrap', '&:hover': { bgcolor: '#1D4ED8' } }}
         >
           Enregistrer
         </Button>

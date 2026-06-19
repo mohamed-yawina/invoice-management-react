@@ -1,19 +1,22 @@
 import React, { useEffect } from 'react';
 import { CssBaseline } from '@mui/material';
-import { ThemeProvider } from '@mui/material/styles';
 import { SnackbarProvider } from 'notistack';
-import darkTheme from './theme/darkTheme';
+import { ThemeModeProvider, getStoredThemeMode } from './contexts/ThemeModeContext';
+import { applyThemeCssVariables } from './theme/palettes';
 import { AuthProvider } from './contexts/AuthContext';
 import { CompanyProvider } from './contexts/CompanyContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import AppRoutes from './routes/AppRoutes';
 import { initEmailJS } from './services/emailService';
 
+// Appliquer le thème avant le 1er rendu React (évite flash blanc)
+applyThemeCssVariables(getStoredThemeMode());
+
 export default function App() {
   useEffect(() => { initEmailJS(); }, []);
 
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeModeProvider>
       <CssBaseline />
       <SnackbarProvider
         maxSnack={4}
@@ -28,6 +31,6 @@ export default function App() {
           </CompanyProvider>
         </AuthProvider>
       </SnackbarProvider>
-    </ThemeProvider>
+    </ThemeModeProvider>
   );
 }

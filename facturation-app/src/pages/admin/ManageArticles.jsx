@@ -18,17 +18,17 @@ import { formatMoney } from '../../utils/currency';
 function StatCard({ icon, label, value, color, bg }) {
   return (
     <Card sx={{
-      bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)',
+      bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)',
       borderRadius: 3, transition: 'transform 0.2s, box-shadow 0.2s',
       '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 8px 32px ${color}18` },
     }}>
       <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: '16px !important' }}>
         <Box sx={{ bgcolor: bg, borderRadius: '10px', p: 1.2, color, flexShrink: 0 }}>{icon}</Box>
         <Box>
-          <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {label}
           </Typography>
-          <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.55rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+          <Typography sx={{ fontWeight: 700, color: 'var(--app-text-primary)', fontSize: '1.55rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
             {value}
           </Typography>
         </Box>
@@ -210,13 +210,13 @@ export default function ManageArticles() {
 
   // ── Styles ────────────────────────────────────────────────────────
   const fieldSx = {
-    '& .MuiInputLabel-root': { color: '#64748B' },
-    '& .MuiInputLabel-root.Mui-focused': { color: '#6EE7B7' },
+    '& .MuiInputLabel-root': { color: 'var(--app-text-secondary)' },
+    '& .MuiInputLabel-root.Mui-focused': { color: '#2563EB' },
     '& .MuiOutlinedInput-root': {
-      color: '#F1F5F9', bgcolor: '#080C14', borderRadius: '10px',
+      color: 'var(--app-text-primary)', bgcolor: 'var(--app-bg-deep)', borderRadius: '10px',
       '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-      '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
-      '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
+      '&:hover fieldset': { borderColor: 'rgba(37,99,235,0.3)' },
+      '&.Mui-focused fieldset': { borderColor: '#2563EB' },
     },
     '& .MuiFormHelperText-root': { color: '#EF4444' },
   };
@@ -228,14 +228,14 @@ export default function ManageArticles() {
         <Box>
           <Typography sx={{
             fontWeight: 800,
-            background: 'linear-gradient(135deg, #6EE7B7 0%, #3B82F6 100%)',
+            background: 'linear-gradient(135deg, #2563EB 0%, #475569 100%)',
             backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent',
             mb: 0.5, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.03em',
             fontSize: { xs: '1.4rem', md: '1.9rem' },
           }}>
             Gestion des articles
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>
+          <Typography variant="body2" sx={{ color: 'var(--app-text-secondary)' }}>
             Ajoutez, modifiez ou supprimez des articles (JSON Server)
           </Typography>
         </Box>
@@ -243,9 +243,9 @@ export default function ManageArticles() {
           <Tooltip title="Actualiser la liste">
             <span>
               <IconButton onClick={loadData} disabled={loading} sx={{
-                color: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.08)',
-                border: '1px solid rgba(110,231,183,0.2)', borderRadius: '10px',
-                '&:hover': { bgcolor: 'rgba(110,231,183,0.16)' },
+                color: '#2563EB', bgcolor: 'rgba(37,99,235,0.08)',
+                border: '1px solid rgba(37,99,235,0.2)', borderRadius: '10px',
+                '&:hover': { bgcolor: 'rgba(37,99,235,0.12)' },
               }}>
                 <Refresh sx={{ fontSize: 20, animation: loading ? 'spin 1s linear infinite' : 'none' }} />
               </IconButton>
@@ -255,10 +255,10 @@ export default function ManageArticles() {
             variant="contained" startIcon={<Add />}
             onClick={() => { resetForm(); setOpenDialog(true); }}
             sx={{
-              bgcolor: '#6EE7B7', color: '#080C14', fontWeight: 700,
+              bgcolor: '#2563EB', color: '#F8FAFC', fontWeight: 700,
               borderRadius: '10px', textTransform: 'none', fontSize: '0.875rem',
-              px: 2.5, boxShadow: '0 0 20px rgba(110,231,183,0.25)',
-              '&:hover': { bgcolor: '#4ADE80', boxShadow: '0 0 28px rgba(110,231,183,0.4)' },
+              px: 2.5, boxShadow: '0 0 20px rgba(37,99,235,0.25)',
+              '&:hover': { bgcolor: '#1D4ED8', boxShadow: '0 0 28px rgba(37,99,235,0.35)' },
             }}
           >
             Nouvel article
@@ -269,7 +269,7 @@ export default function ManageArticles() {
       {/* KPIs */}
       <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: { xs: 2, md: 3 } }}>
         <Grid item xs={6} sm={3}>
-          <StatCard icon={<Inventory sx={{ fontSize: 26 }} />} label="Total articles" value={loading ? '—' : articles.length} color="#6EE7B7" bg="rgba(110,231,183,0.1)" />
+          <StatCard icon={<Inventory sx={{ fontSize: 26 }} />} label="Total articles" value={loading ? '—' : articles.length} color="#2563EB" bg="rgba(37,99,235,0.1)" />
         </Grid>
         <Grid item xs={6} sm={3}>
           <StatCard icon={<Category sx={{ fontSize: 26 }} />} label="Catégories" value={loading ? '—' : categories.length} color="#3B82F6" bg="rgba(59,130,246,0.1)" />
@@ -283,7 +283,7 @@ export default function ManageArticles() {
       </Grid>
 
       {/* Barre de recherche & filtre */}
-      <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: 2, mb: 3 }}>
+      <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: 2, mb: 3 }}>
         <Grid container spacing={1.5} alignItems="center">
           <Grid item xs={12} md={8}>
             <TextField
@@ -291,19 +291,19 @@ export default function ManageArticles() {
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
               InputProps={{
-                startAdornment: <InputAdornment position="start"><Search sx={{ color: '#64748B', fontSize: 20 }} /></InputAdornment>,
+                startAdornment: <InputAdornment position="start"><Search sx={{ color: 'var(--app-text-secondary)', fontSize: 20 }} /></InputAdornment>,
                 endAdornment: searchTerm && (
                   <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setSearchTerm('')} sx={{ color: '#64748B' }}>
+                    <IconButton size="small" onClick={() => setSearchTerm('')} sx={{ color: 'var(--app-text-secondary)' }}>
                       <Close sx={{ fontSize: 16 }} />
                     </IconButton>
                   </InputAdornment>
                 ),
                 sx: {
-                  color: '#F1F5F9', bgcolor: '#080C14', borderRadius: '10px',
+                  color: 'var(--app-text-primary)', bgcolor: 'var(--app-bg-deep)', borderRadius: '10px',
                   '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-                  '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
-                  '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
+                  '&:hover fieldset': { borderColor: 'rgba(37,99,235,0.3)' },
+                  '&.Mui-focused fieldset': { borderColor: '#2563EB' },
                   '& input::placeholder': { color: '#475569', opacity: 1 },
                 },
               }}
@@ -316,7 +316,7 @@ export default function ManageArticles() {
                 value={categoryFilter}
                 onChange={(e) => { setCategoryFilter(e.target.value); setPage(0); }}
                 label="Catégorie"
-                MenuProps={{ PaperProps: { sx: { bgcolor: '#0F1623' } } }}
+                MenuProps={{ PaperProps: { sx: { bgcolor: 'var(--app-bg-card)' } } }}
               >
                 <MenuItem value="">Toutes</MenuItem>
                 {categories.map((c) => (
@@ -327,17 +327,17 @@ export default function ManageArticles() {
           </Grid>
         </Grid>
         {(searchTerm || categoryFilter) && !loading && (
-          <Typography sx={{ color: '#64748B', fontSize: '0.78rem', mt: 1.5 }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.78rem', mt: 1.5 }}>
             {filteredArticles.length} résultat{filteredArticles.length !== 1 ? 's' : ''} sur {articles.length}
           </Typography>
         )}
       </Paper>
 
       {/* Tableau */}
-      <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+      <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, overflow: 'hidden' }}>
         {loading ? (
           <Box sx={{ p: 3 }}>
-            <LinearProgress sx={{ bgcolor: '#1E2536', '& .MuiLinearProgress-bar': { bgcolor: '#6EE7B7' } }} />
+            <LinearProgress sx={{ bgcolor: '#1E2536', '& .MuiLinearProgress-bar': { bgcolor: '#2563EB' } }} />
           </Box>
         ) : (
           <>
@@ -346,7 +346,7 @@ export default function ManageArticles() {
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
                     {['Référence', 'Désignation', 'Prix unitaire', 'Stock', 'Catégorie', 'Actions'].map(h => (
-                      <TableCell key={h} sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</TableCell>
+                      <TableCell key={h} sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
@@ -354,8 +354,8 @@ export default function ManageArticles() {
                   {paginated.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} sx={{ py: 7, textAlign: 'center', borderBottom: 'none' }}>
-                        <Inventory sx={{ color: '#1E293B', fontSize: 48, mb: 1 }} />
-                        <Typography sx={{ color: '#64748B' }}>
+                        <Inventory sx={{ color: 'var(--app-text-primary)', fontSize: 48, mb: 1 }} />
+                        <Typography sx={{ color: 'var(--app-text-secondary)' }}>
                           {searchTerm || categoryFilter ? 'Aucun article ne correspond' : 'Aucun article trouvé'}
                         </Typography>
                       </TableCell>
@@ -365,36 +365,36 @@ export default function ManageArticles() {
                     return (
                       <TableRow
                         key={article.id}
-                        sx={{ borderBottom: '1px solid rgba(255,255,255,0.03)', '&:hover': { bgcolor: 'rgba(110,231,183,0.03)' } }}
+                        sx={{ borderBottom: '1px solid #E5E7EB', '&:hover': { bgcolor: 'rgba(37,99,235,0.04)' } }}
                       >
                         <TableCell>
                           {article.reference ? (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7 }}>
-                              <QrCode2 sx={{ color: '#64748B', fontSize: 16 }} />
-                              <Typography sx={{ color: '#6EE7B7', fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600 }}>
+                              <QrCode2 sx={{ color: 'var(--app-text-secondary)', fontSize: 16 }} />
+                              <Typography sx={{ color: '#2563EB', fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600 }}>
                                 {article.reference}
                               </Typography>
                             </Box>
                           ) : (
-                            <Typography sx={{ color: '#64748B', fontFamily: 'monospace', fontSize: '0.78rem' }}>
+                            <Typography sx={{ color: 'var(--app-text-secondary)', fontFamily: 'monospace', fontSize: '0.78rem' }}>
                               #{String(article.id).slice(0, 8)}
                             </Typography>
                           )}
                         </TableCell>
-                        <TableCell sx={{ color: '#F1F5F9', fontWeight: 500 }}>
+                        <TableCell sx={{ color: 'var(--app-text-primary)', fontWeight: 500 }}>
                           <Typography sx={{ fontWeight: 600 }}>{article.designation}</Typography>
                           {article.description && (
-                            <Typography sx={{ color: '#64748B', fontSize: '0.75rem', mt: 0.3, maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.75rem', mt: 0.3, maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {article.description}
                             </Typography>
                           )}
                         </TableCell>
-                        <TableCell sx={{ color: '#F1F5F9', fontWeight: 700 }}>
+                        <TableCell sx={{ color: 'var(--app-text-primary)', fontWeight: 700 }}>
                           {formatMoney(article.prix_unitaire, 'MAD')}
                         </TableCell>
                         <TableCell>
                           {article.stock === null || article.stock === undefined ? (
-                            <Chip label="N/A" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.04)', color: '#64748B', fontSize: '0.7rem' }} />
+                            <Chip label="N/A" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.04)', color: 'var(--app-text-secondary)', fontSize: '0.7rem' }} />
                           ) : (
                             <Chip
                               label={`${article.stock} unit.`}
@@ -412,7 +412,7 @@ export default function ManageArticles() {
                         <TableCell>
                           <Chip
                             label={getCategoryName(article.categorie_id)} size="small"
-                            sx={{ bgcolor: 'rgba(110,231,183,0.1)', color: '#6EE7B7', fontWeight: 600, fontSize: '0.72rem' }}
+                            sx={{ bgcolor: 'rgba(37,99,235,0.1)', color: '#2563EB', fontWeight: 600, fontSize: '0.72rem' }}
                           />
                         </TableCell>
                         <TableCell>
@@ -455,9 +455,9 @@ export default function ManageArticles() {
       <Dialog
         open={openDialog} onClose={() => !saving && setOpenDialog(false)}
         maxWidth="sm" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: '1px solid rgba(110,231,183,0.15)' } }}
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: '16px', border: '1px solid rgba(37,99,235,0.15)' } }}
       >
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, fontFamily: "'Syne', sans-serif" }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, fontFamily: "'Syne', sans-serif" }}>
           {editId ? 'Modifier' : 'Ajouter'} un article
         </DialogTitle>
         <DialogContent sx={{ pt: '20px !important' }}>
@@ -486,7 +486,7 @@ export default function ManageArticles() {
                 onChange={(e) => setForm({ ...form, prix_unitaire: e.target.value })}
                 error={!!formErrors.prix_unitaire} helperText={formErrors.prix_unitaire}
                 placeholder="0" sx={fieldSx}
-                InputProps={{ endAdornment: <InputAdornment position="end" sx={{ '& .MuiTypography-root': { color: '#64748B' } }}>DH</InputAdornment> }}
+                InputProps={{ endAdornment: <InputAdornment position="end" sx={{ '& .MuiTypography-root': { color: 'var(--app-text-secondary)' } }}>DH</InputAdornment> }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -496,7 +496,7 @@ export default function ManageArticles() {
                   value={form.categorie_id}
                   onChange={(e) => setForm({ ...form, categorie_id: e.target.value })}
                   label="Catégorie *"
-                  MenuProps={{ PaperProps: { sx: { bgcolor: '#0F1623' } } }}
+                  MenuProps={{ PaperProps: { sx: { bgcolor: 'var(--app-bg-card)' } } }}
                 >
                   <MenuItem value="">Sélectionner</MenuItem>
                   {categories.map((cat) => (
@@ -530,10 +530,10 @@ export default function ManageArticles() {
           </Grid>
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', p: 2, gap: 1 }}>
-          <Button onClick={() => setOpenDialog(false)} disabled={saving} sx={{ color: '#64748B' }}>Annuler</Button>
+          <Button onClick={() => setOpenDialog(false)} disabled={saving} sx={{ color: 'var(--app-text-secondary)' }}>Annuler</Button>
           <Button
             onClick={handleSave} disabled={saving} variant="contained"
-            sx={{ bgcolor: '#6EE7B7', color: '#080C14', fontWeight: 700, '&:hover': { bgcolor: '#4ADE80' } }}
+            sx={{ bgcolor: '#2563EB', color: '#F8FAFC', fontWeight: 700, '&:hover': { bgcolor: '#1D4ED8' } }}
           >
             {saving ? 'Enregistrement...' : (editId ? 'Modifier' : 'Ajouter')}
           </Button>
@@ -545,19 +545,19 @@ export default function ManageArticles() {
         open={deleteDialog.open}
         onClose={() => !deleteDialog.loading && setDeleteDialog({ open: false, article: null, loading: false })}
         maxWidth="xs" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.2)' } }}
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.2)' } }}
       >
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2 }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2 }}>
           Confirmer la suppression
         </DialogTitle>
         <DialogContent sx={{ pt: '20px !important' }}>
           <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
             Êtes-vous sûr de vouloir supprimer l'article <strong>"{deleteDialog.article?.designation}"</strong> ?
           </Alert>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>Cette action est irréversible.</Typography>
+          <Typography variant="body2" sx={{ color: 'var(--app-text-secondary)' }}>Cette action est irréversible.</Typography>
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', p: 2, gap: 1 }}>
-          <Button onClick={() => setDeleteDialog({ open: false, article: null, loading: false })} disabled={deleteDialog.loading} sx={{ color: '#64748B' }}>
+          <Button onClick={() => setDeleteDialog({ open: false, article: null, loading: false })} disabled={deleteDialog.loading} sx={{ color: 'var(--app-text-secondary)' }}>
             Annuler
           </Button>
           <Button onClick={handleDelete} variant="contained" disabled={deleteDialog.loading} sx={{ bgcolor: '#EF4444', '&:hover': { bgcolor: '#DC2626' } }}>

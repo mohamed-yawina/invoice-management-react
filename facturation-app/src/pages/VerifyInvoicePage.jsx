@@ -24,12 +24,12 @@ const STATUS_COLOR = {
 function InfoRow({ icon, label, value }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1.2 }}>
-      <Box sx={{ color: '#6EE7B7', mt: 0.3 }}>{icon}</Box>
+      <Box sx={{ color: '#2563EB', mt: 0.3 }}>{icon}</Box>
       <Box>
-        <Typography sx={{ color: '#64748B', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           {label}
         </Typography>
-        <Typography sx={{ color: '#F1F5F9', fontWeight: 600, fontSize: '0.95rem' }}>{value}</Typography>
+        <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>{value}</Typography>
       </Box>
     </Box>
   );
@@ -181,7 +181,7 @@ export default function VerifyInvoicePage() {
 
   return (
     <Box sx={{
-      minHeight: '100vh', bgcolor: '#080C14',
+      minHeight: '100vh', bgcolor: 'var(--app-bg-deep)',
       background: 'radial-gradient(ellipse at top, rgba(16,185,129,0.08) 0%, transparent 55%)',
       py: { xs: 3, md: 6 },
     }}>
@@ -190,28 +190,28 @@ export default function VerifyInvoicePage() {
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Typography sx={{
             fontWeight: 800, fontSize: '1.5rem', fontFamily: "'Syne', sans-serif",
-            background: 'linear-gradient(135deg, #6EE7B7, #3B82F6)',
+            background: 'linear-gradient(135deg, #2563EB, #475569)',
             backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent',
           }}>
             FacturePro
           </Typography>
-          <Typography sx={{ color: '#64748B', fontSize: '0.85rem', mt: 0.5 }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.85rem', mt: 0.5 }}>
             Vérification de facture
           </Typography>
         </Box>
 
         {loading && (
-          <Card sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.12)', borderRadius: 3, p: 4, textAlign: 'center' }}>
-            <CircularProgress sx={{ color: '#6EE7B7', mb: 2 }} />
+          <Card sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.12)', borderRadius: 3, p: 4, textAlign: 'center' }}>
+            <CircularProgress sx={{ color: '#2563EB', mb: 2 }} />
             <Typography sx={{ color: '#94A3B8' }}>Vérification en cours…</Typography>
           </Card>
         )}
 
         {!loading && status === 'invalid' && (
-          <Card sx={{ bgcolor: '#0F1623', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 3 }}>
+          <Card sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 3 }}>
             <CardContent sx={{ textAlign: 'center', py: 4 }}>
               <ErrorOutlineOutlined sx={{ fontSize: 56, color: '#EF4444', mb: 2 }} />
-              <Typography variant="h5" sx={{ color: '#F1F5F9', fontWeight: 700, mb: 1 }}>
+              <Typography variant="h5" sx={{ color: 'var(--app-text-primary)', fontWeight: 700, mb: 1 }}>
                 Lien invalide ou facture introuvable
               </Typography>
               <Typography sx={{ color: '#94A3B8', fontSize: '0.9rem' }}>{errorMsg}</Typography>
@@ -220,14 +220,14 @@ export default function VerifyInvoicePage() {
         )}
 
         {!loading && status === 'error' && (
-          <Alert severity="error" sx={{ bgcolor: '#0F1623', border: '1px solid rgba(239,68,68,0.3)' }}>
+          <Alert severity="error" sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(239,68,68,0.3)' }}>
             {errorMsg}
           </Alert>
         )}
 
         {!loading && status === 'valid' && facture && (
           <Card sx={{
-            bgcolor: '#0F1623', border: '1px solid rgba(34,197,94,0.35)', borderRadius: 3,
+            bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: 3,
             boxShadow: '0 0 40px rgba(34,197,94,0.12)',
           }}>
             <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
@@ -236,7 +236,7 @@ export default function VerifyInvoicePage() {
                 <Typography variant="h5" sx={{ color: '#22C55E', fontWeight: 800, mb: 0.5 }}>
                   Facture authentique
                 </Typography>
-                <Typography sx={{ color: '#64748B', fontSize: '0.82rem' }}>
+                <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.82rem' }}>
                   Ce document a été vérifié via un lien sécurisé FacturePro
                 </Typography>
               </Box>
@@ -263,9 +263,9 @@ export default function VerifyInvoicePage() {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1.2 }}>
-                    <Box sx={{ color: '#6EE7B7', mt: 0.3 }}><Receipt fontSize="small" /></Box>
+                    <Box sx={{ color: '#2563EB', mt: 0.3 }}><Receipt fontSize="small" /></Box>
                     <Box>
-                      <Typography sx={{ color: '#64748B', fontSize: '0.72rem', textTransform: 'uppercase' }}>Statut actuel</Typography>
+                      <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Statut actuel</Typography>
                       <Chip
                         label={facture.statut || 'En attente'} size="small"
                         sx={{ mt: 0.5, bgcolor: statutStyle.bg, color: statutStyle.color, fontWeight: 600 }}
@@ -280,9 +280,9 @@ export default function VerifyInvoicePage() {
                 )}
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1.2 }}>
-                    <Box sx={{ color: '#6EE7B7', mt: 0.3 }}><Draw fontSize="small" /></Box>
+                    <Box sx={{ color: '#2563EB', mt: 0.3 }}><Draw fontSize="small" /></Box>
                     <Box>
-                      <Typography sx={{ color: '#64748B', fontSize: '0.72rem', textTransform: 'uppercase' }}>Signature numérique</Typography>
+                      <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Signature numérique</Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mt: 0.5 }}>
                         {hasSignature ? (
                           <>
@@ -291,8 +291,8 @@ export default function VerifyInvoicePage() {
                           </>
                         ) : (
                           <>
-                            <Cancel sx={{ fontSize: 18, color: '#64748B' }} />
-                            <Typography sx={{ color: '#64748B', fontWeight: 600 }}>Non disponible</Typography>
+                            <Cancel sx={{ fontSize: 18, color: 'var(--app-text-secondary)' }} />
+                            <Typography sx={{ color: 'var(--app-text-secondary)', fontWeight: 600 }}>Non disponible</Typography>
                           </>
                         )}
                       </Box>

@@ -39,17 +39,17 @@ const getStatus = (s) => STATUS_META[s] || STATUS_META['En attente'];
 function StatCard({ icon, label, value, color, bg }) {
   return (
     <Card sx={{
-      bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)',
+      bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)',
       borderRadius: 3, transition: 'transform 0.2s, box-shadow 0.2s',
       '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 8px 32px ${color}18` },
     }}>
       <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: '16px !important' }}>
         <Box sx={{ bgcolor: bg, borderRadius: '10px', p: 1.2, color, flexShrink: 0 }}>{icon}</Box>
         <Box>
-          <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {label}
           </Typography>
-          <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.55rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+          <Typography sx={{ fontWeight: 700, color: 'var(--app-text-primary)', fontSize: '1.55rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
             {value}
           </Typography>
         </Box>
@@ -230,13 +230,13 @@ export default function Invoices() {
 
   // ── Styles de champs ──────────────────────────────────────────────
   const fieldSx = {
-    '& .MuiInputLabel-root': { color: '#64748B' },
-    '& .MuiInputLabel-root.Mui-focused': { color: '#6EE7B7' },
+    '& .MuiInputLabel-root': { color: 'var(--app-text-secondary)' },
+    '& .MuiInputLabel-root.Mui-focused': { color: '#2563EB' },
     '& .MuiOutlinedInput-root': {
-      color: '#F1F5F9', bgcolor: '#080C14', borderRadius: '10px',
+      color: 'var(--app-text-primary)', bgcolor: 'var(--app-bg-deep)', borderRadius: '10px',
       '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-      '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
-      '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
+      '&:hover fieldset': { borderColor: 'rgba(37,99,235,0.3)' },
+      '&.Mui-focused fieldset': { borderColor: '#2563EB' },
     },
   };
 
@@ -247,14 +247,14 @@ export default function Invoices() {
         <Box>
           <Typography sx={{
             fontWeight: 800,
-            background: 'linear-gradient(135deg, #6EE7B7 0%, #3B82F6 100%)',
+            background: 'linear-gradient(135deg, #2563EB 0%, #475569 100%)',
             backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent',
             mb: 0.5, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.03em',
             fontSize: { xs: '1.4rem', md: '1.9rem' },
           }}>
             Gestion des factures
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>
+          <Typography variant="body2" sx={{ color: 'var(--app-text-secondary)' }}>
             Consultez, filtrez, validez et gérez toutes les factures
           </Typography>
         </Box>
@@ -262,9 +262,9 @@ export default function Invoices() {
           <Tooltip title="Actualiser">
             <span>
               <IconButton onClick={loadData} disabled={loading} sx={{
-                color: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.08)',
-                border: '1px solid rgba(110,231,183,0.2)', borderRadius: '10px',
-                '&:hover': { bgcolor: 'rgba(110,231,183,0.16)' },
+                color: '#2563EB', bgcolor: 'rgba(37,99,235,0.08)',
+                border: '1px solid rgba(37,99,235,0.2)', borderRadius: '10px',
+                '&:hover': { bgcolor: 'rgba(37,99,235,0.12)' },
               }}>
                 <Refresh sx={{ fontSize: 20, animation: loading ? 'spin 1s linear infinite' : 'none' }} />
               </IconButton>
@@ -274,9 +274,9 @@ export default function Invoices() {
             variant="outlined" startIcon={<TableView />}
             onClick={handleExportExcel} disabled={loading || filtered.length === 0}
             sx={{
-              color: '#6EE7B7', borderColor: 'rgba(110,231,183,0.4)', fontWeight: 600,
+              color: '#2563EB', borderColor: 'rgba(37,99,235,0.35)', fontWeight: 600,
               borderRadius: '10px', textTransform: 'none', px: 2,
-              '&:hover': { borderColor: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.08)' },
+              '&:hover': { borderColor: '#2563EB', bgcolor: 'rgba(37,99,235,0.08)' },
             }}
           >
             Excel
@@ -285,10 +285,10 @@ export default function Invoices() {
             variant="contained" startIcon={<Download />}
             onClick={handleExportAll} disabled={loading || filtered.length === 0}
             sx={{
-              bgcolor: '#6EE7B7', color: '#080C14', fontWeight: 700,
+              bgcolor: '#2563EB', color: '#F8FAFC', fontWeight: 700,
               borderRadius: '10px', textTransform: 'none', px: 2.5,
-              boxShadow: '0 0 20px rgba(110,231,183,0.25)',
-              '&:hover': { bgcolor: '#4ADE80', boxShadow: '0 0 28px rgba(110,231,183,0.4)' },
+              boxShadow: '0 0 20px rgba(37,99,235,0.25)',
+              '&:hover': { bgcolor: '#1D4ED8', boxShadow: '0 0 28px rgba(37,99,235,0.35)' },
             }}
           >
             Exporter PDF
@@ -313,26 +313,26 @@ export default function Invoices() {
       </Grid>
 
       {/* Filtres */}
-      <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: 2, mb: 3 }}>
+      <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: 2, mb: 3 }}>
         <Grid container spacing={1.5} alignItems="center">
           <Grid item xs={12} sm={6} md={4}>
             <TextField
               fullWidth size="small" placeholder="Rechercher N°, client, montant..."
               value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }}
               InputProps={{
-                startAdornment: <InputAdornment position="start"><Search sx={{ color: '#64748B', fontSize: 20 }} /></InputAdornment>,
+                startAdornment: <InputAdornment position="start"><Search sx={{ color: 'var(--app-text-secondary)', fontSize: 20 }} /></InputAdornment>,
                 endAdornment: search && (
                   <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setSearch('')} sx={{ color: '#64748B' }}>
+                    <IconButton size="small" onClick={() => setSearch('')} sx={{ color: 'var(--app-text-secondary)' }}>
                       <Close sx={{ fontSize: 16 }} />
                     </IconButton>
                   </InputAdornment>
                 ),
                 sx: {
-                  color: '#F1F5F9', bgcolor: '#080C14', borderRadius: '10px',
+                  color: 'var(--app-text-primary)', bgcolor: 'var(--app-bg-deep)', borderRadius: '10px',
                   '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-                  '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
-                  '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
+                  '&:hover fieldset': { borderColor: 'rgba(37,99,235,0.3)' },
+                  '&.Mui-focused fieldset': { borderColor: '#2563EB' },
                   '& input::placeholder': { color: '#475569', opacity: 1 },
                 },
               }}
@@ -344,7 +344,7 @@ export default function Invoices() {
               <Select
                 value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
                 label="Statut"
-                MenuProps={{ PaperProps: { sx: { bgcolor: '#0F1623' } } }}
+                MenuProps={{ PaperProps: { sx: { bgcolor: 'var(--app-bg-card)' } } }}
               >
                 <MenuItem value="">Tous</MenuItem>
                 <MenuItem value="En attente">En attente</MenuItem>
@@ -382,7 +382,7 @@ export default function Invoices() {
                 <Switch
                   checked={showArchived}
                   onChange={(e) => { setShowArchived(e.target.checked); setPage(0); }}
-                  sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#6EE7B7' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#6EE7B7' } }}
+                  sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#2563EB' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#2563EB' } }}
                 />
               }
               label={<Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>Afficher les factures archivées</Typography>}
@@ -390,17 +390,17 @@ export default function Invoices() {
           </Grid>
         </Grid>
         {(search || statusFilter || dateFrom || dateTo) && !loading && (
-          <Typography sx={{ color: '#64748B', fontSize: '0.78rem', mt: 1.5 }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.78rem', mt: 1.5 }}>
             {filtered.length} résultat{filtered.length !== 1 ? 's' : ''} sur {factures.length}
           </Typography>
         )}
       </Paper>
 
       {/* Tableau */}
-      <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+      <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, overflow: 'hidden' }}>
         {loading ? (
           <Box sx={{ p: 3 }}>
-            <LinearProgress sx={{ bgcolor: '#1E2536', '& .MuiLinearProgress-bar': { bgcolor: '#6EE7B7' } }} />
+            <LinearProgress sx={{ bgcolor: '#1E2536', '& .MuiLinearProgress-bar': { bgcolor: '#2563EB' } }} />
           </Box>
         ) : (
           <>
@@ -409,7 +409,7 @@ export default function Invoices() {
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
                     {['N° Facture', 'Date', 'Client', 'Société', 'Devise', 'Montant TTC', 'Statut', 'Validation', 'Actions'].map(h => (
-                      <TableCell key={h} sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</TableCell>
+                      <TableCell key={h} sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
@@ -417,8 +417,8 @@ export default function Invoices() {
                   {paginated.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} sx={{ py: 7, textAlign: 'center', borderBottom: 'none' }}>
-                        <Receipt sx={{ color: '#1E293B', fontSize: 48, mb: 1 }} />
-                        <Typography sx={{ color: '#64748B' }}>Aucune facture trouvée</Typography>
+                        <Receipt sx={{ color: 'var(--app-text-primary)', fontSize: 48, mb: 1 }} />
+                        <Typography sx={{ color: 'var(--app-text-secondary)' }}>Aucune facture trouvée</Typography>
                       </TableCell>
                     </TableRow>
                   ) : paginated.map((f) => {
@@ -426,13 +426,13 @@ export default function Invoices() {
                     return (
                       <TableRow
                         key={f.id || f._path}
-                        sx={{ borderBottom: '1px solid rgba(255,255,255,0.03)', '&:hover': { bgcolor: 'rgba(110,231,183,0.03)' } }}
+                        sx={{ borderBottom: '1px solid #E5E7EB', '&:hover': { bgcolor: 'rgba(37,99,235,0.04)' } }}
                       >
-                        <TableCell sx={{ color: '#6EE7B7', fontFamily: 'monospace', fontWeight: 600 }}>
+                        <TableCell sx={{ color: '#2563EB', fontFamily: 'monospace', fontWeight: 600 }}>
                           {f.numero || `#${String(f.id || '').slice(0, 6)}`}
                         </TableCell>
                         <TableCell sx={{ color: '#94A3B8' }}>{fmtDate(f.date_creation)}</TableCell>
-                        <TableCell sx={{ color: '#F1F5F9' }}>
+                        <TableCell sx={{ color: 'var(--app-text-primary)' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Avatar sx={{ width: 28, height: 28, bgcolor: 'rgba(59,130,246,0.15)', color: '#3B82F6', fontSize: '0.75rem', fontWeight: 700 }}>
                               {(f.client_nom?.[0] || '?').toUpperCase()}
@@ -444,7 +444,7 @@ export default function Invoices() {
                           {getCompanyDisplayName(f)}
                         </TableCell>
                         <TableCell sx={{ color: '#94A3B8', fontWeight: 600 }}>{normalizeCurrency(f.currency)}</TableCell>
-                        <TableCell sx={{ color: '#F1F5F9', fontWeight: 700 }}>{fmtInv(f.total_ttc, f)}</TableCell>
+                        <TableCell sx={{ color: 'var(--app-text-primary)', fontWeight: 700 }}>{fmtInv(f.total_ttc, f)}</TableCell>
                         <TableCell>
                           <Chip
                             label={f.statut || 'En attente'} size="small" icon={st.icon}
@@ -522,11 +522,11 @@ export default function Invoices() {
         open={detailDialog.open}
         onClose={() => setDetailDialog({ open: false, facture: null })}
         maxWidth="md" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: '1px solid rgba(110,231,183,0.15)' } }}
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: '16px', border: '1px solid rgba(37,99,235,0.15)' } }}
       >
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Syne', sans-serif" }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Syne', sans-serif" }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
-            <Receipt sx={{ color: '#6EE7B7' }} />
+            <Receipt sx={{ color: '#2563EB' }} />
             Facture {detailDialog.facture?.numero}
             {detailDialog.facture && (
               <Chip
@@ -539,7 +539,7 @@ export default function Invoices() {
               />
             )}
           </Box>
-          <IconButton onClick={() => setDetailDialog({ open: false, facture: null })} sx={{ color: '#64748B' }}>
+          <IconButton onClick={() => setDetailDialog({ open: false, facture: null })} sx={{ color: 'var(--app-text-secondary)' }}>
             <Close />
           </IconButton>
         </DialogTitle>
@@ -548,10 +548,10 @@ export default function Invoices() {
             <Box>
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 <Grid item xs={12} sm={6}>
-                  <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 0.5 }}>
+                  <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 0.5 }}>
                     <Person sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />Client
                   </Typography>
-                  <Typography sx={{ color: '#F1F5F9', fontWeight: 600 }}>{detailDialog.facture.client_nom || '—'}</Typography>
+                  <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 600 }}>{detailDialog.facture.client_nom || '—'}</Typography>
                   {detailDialog.facture.client_email && (
                     <Typography sx={{ color: '#94A3B8', fontSize: '0.82rem' }}>{detailDialog.facture.client_email}</Typography>
                   )}
@@ -560,10 +560,10 @@ export default function Invoices() {
                   )}
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 0.5 }}>
+                  <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 0.5 }}>
                     <Event sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />Dates
                   </Typography>
-                  <Typography sx={{ color: '#F1F5F9', fontSize: '0.85rem' }}>Création : <strong>{fmtDate(detailDialog.facture.date_creation)}</strong></Typography>
+                  <Typography sx={{ color: 'var(--app-text-primary)', fontSize: '0.85rem' }}>Création : <strong>{fmtDate(detailDialog.facture.date_creation)}</strong></Typography>
                   {detailDialog.facture.date_depot && (
                     <Typography sx={{ color: '#94A3B8', fontSize: '0.82rem' }}>Dépôt : {fmtDate(detailDialog.facture.date_depot)}</Typography>
                   )}
@@ -578,15 +578,15 @@ export default function Invoices() {
 
               <Divider sx={{ borderColor: 'rgba(255,255,255,0.05)', mb: 2 }} />
 
-              <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>Articles</Typography>
-              <TableContainer sx={{ bgcolor: '#080C14', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+              <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>Articles</Typography>
+              <TableContainer sx={{ bgcolor: 'var(--app-bg-deep)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem' }}>Désignation</TableCell>
-                      <TableCell align="center" sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem' }}>Qté</TableCell>
-                      <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem' }}>P.U.</TableCell>
-                      <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem' }}>Total</TableCell>
+                      <TableCell sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem' }}>Désignation</TableCell>
+                      <TableCell align="center" sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem' }}>Qté</TableCell>
+                      <TableCell align="right" sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem' }}>P.U.</TableCell>
+                      <TableCell align="right" sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem' }}>Total</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -595,16 +595,16 @@ export default function Invoices() {
                       const pu = Number(a.prix_unitaire ?? a.prix ?? 0);
                       return (
                         <TableRow key={i}>
-                          <TableCell sx={{ color: '#F1F5F9' }}>{a.designation || a.nom || '—'}</TableCell>
+                          <TableCell sx={{ color: 'var(--app-text-primary)' }}>{a.designation || a.nom || '—'}</TableCell>
                           <TableCell align="center" sx={{ color: '#94A3B8' }}>{q}</TableCell>
                           <TableCell align="right" sx={{ color: '#94A3B8' }}>{fmtInv(pu, detailDialog.facture)}</TableCell>
-                          <TableCell align="right" sx={{ color: '#F1F5F9', fontWeight: 600 }}>{fmtInv(q * pu, detailDialog.facture)}</TableCell>
+                          <TableCell align="right" sx={{ color: 'var(--app-text-primary)', fontWeight: 600 }}>{fmtInv(q * pu, detailDialog.facture)}</TableCell>
                         </TableRow>
                       );
                     })}
                     {(!detailDialog.facture.articles || detailDialog.facture.articles.length === 0) && (
                       <TableRow>
-                        <TableCell colSpan={4} sx={{ color: '#64748B', textAlign: 'center' }}>Aucun article</TableCell>
+                        <TableCell colSpan={4} sx={{ color: 'var(--app-text-secondary)', textAlign: 'center' }}>Aucun article</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -613,12 +613,12 @@ export default function Invoices() {
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 2, alignItems: 'flex-end' }}>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-                  Total HT : <strong style={{ color: '#F1F5F9' }}>{fmtInv(detailDialog.facture.total_ht, detailDialog.facture)}</strong>
+                  Total HT : <strong style={{ color: 'var(--app-text-primary)' }}>{fmtInv(detailDialog.facture.total_ht, detailDialog.facture)}</strong>
                 </Typography>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-                  TVA : <strong style={{ color: '#F1F5F9' }}>{fmtInv(detailDialog.facture.tva, detailDialog.facture)}</strong>
+                  TVA : <strong style={{ color: 'var(--app-text-primary)' }}>{fmtInv(detailDialog.facture.tva, detailDialog.facture)}</strong>
                 </Typography>
-                <Typography sx={{ color: '#6EE7B7', fontSize: '1.2rem', fontWeight: 800 }}>
+                <Typography sx={{ color: '#2563EB', fontSize: '1.2rem', fontWeight: 800 }}>
                   TTC : {fmtInv(detailDialog.facture.total_ttc, detailDialog.facture)}
                 </Typography>
               </Box>
@@ -628,7 +628,7 @@ export default function Invoices() {
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', p: 2, gap: 1 }}>
           <Button startIcon={<PictureAsPdf />} onClick={() => handlePdf(detailDialog.facture)} sx={{ color: '#EF4444' }}>PDF</Button>
           <Box sx={{ flex: 1 }} />
-          <Button onClick={() => setDetailDialog({ open: false, facture: null })} sx={{ color: '#64748B' }}>Fermer</Button>
+          <Button onClick={() => setDetailDialog({ open: false, facture: null })} sx={{ color: 'var(--app-text-secondary)' }}>Fermer</Button>
         </DialogActions>
       </Dialog>
 
@@ -637,9 +637,9 @@ export default function Invoices() {
         open={confirmDialog.open}
         onClose={() => !actionLoading && setConfirmDialog({ open: false, facture: null, action: null })}
         maxWidth="xs" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px' } }}
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: '16px' } }}
       >
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700 }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700 }}>
           {confirmDialog.action === 'validate' && 'Valider la facture ?'}
           {confirmDialog.action === 'reject' && 'Rejeter la facture ?'}
           {confirmDialog.action === 'delete' && 'Supprimer la facture ?'}
@@ -655,20 +655,20 @@ export default function Invoices() {
           </Alert>
           {confirmDialog.facture && (
             <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-              Client : <strong style={{ color: '#F1F5F9' }}>{confirmDialog.facture.client_nom || '—'}</strong><br />
-              Montant TTC : <strong style={{ color: '#6EE7B7' }}>{fmtInv(confirmDialog.facture.total_ttc, confirmDialog.facture)}</strong>
+              Client : <strong style={{ color: 'var(--app-text-primary)' }}>{confirmDialog.facture.client_nom || '—'}</strong><br />
+              Montant TTC : <strong style={{ color: '#2563EB' }}>{fmtInv(confirmDialog.facture.total_ttc, confirmDialog.facture)}</strong>
             </Typography>
           )}
         </DialogContent>
         <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button disabled={actionLoading} onClick={() => setConfirmDialog({ open: false, facture: null, action: null })} sx={{ color: '#64748B' }}>Annuler</Button>
+          <Button disabled={actionLoading} onClick={() => setConfirmDialog({ open: false, facture: null, action: null })} sx={{ color: 'var(--app-text-secondary)' }}>Annuler</Button>
           {confirmDialog.action === 'validate' && (
             <Button disabled={actionLoading} variant="contained" onClick={() => handleValidate(confirmDialog.facture)} sx={{ bgcolor: '#22C55E', '&:hover': { bgcolor: '#16A34A' } }}>
               {actionLoading ? '...' : 'Valider'}
             </Button>
           )}
           {confirmDialog.action === 'reject' && (
-            <Button disabled={actionLoading} variant="contained" onClick={() => handleReject(confirmDialog.facture)} sx={{ bgcolor: '#EAB308', color: '#0F1623', '&:hover': { bgcolor: '#CA8A04' } }}>
+            <Button disabled={actionLoading} variant="contained" onClick={() => handleReject(confirmDialog.facture)} sx={{ bgcolor: '#EAB308', color: '#FFFFFF', '&:hover': { bgcolor: '#CA8A04' } }}>
               {actionLoading ? '...' : 'Rejeter'}
             </Button>
           )}

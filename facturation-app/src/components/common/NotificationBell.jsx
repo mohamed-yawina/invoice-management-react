@@ -16,7 +16,7 @@ const typeIcon = (type) => {
     case 'error': return <Cancel sx={{ fontSize: 18, color: '#EF4444' }} />;
     case 'warning': return <Receipt sx={{ fontSize: 18, color: '#EAB308' }} />;
     case 'email': return <Email sx={{ fontSize: 18, color: '#3B82F6' }} />;
-    default: return <Notifications sx={{ fontSize: 18, color: '#6EE7B7' }} />;
+    default: return <Notifications sx={{ fontSize: 18, color: '#2563EB' }} />;
   }
 };
 
@@ -26,7 +26,7 @@ const typeColor = (type) => {
     case 'error': return '#EF4444';
     case 'warning': return '#EAB308';
     case 'email': return '#3B82F6';
-    default: return '#6EE7B7';
+    default: return '#2563EB';
   }
 };
 
@@ -67,7 +67,7 @@ export default function NotificationBell({ iconSize = 22, iconColor = '#94A3B8',
         <IconButton
           size={compact ? 'small' : 'medium'}
           onClick={(e) => setAnchorEl(e.currentTarget)}
-          sx={{ color: iconColor, '&:hover': { color: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.08)' } }}
+          sx={{ color: iconColor, '&:hover': { color: '#2563EB', bgcolor: 'rgba(37,99,235,0.08)' } }}
         >
           <Badge
             badgeContent={unreadCount}
@@ -90,7 +90,7 @@ export default function NotificationBell({ iconSize = 22, iconColor = '#94A3B8',
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         TransitionComponent={Fade}
         PaperProps={{ sx: {
-          bgcolor: '#0D1117', border: '1px solid rgba(110,231,183,0.15)',
+          bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.15)',
           borderRadius: '14px', mt: 1.5, minWidth: 340, maxWidth: 380,
           boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
           maxHeight: 520, overflow: 'hidden',
@@ -99,7 +99,7 @@ export default function NotificationBell({ iconSize = 22, iconColor = '#94A3B8',
         <Box sx={{ px: 2, py: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <Box>
-            <Typography sx={{ color: '#F1F5F9', fontSize: '0.95rem', fontWeight: 700 }}>
+            <Typography sx={{ color: 'var(--app-text-primary)', fontSize: '0.95rem', fontWeight: 700 }}>
               Notifications
             </Typography>
             {unreadCount > 0 && (
@@ -112,7 +112,7 @@ export default function NotificationBell({ iconSize = 22, iconColor = '#94A3B8',
           </Box>
           {unreadCount > 0 && (
             <Tooltip title="Tout marquer comme lu">
-              <IconButton size="small" onClick={markAllAsRead} sx={{ color: '#6EE7B7' }}>
+              <IconButton size="small" onClick={markAllAsRead} sx={{ color: '#2563EB' }}>
                 <MarkEmailRead fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -122,7 +122,7 @@ export default function NotificationBell({ iconSize = 22, iconColor = '#94A3B8',
         {visible.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <NotificationsNone sx={{ fontSize: 40, color: '#334155', mb: 1 }} />
-            <Typography sx={{ color: '#64748B', fontSize: '0.85rem' }}>
+            <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.85rem' }}>
               Aucune notification
             </Typography>
           </Box>
@@ -135,16 +135,16 @@ export default function NotificationBell({ iconSize = 22, iconColor = '#94A3B8',
                 sx={{
                   px: 2, py: 1.3, display: 'flex', alignItems: 'flex-start', gap: 1.2,
                   borderLeft: '3px solid', borderLeftColor: typeColor(n.type),
-                  bgcolor: n.read ? 'transparent' : 'rgba(110,231,183,0.04)',
+                  bgcolor: n.read ? 'transparent' : 'rgba(37,99,235,0.06)',
                   whiteSpace: 'normal',
-                  '&:hover': { bgcolor: 'rgba(110,231,183,0.08)' },
+                  '&:hover': { bgcolor: 'rgba(37,99,235,0.08)' },
                 }}
               >
                 <Box sx={{ flexShrink: 0, mt: 0.3 }}>{typeIcon(n.type)}</Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   {n.title && (
                     <Typography sx={{
-                      color: '#F1F5F9', fontSize: '0.8rem',
+                      color: 'var(--app-text-primary)', fontSize: '0.8rem',
                       fontWeight: n.read ? 500 : 700, mb: 0.2,
                     }}>
                       {n.title}

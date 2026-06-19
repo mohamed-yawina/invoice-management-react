@@ -18,17 +18,17 @@ const emptyForm = { nom: '', adresse: '', tel: '', email: '', ice: '' };
 function StatCard({ icon, label, value, color, bg }) {
   return (
     <Card sx={{
-      bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3,
+      bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3,
       '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 8px 32px ${color}18` },
       transition: 'transform 0.2s',
     }}>
       <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: '16px !important' }}>
         <Box sx={{ bgcolor: bg, borderRadius: '10px', p: 1.2, color }}>{icon}</Box>
         <Box>
-          <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>
             {label}
           </Typography>
-          <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.5rem' }}>{value}</Typography>
+          <Typography sx={{ fontWeight: 700, color: 'var(--app-text-primary)', fontSize: '1.5rem' }}>{value}</Typography>
         </Box>
       </CardContent>
     </Card>
@@ -111,17 +111,17 @@ export default function ManageCompanies() {
     <AdminLayout>
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography sx={{ fontWeight: 800, color: '#F1F5F9', fontFamily: "'Syne', sans-serif", fontSize: '1.75rem', mb: 0.5 }}>
+          <Typography sx={{ fontWeight: 800, color: 'var(--app-text-primary)', fontFamily: "'Syne', sans-serif", fontSize: '1.75rem', mb: 0.5 }}>
             Sociétés
           </Typography>
-          <Typography sx={{ color: '#64748B' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)' }}>
             Gérez les entités émettrices de factures (multi-société)
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button startIcon={<Refresh />} onClick={loadData} sx={{ color: '#64748B' }}>Actualiser</Button>
+          <Button startIcon={<Refresh />} onClick={loadData} sx={{ color: 'var(--app-text-secondary)' }}>Actualiser</Button>
           <Button variant="contained" startIcon={<Add />} onClick={openCreate}
-            sx={{ bgcolor: '#6EE7B7', color: '#080C14', fontWeight: 700 }}>
+            sx={{ bgcolor: '#2563EB', color: '#F8FAFC', fontWeight: 700 }}>
             Nouvelle société
           </Button>
         </Box>
@@ -130,20 +130,20 @@ export default function ManageCompanies() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={4}>
           <StatCard icon={<Business />} label="Sociétés actives" value={loading ? '—' : companies.length}
-            color="#6EE7B7" bg="rgba(110,231,183,0.12)" />
+            color="#2563EB" bg="rgba(37,99,235,0.12)" />
         </Grid>
       </Grid>
 
-      <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+      <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, overflow: 'hidden' }}>
         {loading ? (
-          <LinearProgress sx={{ bgcolor: '#1E2536', '& .MuiLinearProgress-bar': { bgcolor: '#6EE7B7' } }} />
+          <LinearProgress sx={{ bgcolor: '#1E2536', '& .MuiLinearProgress-bar': { bgcolor: '#2563EB' } }} />
         ) : (
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
                   {['Nom', 'ICE', 'Email', 'Téléphone', 'Ville / Adresse', 'Actions'].map((h) => (
-                    <TableCell key={h} sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>
+                    <TableCell key={h} sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>
                       {h}
                     </TableCell>
                   ))}
@@ -152,25 +152,25 @@ export default function ManageCompanies() {
               <TableBody>
                 {companies.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ py: 6, textAlign: 'center', color: '#64748B' }}>
+                    <TableCell colSpan={6} sx={{ py: 6, textAlign: 'center', color: 'var(--app-text-secondary)' }}>
                       Aucune société — cliquez sur « Nouvelle société »
                     </TableCell>
                   </TableRow>
                 ) : companies.map((c) => (
-                  <TableRow key={c.id} sx={{ '&:hover': { bgcolor: 'rgba(110,231,183,0.03)' } }}>
-                    <TableCell sx={{ color: '#F1F5F9', fontWeight: 600 }}>
+                  <TableRow key={c.id} sx={{ '&:hover': { bgcolor: 'rgba(37,99,235,0.04)' } }}>
+                    <TableCell sx={{ color: 'var(--app-text-primary)', fontWeight: 600 }}>
                       {c.nom}
                       {c.isDefault && (
-                        <Chip label="Défaut" size="small" sx={{ ml: 1, height: 20, fontSize: '0.65rem', bgcolor: 'rgba(110,231,183,0.12)', color: '#6EE7B7' }} />
+                        <Chip label="Défaut" size="small" sx={{ ml: 1, height: 20, fontSize: '0.65rem', bgcolor: 'rgba(37,99,235,0.12)', color: '#2563EB' }} />
                       )}
                     </TableCell>
                     <TableCell sx={{ color: '#94A3B8', fontFamily: 'monospace', fontSize: '0.85rem' }}>{c.ice || '—'}</TableCell>
                     <TableCell sx={{ color: '#94A3B8' }}>{c.email || '—'}</TableCell>
                     <TableCell sx={{ color: '#94A3B8' }}>{c.tel || '—'}</TableCell>
-                    <TableCell sx={{ color: '#64748B', maxWidth: 200 }}>{c.adresse || '—'}</TableCell>
+                    <TableCell sx={{ color: 'var(--app-text-secondary)', maxWidth: 200 }}>{c.adresse || '—'}</TableCell>
                     <TableCell>
                       <Tooltip title="Modifier">
-                        <IconButton size="small" onClick={() => openEdit(c)} sx={{ color: '#6EE7B7' }}>
+                        <IconButton size="small" onClick={() => openEdit(c)} sx={{ color: '#2563EB' }}>
                           <Edit fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -192,10 +192,10 @@ export default function ManageCompanies() {
 
       <Dialog open={dialog.open} onClose={() => !saving && setDialog({ open: false, editId: null, form: emptyForm })}
         maxWidth="sm" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.15)', borderRadius: 3 } }}>
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, display: 'flex', justifyContent: 'space-between' }}>
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.15)', borderRadius: 3 } }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700, display: 'flex', justifyContent: 'space-between' }}>
           {dialog.editId ? 'Modifier la société' : 'Nouvelle société'}
-          <IconButton onClick={() => setDialog({ open: false, editId: null, form: emptyForm })} sx={{ color: '#64748B' }}>
+          <IconButton onClick={() => setDialog({ open: false, editId: null, form: emptyForm })} sx={{ color: 'var(--app-text-secondary)' }}>
             <Close />
           </IconButton>
         </DialogTitle>
@@ -224,25 +224,25 @@ export default function ManageCompanies() {
           </Grid>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setDialog({ open: false, editId: null, form: emptyForm })} sx={{ color: '#64748B' }}>
+          <Button onClick={() => setDialog({ open: false, editId: null, form: emptyForm })} sx={{ color: 'var(--app-text-secondary)' }}>
             Annuler
           </Button>
-          <Button onClick={handleSave} disabled={saving} variant="contained" sx={{ bgcolor: '#6EE7B7', color: '#080C14' }}>
+          <Button onClick={handleSave} disabled={saving} variant="contained" sx={{ bgcolor: '#2563EB', color: '#F8FAFC' }}>
             {saving ? 'Enregistrement…' : 'Enregistrer'}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={Boolean(confirmDelete)} onClose={() => !saving && setConfirmDelete(null)}
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: 3, minWidth: 360 } }}>
-        <DialogTitle sx={{ color: '#F1F5F9' }}>Désactiver {confirmDelete?.nom} ?</DialogTitle>
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: 3, minWidth: 360 } }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)' }}>Désactiver {confirmDelete?.nom} ?</DialogTitle>
         <DialogContent>
           <Typography sx={{ color: '#94A3B8' }}>
             La société ne sera plus proposée pour les nouvelles factures. Les factures existantes conservent leurs données.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDelete(null)} sx={{ color: '#64748B' }}>Annuler</Button>
+          <Button onClick={() => setConfirmDelete(null)} sx={{ color: 'var(--app-text-secondary)' }}>Annuler</Button>
           <Button onClick={handleDelete} disabled={saving} color="error" variant="contained">Désactiver</Button>
         </DialogActions>
       </Dialog>

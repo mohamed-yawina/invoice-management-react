@@ -28,7 +28,7 @@ function YearCard({ data, onArchive, onUnarchive, onExport, loading }) {
 
   return (
     <Card sx={{
-      bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)',
+      bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)',
       borderRadius: 3, transition: 'all 0.2s',
       '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 32px rgba(59,130,246,0.12)' },
     }}>
@@ -39,17 +39,17 @@ function YearCard({ data, onArchive, onUnarchive, onExport, loading }) {
               <CalendarMonth />
             </Box>
             <Box>
-              <Typography sx={{ color: '#F1F5F9', fontWeight: 800, fontSize: '1.4rem', fontFamily: "'Syne', sans-serif" }}>
+              <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 800, fontSize: '1.4rem', fontFamily: "'Syne', sans-serif" }}>
                 {data.year}
               </Typography>
-              <Typography sx={{ color: '#64748B', fontSize: '0.75rem' }}>
+              <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.75rem' }}>
                 {data.total} facture{data.total > 1 ? 's' : ''}
               </Typography>
             </Box>
           </Box>
           {fullyArchived ? (
             <Chip label="Archivée" size="small" icon={<Archive sx={{ fontSize: '14px !important' }} />}
-              sx={{ bgcolor: 'rgba(110,231,183,0.12)', color: '#6EE7B7', fontWeight: 600, fontSize: '0.7rem' }} />
+              sx={{ bgcolor: 'rgba(37,99,235,0.12)', color: '#2563EB', fontWeight: 600, fontSize: '0.7rem' }} />
           ) : partiallyArchived ? (
             <Chip label="Partielle" size="small"
               sx={{ bgcolor: 'rgba(234,179,8,0.12)', color: '#EAB308', fontWeight: 600, fontSize: '0.7rem' }} />
@@ -61,19 +61,19 @@ function YearCard({ data, onArchive, onUnarchive, onExport, loading }) {
 
         <Grid container spacing={1} sx={{ mb: 1 }}>
           <Grid item xs={6}>
-            <Typography sx={{ color: '#64748B', fontSize: '0.68rem', textTransform: 'uppercase' }}>Total TTC (MAD)</Typography>
-            <Typography sx={{ color: '#F1F5F9', fontWeight: 700 }}>{fmtMad(data.montantTTC)}</Typography>
+            <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.68rem', textTransform: 'uppercase' }}>Total TTC (MAD)</Typography>
+            <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700 }}>{fmtMad(data.montantTTC)}</Typography>
           </Grid>
           <Grid item xs={6}>
-            <Typography sx={{ color: '#64748B', fontSize: '0.68rem', textTransform: 'uppercase' }}>Encaissé (MAD)</Typography>
+            <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.68rem', textTransform: 'uppercase' }}>Encaissé (MAD)</Typography>
             <Typography sx={{ color: '#22C55E', fontWeight: 700 }}>{fmtMad(data.montantPaye)}</Typography>
           </Grid>
           <Grid item xs={6}>
-            <Typography sx={{ color: '#64748B', fontSize: '0.68rem' }}>Archivées</Typography>
-            <Typography sx={{ color: '#6EE7B7', fontWeight: 600 }}>{data.archived}</Typography>
+            <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.68rem' }}>Archivées</Typography>
+            <Typography sx={{ color: '#2563EB', fontWeight: 600 }}>{data.archived}</Typography>
           </Grid>
           <Grid item xs={6}>
-            <Typography sx={{ color: '#64748B', fontSize: '0.68rem' }}>Actives</Typography>
+            <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.68rem' }}>Actives</Typography>
             <Typography sx={{ color: '#3B82F6', fontWeight: 600 }}>{data.active}</Typography>
           </Grid>
         </Grid>
@@ -84,7 +84,7 @@ function YearCard({ data, onArchive, onUnarchive, onExport, loading }) {
       <CardActions sx={{ px: 2, py: 1.5, flexWrap: 'wrap', gap: 1 }}>
         <Button size="small" startIcon={<TableView />} disabled={loading || data.total === 0}
           onClick={() => onExport(data.year, false)}
-          sx={{ color: '#6EE7B7', textTransform: 'none', fontWeight: 600 }}>
+          sx={{ color: '#2563EB', textTransform: 'none', fontWeight: 600 }}>
           Excel (tout)
         </Button>
         {data.archived > 0 && (
@@ -214,22 +214,22 @@ export default function AnnualArchive() {
         <Box>
           <Typography sx={{
             fontWeight: 800,
-            background: 'linear-gradient(135deg, #6EE7B7 0%, #3B82F6 100%)',
+            background: 'linear-gradient(135deg, #2563EB 0%, #475569 100%)',
             backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent',
             mb: 0.5, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.03em',
             fontSize: { xs: '1.4rem', md: '1.9rem' },
           }}>
             Archivage annuel
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>
+          <Typography variant="body2" sx={{ color: 'var(--app-text-secondary)' }}>
             Clôturez et exportez les factures par année fiscale
           </Typography>
         </Box>
         <Tooltip title="Actualiser">
           <span>
             <IconButton onClick={loadData} disabled={loading || actionLoading} sx={{
-              color: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.08)',
-              border: '1px solid rgba(110,231,183,0.2)', borderRadius: '10px',
+              color: '#2563EB', bgcolor: 'rgba(37,99,235,0.08)',
+              border: '1px solid rgba(37,99,235,0.2)', borderRadius: '10px',
             }}>
               <Refresh sx={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
             </IconButton>
@@ -237,7 +237,7 @@ export default function AnnualArchive() {
         </Tooltip>
       </Box>
 
-      {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1, bgcolor: 'rgba(110,231,183,0.08)', '& .MuiLinearProgress-bar': { bgcolor: '#6EE7B7' } }} />}
+      {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1, bgcolor: 'rgba(37,99,235,0.08)', '& .MuiLinearProgress-bar': { bgcolor: '#2563EB' } }} />}
 
       <Alert severity="info" sx={{
         mb: 3, bgcolor: 'rgba(59,130,246,0.08)', color: '#94A3B8',
@@ -251,27 +251,27 @@ export default function AnnualArchive() {
 
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={6} md={3}>
-          <Card sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3 }}>
+          <Card sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box sx={{ bgcolor: 'rgba(59,130,246,0.12)', borderRadius: '10px', p: 1.2, color: '#3B82F6' }}>
                 <Receipt />
               </Box>
               <Box>
-                <Typography sx={{ color: '#64748B', fontSize: '0.7rem', textTransform: 'uppercase' }}>Années</Typography>
-                <Typography sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '1.5rem' }}>{yearStats.length}</Typography>
+                <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase' }}>Années</Typography>
+                <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '1.5rem' }}>{yearStats.length}</Typography>
               </Box>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={6} md={3}>
-          <Card sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3 }}>
+          <Card sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3 }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ bgcolor: 'rgba(110,231,183,0.12)', borderRadius: '10px', p: 1.2, color: '#6EE7B7' }}>
+              <Box sx={{ bgcolor: 'rgba(37,99,235,0.12)', borderRadius: '10px', p: 1.2, color: '#2563EB' }}>
                 <Archive />
               </Box>
               <Box>
-                <Typography sx={{ color: '#64748B', fontSize: '0.7rem', textTransform: 'uppercase' }}>Archivées</Typography>
-                <Typography sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '1.5rem' }}>{totalArchived}</Typography>
+                <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase' }}>Archivées</Typography>
+                <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '1.5rem' }}>{totalArchived}</Typography>
               </Box>
             </CardContent>
           </Card>
@@ -279,8 +279,8 @@ export default function AnnualArchive() {
       </Grid>
 
       {yearStats.length === 0 && !loading ? (
-        <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: 4, textAlign: 'center' }}>
-          <Typography sx={{ color: '#64748B' }}>Aucune facture disponible pour l&apos;archivage.</Typography>
+        <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: 4, textAlign: 'center' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)' }}>Aucune facture disponible pour l&apos;archivage.</Typography>
         </Paper>
       ) : (
         <Grid container spacing={2}>
@@ -299,14 +299,14 @@ export default function AnnualArchive() {
       )}
 
       {archivedFactures.length > 0 && (
-        <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, mt: 4, overflow: 'hidden' }}>
+        <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, mt: 4, overflow: 'hidden' }}>
           <Box sx={{ p: 2, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <Typography sx={{ color: '#F1F5F9', fontWeight: 700 }}>Dernières factures archivées</Typography>
+            <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700 }}>Dernières factures archivées</Typography>
           </Box>
           <TableContainer>
             <Table size="small">
               <TableHead>
-                <TableRow sx={{ '& th': { color: '#64748B', fontWeight: 600, fontSize: '0.72rem', borderColor: 'rgba(255,255,255,0.06)' } }}>
+                <TableRow sx={{ '& th': { color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem', borderColor: 'rgba(255,255,255,0.06)' } }}>
                   <TableCell>N° Facture</TableCell>
                   <TableCell>Année</TableCell>
                   <TableCell>Client</TableCell>
@@ -326,7 +326,7 @@ export default function AnnualArchive() {
                     <TableCell align="right">{fmtInv(f.total_ttc, f)}</TableCell>
                     <TableCell>
                       <Chip label={f.statut || 'En attente'} size="small"
-                        sx={{ height: 22, fontSize: '0.68rem', bgcolor: 'rgba(110,231,183,0.1)', color: '#6EE7B7' }} />
+                        sx={{ height: 22, fontSize: '0.68rem', bgcolor: 'rgba(37,99,235,0.1)', color: '#2563EB' }} />
                     </TableCell>
                     <TableCell>{f.archived_at ? new Date(f.archived_at).toLocaleDateString('fr-FR') : '—'}</TableCell>
                   </TableRow>
@@ -338,8 +338,8 @@ export default function AnnualArchive() {
       )}
 
       <Dialog open={Boolean(confirmAction)} onClose={() => !actionLoading && setConfirmAction(null)}
-        PaperProps={{ sx: { bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.15)', borderRadius: 3, minWidth: 360 } }}>
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700 }}>
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.15)', borderRadius: 3, minWidth: 360 } }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700 }}>
           Confirmer l&apos;archivage {confirmAction?.year}
         </DialogTitle>
         <DialogContent>
@@ -354,7 +354,7 @@ export default function AnnualArchive() {
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setConfirmAction(null)} disabled={actionLoading} sx={{ color: '#64748B' }}>
+          <Button onClick={() => setConfirmAction(null)} disabled={actionLoading} sx={{ color: 'var(--app-text-secondary)' }}>
             Annuler
           </Button>
           <Button variant="contained" startIcon={<Archive />} onClick={handleConfirmArchive} disabled={actionLoading}
@@ -368,7 +368,7 @@ export default function AnnualArchive() {
         onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert severity={snackbar.severity} onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
-          sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.2)' }}>
+          sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.2)' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

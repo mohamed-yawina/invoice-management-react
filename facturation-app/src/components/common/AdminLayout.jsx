@@ -4,6 +4,7 @@ import {
   Dashboard, Inventory, Category, Settings,
   AdminPanelSettings, CheckCircle, ManageAccounts, Receipt, Archive, Business,
 } from '@mui/icons-material';
+import { useThemeMode } from '../../contexts/ThemeModeContext';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { db, ref, get } from '../../services/firebaseService';
@@ -19,6 +20,7 @@ const adminBrand = {
 };
 
 export default function AdminLayout({ children }) {
+  const { palette } = useThemeMode();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -57,7 +59,7 @@ export default function AdminLayout({ children }) {
   const effectiveWidth = collapsed && !isMobile ? COLLAPSED_WIDTH : DRAWER_WIDTH;
 
   return (
-    <Box sx={{ display: 'flex', bgcolor: '#080C14', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', bgcolor: palette.bg.page, minHeight: '100vh' }}>
       <Navbar
         onMobileMenuOpen={() => setMobileOpen(true)}
         brand={adminBrand}
@@ -81,7 +83,7 @@ export default function AdminLayout({ children }) {
         width: { md: `calc(100% - ${effectiveWidth}px)` },
         ml: { md: `${effectiveWidth}px` },
         mt: { xs: '60px', md: 0 }, minHeight: '100vh',
-        bgcolor: '#080C14', overflowX: 'hidden',
+        bgcolor: palette.bg.page, overflowX: 'hidden',
         transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1), width 0.3s cubic-bezier(0.4,0,0.2,1)',
       }}>
         {children}

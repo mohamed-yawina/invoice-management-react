@@ -23,6 +23,7 @@ import AnnualArchive from '../pages/admin/AnnualArchive';
 import Settings from '../pages/admin/Settings';
 import VerifyInvoicePage from '../pages/VerifyInvoicePage';
 
+import { useThemeMode } from '../contexts/ThemeModeContext';
 import ProtectedRoute from '../components/common/ProtectedRoute';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -34,17 +35,23 @@ import { useAuth } from '../contexts/AuthContext';
  *   - Admin  : /admin/*     (ProtectedRoute requireRole="admin")
  */
 
+// Écran de chargement plein page
+const AppLoadingScreen = () => {
+  const { palette } = useThemeMode();
+  return (
+    <Box sx={{
+      display: 'flex', justifyContent: 'center', alignItems: 'center',
+      minHeight: '100vh', bgcolor: palette.bg.page,
+    }}>
+      <CircularProgress sx={{ color: palette.accent.blue }} />
+    </Box>
+  );
+};
+
 // Redirige un visiteur déjà connecté vers son dashboard
 const PublicOnly = ({ children }) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center',
-        minHeight: '100vh', bgcolor: '#0D0F14' }}>
-        <CircularProgress sx={{ color: '#6EE7B7' }} />
-      </Box>
-    );
-  }
+  if (loading) return <AppLoadingScreen />;
   if (isAuthenticated) {
     return <Navigate to={isAdmin ? '/admin/dashboard' : '/app/dashboard'} replace />;
   }
@@ -54,14 +61,7 @@ const PublicOnly = ({ children }) => {
 // Landing page publique ; redirige vers le dashboard si déjà connecté
 const LandingRoute = () => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center',
-        minHeight: '100vh', bgcolor: '#030f0a' }}>
-        <CircularProgress sx={{ color: '#6EE7B7' }} />
-      </Box>
-    );
-  }
+  if (loading) return <AppLoadingScreen />;
   if (isAuthenticated) {
     return <Navigate to={isAdmin ? '/admin/dashboard' : '/app/dashboard'} replace />;
   }

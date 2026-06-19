@@ -5,11 +5,12 @@ import {
 } from '@mui/material';
 import {
   Edit, Delete, Email, Save, Draw, AccountCircle,
-  Notifications, CheckCircle,
+  Notifications, CheckCircle, DarkMode, LightMode,
 } from '@mui/icons-material';
 import Layout from '../../components/common/Layout';
 import SignaturePad from '../../components/common/SignaturePad';
 import { useAuth } from '../../contexts/AuthContext';
+import { useThemeMode } from '../../contexts/ThemeModeContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { getUserSignature, setUserSignature } from '../../services/signatureService';
 import { isEmailJSConfigured } from '../../services/emailService';
@@ -17,6 +18,7 @@ import QrPublicUrlCard from '../../components/common/QrPublicUrlCard';
 
 export default function UserSettings() {
   const { user } = useAuth();
+  const { mode, setThemeMode, isDark } = useThemeMode();
   const { toast } = useNotifications();
   const [signature, setSignature] = useState(null);
   const [padOpen, setPadOpen] = useState(false);
@@ -58,7 +60,7 @@ export default function UserSettings() {
     <Layout>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{
-          fontWeight: 800, color: '#F1F5F9',
+          fontWeight: 800, color: 'var(--app-text-primary)',
           fontFamily: "'Syne', sans-serif", letterSpacing: '-0.02em', mb: 0.5,
         }}>
           Mon profil & paramètres
@@ -72,20 +74,20 @@ export default function UserSettings() {
         {/* ── Profil ─────────────────────────────────── */}
         <Grid item xs={12} md={5}>
           <Paper sx={{
-            p: 3, bgcolor: '#0F1623',
-            border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, height: '100%',
+            p: 3, bgcolor: 'var(--app-bg-card)',
+            border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, height: '100%',
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
               <Avatar sx={{
                 width: 64, height: 64,
-                background: 'linear-gradient(135deg, #6EE7B7, #3B82F6)',
-                color: '#0A0F1A', fontSize: '1.6rem', fontWeight: 800,
-                boxShadow: '0 0 20px rgba(110,231,183,0.3)',
+                background: 'linear-gradient(135deg, #2563EB, #475569)',
+                color: '#FFFFFF', fontSize: '1.6rem', fontWeight: 800,
+                boxShadow: '0 0 20px rgba(37,99,235,0.3)',
               }}>
                 {user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
               </Avatar>
               <Box sx={{ flex: 1, overflow: 'hidden' }}>
-                <Typography sx={{ color: '#F1F5F9', fontSize: '1.05rem', fontWeight: 700 }}>
+                <Typography sx={{ color: 'var(--app-text-primary)', fontSize: '1.05rem', fontWeight: 700 }}>
                   {user?.displayName || 'Utilisateur'}
                 </Typography>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem',
@@ -97,9 +99,9 @@ export default function UserSettings() {
                   icon={<CheckCircle sx={{ fontSize: '14px !important' }} />}
                   label="Comptable / Agent"
                   sx={{ mt: 0.8, height: 20, fontSize: '0.65rem',
-                    bgcolor: 'rgba(110,231,183,0.12)', color: '#6EE7B7',
-                    border: '1px solid rgba(110,231,183,0.3)',
-                    '& .MuiChip-icon': { color: '#6EE7B7' },
+                    bgcolor: 'rgba(37,99,235,0.12)', color: '#2563EB',
+                    border: '1px solid rgba(37,99,235,0.3)',
+                    '& .MuiChip-icon': { color: '#2563EB' },
                   }}
                 />
               </Box>
@@ -109,7 +111,7 @@ export default function UserSettings() {
 
             <Stack spacing={2}>
               <Box>
-                <Typography sx={{ color: '#64748B', fontSize: '0.7rem',
+                <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.7rem',
                   textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, mb: 0.5 }}>
                   Email
                 </Typography>
@@ -119,12 +121,12 @@ export default function UserSettings() {
                   disabled
                   size="small"
                   InputProps={{
-                    startAdornment: <Email sx={{ color: '#64748B', fontSize: 18, mr: 1 }} />,
+                    startAdornment: <Email sx={{ color: 'var(--app-text-secondary)', fontSize: 18, mr: 1 }} />,
                   }}
                 />
               </Box>
               <Box>
-                <Typography sx={{ color: '#64748B', fontSize: '0.7rem',
+                <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.7rem',
                   textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, mb: 0.5 }}>
                   Nom affiché
                 </Typography>
@@ -134,7 +136,7 @@ export default function UserSettings() {
                   disabled
                   size="small"
                   InputProps={{
-                    startAdornment: <AccountCircle sx={{ color: '#64748B', fontSize: 18, mr: 1 }} />,
+                    startAdornment: <AccountCircle sx={{ color: 'var(--app-text-secondary)', fontSize: 18, mr: 1 }} />,
                   }}
                 />
               </Box>
@@ -145,23 +147,23 @@ export default function UserSettings() {
         {/* ── Signature ──────────────────────────────── */}
         <Grid item xs={12} md={7}>
           <Paper sx={{
-            p: 3, bgcolor: '#0F1623',
-            border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, height: '100%',
+            p: 3, bgcolor: 'var(--app-bg-card)',
+            border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, height: '100%',
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
               <Box sx={{
                 width: 36, height: 36, borderRadius: 2,
-                background: 'linear-gradient(135deg, rgba(110,231,183,0.15), rgba(59,130,246,0.15))',
-                border: '1px solid rgba(110,231,183,0.25)',
+                background: 'linear-gradient(135deg, rgba(37,99,235,0.15), rgba(59,130,246,0.15))',
+                border: '1px solid rgba(37,99,235,0.25)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <Draw sx={{ color: '#6EE7B7', fontSize: 20 }} />
+                <Draw sx={{ color: '#2563EB', fontSize: 20 }} />
               </Box>
               <Box>
-                <Typography sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '1.05rem' }}>
+                <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '1.05rem' }}>
                   Signature numérique
                 </Typography>
-                <Typography sx={{ color: '#64748B', fontSize: '0.75rem' }}>
+                <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.75rem' }}>
                   Apparaît sur chaque PDF avec le code QR de vérification
                 </Typography>
               </Box>
@@ -172,7 +174,7 @@ export default function UserSettings() {
             {signature ? (
               <Box>
                 <Box sx={{
-                  bgcolor: '#FFFFFF', p: 2, borderRadius: 2,
+                  bgcolor: 'var(--app-bg-card)', p: 2, borderRadius: 2,
                   border: '1px solid rgba(255,255,255,0.06)',
                   display: 'flex', justifyContent: 'center', alignItems: 'center',
                   minHeight: 140, mb: 2,
@@ -198,7 +200,7 @@ export default function UserSettings() {
                     startIcon={<Edit />}
                     onClick={() => setPadOpen(true)}
                     disabled={loading}
-                    sx={{ bgcolor: '#6EE7B7', color: '#0D1117', '&:hover': { bgcolor: '#5DD9A6' } }}
+                    sx={{ bgcolor: '#2563EB', color: '#FFFFFF', '&:hover': { bgcolor: '#1D4ED8' } }}
                   >
                     Modifier
                   </Button>
@@ -206,10 +208,10 @@ export default function UserSettings() {
               </Box>
             ) : (
               <Box sx={{
-                border: '2px dashed rgba(110,231,183,0.25)', borderRadius: 2,
-                p: 4, textAlign: 'center', bgcolor: 'rgba(110,231,183,0.02)',
+                border: '2px dashed rgba(37,99,235,0.25)', borderRadius: 2,
+                p: 4, textAlign: 'center', bgcolor: 'rgba(37,99,235,0.04)',
               }}>
-                <Draw sx={{ color: '#6EE7B7', fontSize: 48, mb: 1, opacity: 0.6 }} />
+                <Draw sx={{ color: '#2563EB', fontSize: 48, mb: 1, opacity: 0.6 }} />
                 <Typography sx={{ color: '#94A3B8', mb: 2, fontSize: '0.88rem' }}>
                   Aucune signature enregistrée
                 </Typography>
@@ -217,7 +219,7 @@ export default function UserSettings() {
                   variant="contained"
                   startIcon={<Save />}
                   onClick={() => setPadOpen(true)}
-                  sx={{ bgcolor: '#6EE7B7', color: '#0D1117', '&:hover': { bgcolor: '#5DD9A6' } }}
+                  sx={{ bgcolor: '#2563EB', color: '#FFFFFF', '&:hover': { bgcolor: '#1D4ED8' } }}
                 >
                   Créer ma signature
                 </Button>
@@ -231,22 +233,50 @@ export default function UserSettings() {
           <QrPublicUrlCard onNotify={(msg, severity) => toast(msg, severity)} />
         </Grid>
 
+        {/* ── Apparence ───────────────────────────────────── */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3, bgcolor: 'var(--app-bg-card)', border: '1px solid var(--app-line-subtle)', borderRadius: 3 }}>
+            <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, mb: 2 }}>Thème de l&apos;interface</Typography>
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                variant={!isDark ? 'contained' : 'outlined'}
+                startIcon={<LightMode />}
+                onClick={() => setThemeMode('light')}
+                sx={{ flex: 1 }}
+              >
+                Clair
+              </Button>
+              <Button
+                variant={isDark ? 'contained' : 'outlined'}
+                startIcon={<DarkMode />}
+                onClick={() => setThemeMode('dark')}
+                sx={{ flex: 1 }}
+              >
+                Sombre
+              </Button>
+            </Stack>
+            <Typography variant="caption" sx={{ color: 'var(--app-text-secondary)', mt: 1.5, display: 'block' }}>
+              Mode actuel : {mode === 'dark' ? 'sombre' : 'clair'} — enregistré sur cet appareil
+            </Typography>
+          </Paper>
+        </Grid>
+
         {/* ── Préférences notifications & email ───────────── */}
         <Grid item xs={12}>
           <Paper sx={{
-            p: 3, bgcolor: '#0F1623',
-            border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3,
+            p: 3, bgcolor: 'var(--app-bg-card)',
+            border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3,
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
               <Box sx={{
                 width: 36, height: 36, borderRadius: 2,
-                background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(110,231,183,0.15))',
+                background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.15))',
                 border: '1px solid rgba(59,130,246,0.25)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <Notifications sx={{ color: '#3B82F6', fontSize: 20 }} />
               </Box>
-              <Typography sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '1.05rem' }}>
+              <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '1.05rem' }}>
                 Notifications & envoi par email
               </Typography>
             </Box>
@@ -255,7 +285,7 @@ export default function UserSettings() {
               <Grid item xs={12} md={6}>
                 <Card sx={{ bgcolor: '#0A1018', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 2 }}>
                   <CardContent>
-                    <Typography sx={{ color: '#F1F5F9', fontWeight: 600, fontSize: '0.9rem', mb: 1 }}>
+                    <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 600, fontSize: '0.9rem', mb: 1 }}>
                       Alertes par message
                     </Typography>
                     <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mb: 1.5 }}>
@@ -276,7 +306,7 @@ export default function UserSettings() {
               <Grid item xs={12} md={6}>
                 <Card sx={{ bgcolor: '#0A1018', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 2 }}>
                   <CardContent>
-                    <Typography sx={{ color: '#F1F5F9', fontWeight: 600, fontSize: '0.9rem', mb: 1 }}>
+                    <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 600, fontSize: '0.9rem', mb: 1 }}>
                       Envoi automatique au client
                     </Typography>
                     <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mb: 1.5 }}>

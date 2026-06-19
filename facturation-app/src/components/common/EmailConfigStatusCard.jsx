@@ -10,23 +10,23 @@ export default function EmailConfigStatusCard() {
 
   return (
     <Paper sx={{
-      p: 3, mb: 3, bgcolor: '#0F1623',
-      border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3,
+      p: 3, mb: 3, bgcolor: 'var(--app-bg-card)',
+      border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3,
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
         <Box sx={{
           width: 36, height: 36, borderRadius: 2,
-          background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(110,231,183,0.15))',
+          background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.15))',
           border: '1px solid rgba(59,130,246,0.25)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <Email sx={{ color: '#3B82F6', fontSize: 20 }} />
         </Box>
         <Box sx={{ flex: 1 }}>
-          <Typography sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '1.05rem' }}>
+          <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '1.05rem' }}>
             Envoi email à la validation
           </Typography>
-          <Typography sx={{ color: '#64748B', fontSize: '0.75rem' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.75rem' }}>
             Déclenché quand l&apos;admin valide une facture (page À valider ou Factures)
           </Typography>
         </Box>

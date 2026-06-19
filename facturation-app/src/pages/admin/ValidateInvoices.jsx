@@ -32,17 +32,17 @@ const fmtInv = (n, f) => formatMoney(n, f?.currency);
 function StatCard({ icon, label, value, color, bg }) {
   return (
     <Card sx={{
-      bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)',
+      bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)',
       borderRadius: 3, transition: 'transform 0.2s, box-shadow 0.2s',
       '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 8px 32px ${color}18` },
     }}>
       <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: '16px !important' }}>
         <Box sx={{ bgcolor: bg, borderRadius: '10px', p: 1.2, color, flexShrink: 0 }}>{icon}</Box>
         <Box>
-          <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {label}
           </Typography>
-          <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.75rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+          <Typography sx={{ fontWeight: 700, color: 'var(--app-text-primary)', fontSize: '1.75rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
             {value}
           </Typography>
         </Box>
@@ -55,7 +55,7 @@ function StatCard({ icon, label, value, color, bg }) {
 function PendingInvoiceCard({ facture, onView, onValidate, onReject, onPdf, loading }) {
   return (
     <Card sx={{
-      bgcolor: '#0F1623', border: '1px solid rgba(234,179,8,0.2)',
+      bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(234,179,8,0.2)',
       borderRadius: 3, transition: 'all 0.2s',
       '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 40px rgba(234,179,8,0.15)', borderColor: 'rgba(234,179,8,0.4)' },
     }}>
@@ -66,10 +66,10 @@ function PendingInvoiceCard({ facture, onView, onValidate, onReject, onPdf, load
               <Receipt sx={{ fontSize: 20 }} />
             </Avatar>
             <Box>
-              <Typography sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '0.95rem', fontFamily: 'monospace' }}>
+              <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '0.95rem', fontFamily: 'monospace' }}>
                 {facture.numero || `#${(facture.id || '').slice(0, 6)}`}
               </Typography>
-              <Typography sx={{ color: '#64748B', fontSize: '0.72rem' }}>
+              <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem' }}>
                 {fmtDate(facture.date_creation)}
               </Typography>
             </Box>
@@ -116,10 +116,10 @@ function PendingInvoiceCard({ facture, onView, onValidate, onReject, onPdf, load
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <Box>
-            <Typography sx={{ color: '#64748B', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total TTC</Typography>
+            <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total TTC</Typography>
             <Chip label={normalizeCurrency(facture.currency)} size="small" sx={{ mt: 0.5, height: 18, fontSize: '0.65rem', bgcolor: 'rgba(59,130,246,0.12)', color: '#3B82F6' }} />
           </Box>
-          <Typography sx={{ color: '#6EE7B7', fontWeight: 800, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
+          <Typography sx={{ color: '#2563EB', fontWeight: 800, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
             {fmtInv(facture.total_ttc, facture)}
           </Typography>
         </Box>
@@ -148,7 +148,7 @@ function PendingInvoiceCard({ facture, onView, onValidate, onReject, onPdf, load
         <Button
           size="small" startIcon={<CheckCircle />} disabled={loading}
           onClick={() => onValidate(facture)}
-          sx={{ bgcolor: '#22C55E', color: '#F1F5F9', textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: '#16A34A' } }}
+          sx={{ bgcolor: '#22C55E', color: 'var(--app-text-primary)', textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: '#16A34A' } }}
           variant="contained"
         >
           Valider
@@ -307,23 +307,23 @@ export default function ValidateInvoices() {
         <Box>
           <Typography sx={{
             fontWeight: 800,
-            background: 'linear-gradient(135deg, #6EE7B7 0%, #3B82F6 100%)',
+            background: 'linear-gradient(135deg, #2563EB 0%, #475569 100%)',
             backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent',
             mb: 0.5, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.03em',
             fontSize: { xs: '1.4rem', md: '1.9rem' },
           }}>
           Validation des factures
         </Typography>
-        <Typography variant="body2" sx={{ color: '#64748B' }}>
+        <Typography variant="body2" sx={{ color: 'var(--app-text-secondary)' }}>
             Validez ou rejetez les factures en attente de traitement
         </Typography>
         </Box>
         <Tooltip title="Actualiser">
           <span>
             <IconButton onClick={loadData} disabled={loading} sx={{
-              color: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.08)',
-              border: '1px solid rgba(110,231,183,0.2)', borderRadius: '10px',
-              '&:hover': { bgcolor: 'rgba(110,231,183,0.16)' },
+              color: '#2563EB', bgcolor: 'rgba(37,99,235,0.08)',
+              border: '1px solid rgba(37,99,235,0.2)', borderRadius: '10px',
+              '&:hover': { bgcolor: 'rgba(37,99,235,0.12)' },
             }}>
               <Refresh sx={{ fontSize: 20, animation: loading ? 'spin 1s linear infinite' : 'none' }} />
             </IconButton>
@@ -348,24 +348,24 @@ export default function ValidateInvoices() {
       </Grid>
 
       {/* Recherche */}
-      <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: 2, mb: 3 }}>
+      <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: 2, mb: 3 }}>
         <TextField
           fullWidth placeholder="Rechercher par numéro, client, montant..." size="small"
           value={search} onChange={(e) => setSearch(e.target.value)}
           InputProps={{
-            startAdornment: <InputAdornment position="start"><Search sx={{ color: '#64748B', fontSize: 20 }} /></InputAdornment>,
+            startAdornment: <InputAdornment position="start"><Search sx={{ color: 'var(--app-text-secondary)', fontSize: 20 }} /></InputAdornment>,
             endAdornment: search && (
               <InputAdornment position="end">
-                <IconButton size="small" onClick={() => setSearch('')} sx={{ color: '#64748B' }}>
+                <IconButton size="small" onClick={() => setSearch('')} sx={{ color: 'var(--app-text-secondary)' }}>
                   <Close sx={{ fontSize: 16 }} />
                 </IconButton>
               </InputAdornment>
             ),
             sx: {
-              color: '#F1F5F9', bgcolor: '#080C14', borderRadius: '10px',
+              color: 'var(--app-text-primary)', bgcolor: 'var(--app-bg-deep)', borderRadius: '10px',
               '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-              '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
-              '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
+              '&:hover fieldset': { borderColor: 'rgba(37,99,235,0.3)' },
+              '&.Mui-focused fieldset': { borderColor: '#2563EB' },
               '& input::placeholder': { color: '#475569', opacity: 1 },
             },
           }}
@@ -382,14 +382,14 @@ export default function ValidateInvoices() {
           ))}
         </Grid>
       ) : pending.length === 0 ? (
-        <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: 6, textAlign: 'center' }}>
+        <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: 6, textAlign: 'center' }}>
           <Box sx={{ width: 80, height: 80, borderRadius: '50%', bgcolor: 'rgba(34,197,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 3 }}>
             <TaskAlt sx={{ fontSize: 40, color: '#22C55E' }} />
           </Box>
-          <Typography variant="h6" sx={{ color: '#F1F5F9', fontWeight: 700, mb: 1 }}>
+          <Typography variant="h6" sx={{ color: 'var(--app-text-primary)', fontWeight: 700, mb: 1 }}>
             {search ? 'Aucun résultat' : 'Aucune facture en attente'}
           </Typography>
-          <Typography sx={{ color: '#64748B' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)' }}>
             {search ? 'Essayez un autre terme de recherche.' : 'Toutes les factures ont été traitées.'}
                   </Typography>
         </Paper>
@@ -415,14 +415,14 @@ export default function ValidateInvoices() {
         open={detailDialog.open}
         onClose={() => setDetailDialog({ open: false, facture: null })}
         maxWidth="md" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: '1px solid rgba(110,231,183,0.15)' } }}
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: '16px', border: '1px solid rgba(37,99,235,0.15)' } }}
       >
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Syne', sans-serif" }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Syne', sans-serif" }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
-            <Receipt sx={{ color: '#6EE7B7' }} />
+            <Receipt sx={{ color: '#2563EB' }} />
             Facture {detailDialog.facture?.numero}
           </Box>
-          <IconButton onClick={() => setDetailDialog({ open: false, facture: null })} sx={{ color: '#64748B' }}>
+          <IconButton onClick={() => setDetailDialog({ open: false, facture: null })} sx={{ color: 'var(--app-text-secondary)' }}>
             <Close />
           </IconButton>
         </DialogTitle>
@@ -431,13 +431,13 @@ export default function ValidateInvoices() {
             <Box>
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 <Grid item xs={12} sm={6}>
-                  <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 0.5 }}>Client</Typography>
-                  <Typography sx={{ color: '#F1F5F9', fontWeight: 600 }}>{detailDialog.facture.client_nom || '—'}</Typography>
+                  <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 0.5 }}>Client</Typography>
+                  <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 600 }}>{detailDialog.facture.client_nom || '—'}</Typography>
                   <Typography sx={{ color: '#94A3B8', fontSize: '0.82rem' }}>{detailDialog.facture.client_email || ''}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 0.5 }}>Date de création</Typography>
-                  <Typography sx={{ color: '#F1F5F9', fontWeight: 600 }}>{fmtDate(detailDialog.facture.date_creation)}</Typography>
+                  <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 0.5 }}>Date de création</Typography>
+                  <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 600 }}>{fmtDate(detailDialog.facture.date_creation)}</Typography>
                   {detailDialog.facture.date_depot && (
                     <Typography sx={{ color: '#94A3B8', fontSize: '0.82rem' }}>Dépôt : {fmtDate(detailDialog.facture.date_depot)}</Typography>
                   )}
@@ -446,15 +446,15 @@ export default function ValidateInvoices() {
 
               <Divider sx={{ borderColor: 'rgba(255,255,255,0.05)', mb: 2 }} />
 
-              <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>Articles</Typography>
-              <TableContainer sx={{ bgcolor: '#080C14', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+              <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>Articles</Typography>
+              <TableContainer sx={{ bgcolor: 'var(--app-bg-deep)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Désignation</TableCell>
-                      <TableCell align="center" sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Qté</TableCell>
-                      <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>P.U.</TableCell>
-                      <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Total</TableCell>
+                      <TableCell sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Désignation</TableCell>
+                      <TableCell align="center" sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Qté</TableCell>
+                      <TableCell align="right" sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>P.U.</TableCell>
+                      <TableCell align="right" sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase' }}>Total</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -463,16 +463,16 @@ export default function ValidateInvoices() {
                       const pu = Number(a.prix_unitaire ?? a.prix ?? 0);
                       return (
                         <TableRow key={i}>
-                          <TableCell sx={{ color: '#F1F5F9' }}>{a.designation || a.nom || '—'}</TableCell>
+                          <TableCell sx={{ color: 'var(--app-text-primary)' }}>{a.designation || a.nom || '—'}</TableCell>
                           <TableCell align="center" sx={{ color: '#94A3B8' }}>{q}</TableCell>
                           <TableCell align="right" sx={{ color: '#94A3B8' }}>{fmtInv(pu, detailDialog.facture)}</TableCell>
-                          <TableCell align="right" sx={{ color: '#F1F5F9', fontWeight: 600 }}>{fmtInv(q * pu, detailDialog.facture)}</TableCell>
+                          <TableCell align="right" sx={{ color: 'var(--app-text-primary)', fontWeight: 600 }}>{fmtInv(q * pu, detailDialog.facture)}</TableCell>
                         </TableRow>
                       );
                     })}
                     {(!detailDialog.facture.articles || detailDialog.facture.articles.length === 0) && (
                       <TableRow>
-                        <TableCell colSpan={4} sx={{ color: '#64748B', textAlign: 'center' }}>Aucun article</TableCell>
+                        <TableCell colSpan={4} sx={{ color: 'var(--app-text-secondary)', textAlign: 'center' }}>Aucun article</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -481,12 +481,12 @@ export default function ValidateInvoices() {
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 2, alignItems: 'flex-end' }}>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-                  Total HT : <strong style={{ color: '#F1F5F9' }}>{fmtInv(detailDialog.facture.total_ht, detailDialog.facture)}</strong>
+                  Total HT : <strong style={{ color: 'var(--app-text-primary)' }}>{fmtInv(detailDialog.facture.total_ht, detailDialog.facture)}</strong>
                 </Typography>
                 <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-                  TVA : <strong style={{ color: '#F1F5F9' }}>{fmtInv(detailDialog.facture.tva, detailDialog.facture)}</strong>
+                  TVA : <strong style={{ color: 'var(--app-text-primary)' }}>{fmtInv(detailDialog.facture.tva, detailDialog.facture)}</strong>
                 </Typography>
-                <Typography sx={{ color: '#6EE7B7', fontSize: '1.1rem', fontWeight: 800 }}>
+                <Typography sx={{ color: '#2563EB', fontSize: '1.1rem', fontWeight: 800 }}>
                   TTC : {fmtInv(detailDialog.facture.total_ttc, detailDialog.facture)}
                 </Typography>
               </Box>
@@ -518,9 +518,9 @@ export default function ValidateInvoices() {
         open={confirmDialog.open}
         onClose={() => !actionLoading && setConfirmDialog({ open: false, facture: null, action: null })}
         maxWidth="xs" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: `1px solid ${confirmDialog.action === 'validate' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}` } }}
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: '16px', border: `1px solid ${confirmDialog.action === 'validate' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}` } }}
       >
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700 }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700 }}>
           {confirmDialog.action === 'validate' ? 'Valider la facture ?' : 'Rejeter la facture ?'}
         </DialogTitle>
         <DialogContent>
@@ -534,8 +534,8 @@ export default function ValidateInvoices() {
           </Alert>
           {confirmDialog.facture && (
             <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-              Client : <strong style={{ color: '#F1F5F9' }}>{confirmDialog.facture.client_nom || '—'}</strong><br />
-              Montant TTC : <strong style={{ color: '#6EE7B7' }}>{fmtInv(confirmDialog.facture.total_ttc, confirmDialog.facture)}</strong>
+              Client : <strong style={{ color: 'var(--app-text-primary)' }}>{confirmDialog.facture.client_nom || '—'}</strong><br />
+              Montant TTC : <strong style={{ color: '#2563EB' }}>{fmtInv(confirmDialog.facture.total_ttc, confirmDialog.facture)}</strong>
             </Typography>
           )}
           {confirmDialog.action === 'validate' && confirmDialog.facture && (() => {
@@ -560,7 +560,7 @@ export default function ValidateInvoices() {
           })()}
         </DialogContent>
         <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button disabled={actionLoading} onClick={() => setConfirmDialog({ open: false, facture: null, action: null })} sx={{ color: '#64748B' }}>Annuler</Button>
+          <Button disabled={actionLoading} onClick={() => setConfirmDialog({ open: false, facture: null, action: null })} sx={{ color: 'var(--app-text-secondary)' }}>Annuler</Button>
           {confirmDialog.action === 'validate' ? (
             <Button disabled={actionLoading} variant="contained" onClick={() => handleValidate(confirmDialog.facture)} sx={{ bgcolor: '#22C55E', '&:hover': { bgcolor: '#16A34A' } }}>
               {actionLoading ? 'Validation...' : 'Valider'}

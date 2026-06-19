@@ -21,7 +21,7 @@ import {
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 function StatCardSkeleton() {
   return (
-    <Card sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3 }}>
+    <Card sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3 }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ flex: 1 }}>
@@ -67,7 +67,7 @@ function CustomTooltip({ active, payload, label }) {
   if (!active || !payload || !payload.length) return null;
   return (
     <Box sx={{
-      bgcolor: '#0D1117', border: '1px solid rgba(110,231,183,0.2)',
+      bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.2)',
       borderRadius: '10px', p: 1.5, boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
     }}>
       <Typography sx={{ color: '#94A3B8', fontSize: '0.7rem', mb: 0.5, fontWeight: 600 }}>
@@ -76,7 +76,7 @@ function CustomTooltip({ active, payload, label }) {
       {payload.map((entry, i) => (
         <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.3 }}>
           <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color }} />
-          <Typography sx={{ color: '#F1F5F9', fontSize: '0.75rem' }}>
+          <Typography sx={{ color: 'var(--app-text-primary)', fontSize: '0.75rem' }}>
             {entry.name}: <strong>{Number(entry.value).toLocaleString('fr-FR')}</strong>
           </Typography>
         </Box>
@@ -267,19 +267,19 @@ export default function AdminDashboard() {
       {/* En-tête */}
       <Box sx={{ mb: { xs: 3, md: 4 }, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography sx={{ fontWeight: 800, color: '#F1F5F9', mb: 0.5, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.03em', fontSize: { xs: '1.4rem', md: '1.9rem' } }}>
+          <Typography sx={{ fontWeight: 800, color: 'var(--app-text-primary)', mb: 0.5, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.03em', fontSize: { xs: '1.4rem', md: '1.9rem' } }}>
             Tableau de bord
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>
+          <Typography variant="body2" sx={{ color: 'var(--app-text-secondary)' }}>
             {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </Typography>
         </Box>
         <Tooltip title="Actualiser">
           <span>
             <IconButton onClick={handleRefresh} disabled={loading} sx={{
-              color: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.1)',
-              border: '1px solid rgba(110,231,183,0.2)', borderRadius: '10px',
-              '&:hover': { bgcolor: 'rgba(110,231,183,0.2)' },
+              color: '#2563EB', bgcolor: 'rgba(37,99,235,0.1)',
+              border: '1px solid rgba(37,99,235,0.2)', borderRadius: '10px',
+              '&:hover': { bgcolor: 'rgba(37,99,235,0.2)' },
               '&:disabled': { color: '#4B5563', border: '1px solid transparent' },
             }}>
               <Refresh sx={{
@@ -305,11 +305,11 @@ export default function AdminDashboard() {
           <Typography sx={{ fontWeight: 600, mb: 0.5 }}>Diagnostic Firebase</Typography>
           <Typography sx={{ fontSize: '0.85rem', color: '#94A3B8' }}>{debugInfo.message}</Typography>
           {debugInfo.rawKeys && (
-            <Typography sx={{ fontSize: '0.78rem', color: '#64748B', mt: 0.5 }}>
+            <Typography sx={{ fontSize: '0.78rem', color: 'var(--app-text-secondary)', mt: 0.5 }}>
               Clés trouvées : <code style={{ background: 'rgba(255,255,255,0.06)', padding: '1px 4px', borderRadius: 3 }}>{debugInfo.rawKeys.join(', ')}</code>
             </Typography>
           )}
-          <Typography sx={{ fontSize: '0.78rem', color: '#64748B', mt: 0.5 }}>
+          <Typography sx={{ fontSize: '0.78rem', color: 'var(--app-text-secondary)', mt: 0.5 }}>
             Chemin attendu : <code style={{ background: 'rgba(255,255,255,0.06)', padding: '1px 4px', borderRadius: 3 }}>/factures/{'{id}'}</code> avec champ <code style={{ background: 'rgba(255,255,255,0.06)', padding: '1px 4px', borderRadius: 3 }}>statut</code> ou <code style={{ background: 'rgba(255,255,255,0.06)', padding: '1px 4px', borderRadius: 3 }}>total_ttc</code>.
           </Typography>
         </Alert>
@@ -322,17 +322,17 @@ export default function AdminDashboard() {
           : kpiCards.map((card) => (
             <Grid item xs={6} md={3} key={card.title}>
               <Card sx={{
-                bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3,
+                bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3,
                 transition: 'transform 0.2s, box-shadow 0.2s',
                 '&:hover': { transform: 'translateY(-3px)', boxShadow: `0 12px 40px ${card.color}20`, borderColor: `${card.color}30` },
               }}>
                 <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box>
-                      <Typography sx={{ color: '#64748B', fontSize: { xs: '0.65rem', sm: '0.72rem' }, fontWeight: 600, mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: { xs: '0.65rem', sm: '0.72rem' }, fontWeight: 600, mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         {card.title}
                       </Typography>
-                      <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: { xs: '1.15rem', sm: '1.4rem', md: '1.65rem' }, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+                      <Typography sx={{ fontWeight: 700, color: 'var(--app-text-primary)', fontSize: { xs: '1.15rem', sm: '1.4rem', md: '1.65rem' }, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
                         {card.value}
                       </Typography>
                       {(card.trend !== undefined && card.trend !== null) && (
@@ -352,16 +352,16 @@ export default function AdminDashboard() {
       {/* ── KPIs secondaires ───────────────────────────────────────────────────── */}
       <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: { xs: 2, md: 3 } }}>
         <Grid item xs={12} md={4}>
-          <Card sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3 }}>
+          <Card sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3 }}>
             <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
               {loading ? <Skeleton variant="rounded" height={56} sx={{ bgcolor: 'rgba(255,255,255,0.08)' }} /> : (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ bgcolor: 'rgba(110,231,183,0.1)', borderRadius: '10px', p: 1.2, color: '#6EE7B7', flexShrink: 0 }}>
+                  <Box sx={{ bgcolor: 'rgba(37,99,235,0.1)', borderRadius: '10px', p: 1.2, color: '#2563EB', flexShrink: 0 }}>
                     <AttachMoney sx={{ fontSize: 26 }} />
                   </Box>
                   <Box>
-                    <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>Montant moyen / Facture</Typography>
-                    <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.35rem', letterSpacing: '-0.02em' }}>
+                    <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>Montant moyen / Facture</Typography>
+                    <Typography sx={{ fontWeight: 700, color: 'var(--app-text-primary)', fontSize: '1.35rem', letterSpacing: '-0.02em' }}>
                       {formatMoney(Math.round(stats.montantMoyenParFacture), 'MAD')}
                     </Typography>
                   </Box>
@@ -372,17 +372,17 @@ export default function AdminDashboard() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3 }}>
+          <Card sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3 }}>
             <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
               {loading ? <Skeleton variant="rounded" height={56} sx={{ bgcolor: 'rgba(255,255,255,0.08)' }} /> : (
                 <Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>Taux de validation</Typography>
-                    <Chip label={`${Math.round(tauxValidation)}%`} size="small" sx={{ bgcolor: 'rgba(110,231,183,0.1)', color: '#6EE7B7', fontSize: '0.7rem', height: 20 }} />
+                    <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>Taux de validation</Typography>
+                    <Chip label={`${Math.round(tauxValidation)}%`} size="small" sx={{ bgcolor: 'rgba(37,99,235,0.1)', color: '#2563EB', fontSize: '0.7rem', height: 20 }} />
                   </Box>
                   <LinearProgress variant="determinate" value={Math.min(tauxValidation, 100)}
-                    sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.06)', '& .MuiLinearProgress-bar': { bgcolor: '#6EE7B7', borderRadius: 3 } }} />
-                  <Typography sx={{ color: '#64748B', fontSize: '0.7rem', mt: 0.8 }}>
+                    sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.06)', '& .MuiLinearProgress-bar': { bgcolor: '#2563EB', borderRadius: 3 } }} />
+                  <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.7rem', mt: 0.8 }}>
                     {stats.totalFactures - stats.facturesEnAttente - stats.facturesRejetees} / {stats.totalFactures} validées
                   </Typography>
                 </Box>
@@ -392,7 +392,7 @@ export default function AdminDashboard() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3 }}>
+          <Card sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3 }}>
             <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
               {loading ? <Skeleton variant="rounded" height={56} sx={{ bgcolor: 'rgba(255,255,255,0.08)' }} /> : (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -400,9 +400,9 @@ export default function AdminDashboard() {
                     <Warning sx={{ fontSize: 26 }} />
                   </Box>
                   <Box>
-                    <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>À traiter</Typography>
-                    <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.35rem', letterSpacing: '-0.02em' }}>{stats.facturesEnAttente}</Typography>
-                    <Typography sx={{ color: '#64748B', fontSize: '0.7rem' }}>Factures en attente</Typography>
+                    <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>À traiter</Typography>
+                    <Typography sx={{ fontWeight: 700, color: 'var(--app-text-primary)', fontSize: '1.35rem', letterSpacing: '-0.02em' }}>{stats.facturesEnAttente}</Typography>
+                    <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.7rem' }}>Factures en attente</Typography>
                   </Box>
                 </Box>
               )}
@@ -414,11 +414,11 @@ export default function AdminDashboard() {
       {/* ── Graphiques ligne + camembert ───────────────────────────────────────── */}
       <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: { xs: 2, md: 3 } }}>
         <Grid item xs={12} lg={8}>
-          <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: { xs: 2, sm: 2.5 } }}>
-            <Typography sx={{ color: '#F1F5F9', mb: 2, fontWeight: 700, fontSize: '0.95rem' }}>Évolution mensuelle</Typography>
+          <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: { xs: 2, sm: 2.5 } }}>
+            <Typography sx={{ color: 'var(--app-text-primary)', mb: 2, fontWeight: 700, fontSize: '0.95rem' }}>Évolution mensuelle</Typography>
             {loading ? <ChartSkeleton height={isMobile ? 220 : 300} /> : monthlyChartData.length === 0 ? (
               <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography sx={{ color: '#64748B' }}>Aucune donnée disponible</Typography>
+                <Typography sx={{ color: 'var(--app-text-secondary)' }}>Aucune donnée disponible</Typography>
               </Box>
             ) : (
               <Box sx={{ width: '100%', height: isMobile ? 220 : 300 }}>
@@ -430,7 +430,7 @@ export default function AdminDashboard() {
                     <YAxis yAxisId="right" orientation="right" stroke="transparent" tick={{ fill: '#64748B', fontSize: isMobile ? 10 : 12 }} />
                     <RechartsTooltip content={<CustomTooltip />} />
                     <Legend wrapperStyle={{ fontSize: isMobile ? 11 : 13, paddingTop: 12 }} />
-                    <Line yAxisId="left"  type="monotone" dataKey="ca"             name="CA (DH)"       stroke="#6EE7B7" strokeWidth={2} dot={{ fill: '#6EE7B7', r: 3 }} activeDot={{ r: 5 }} />
+                    <Line yAxisId="left"  type="monotone" dataKey="ca"             name="CA (DH)"       stroke="#2563EB" strokeWidth={2} dot={{ fill: '#2563EB', r: 3 }} activeDot={{ r: 5 }} />
                     <Line yAxisId="left"  type="monotone" dataKey="encaisse"       name="Encaissé (DH)" stroke="#22C55E" strokeWidth={2} dot={{ fill: '#22C55E', r: 3 }} activeDot={{ r: 5 }} />
                     <Line yAxisId="right" type="monotone" dataKey="nombreFactures" name="Nb factures"    stroke="#3B82F6" strokeWidth={2} dot={{ fill: '#3B82F6', r: 3 }} activeDot={{ r: 5 }} />
                   </LineChart>
@@ -441,11 +441,11 @@ export default function AdminDashboard() {
         </Grid>
 
         <Grid item xs={12} lg={4}>
-          <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: { xs: 2, sm: 2.5 } }}>
-            <Typography sx={{ color: '#F1F5F9', mb: 2, fontWeight: 700, fontSize: '0.95rem' }}>Répartition des statuts</Typography>
+          <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: { xs: 2, sm: 2.5 } }}>
+            <Typography sx={{ color: 'var(--app-text-primary)', mb: 2, fontWeight: 700, fontSize: '0.95rem' }}>Répartition des statuts</Typography>
             {loading ? <ChartSkeleton height={isMobile ? 200 : 240} /> : statusDistribution.length === 0 ? (
               <Box sx={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography sx={{ color: '#64748B' }}>Aucune donnée</Typography>
+                <Typography sx={{ color: 'var(--app-text-secondary)' }}>Aucune donnée</Typography>
               </Box>
             ) : (
               <>
@@ -460,7 +460,7 @@ export default function AdminDashboard() {
                         {statusDistribution.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}
                       </Pie>
                       <RechartsTooltip
-                        contentStyle={{ backgroundColor: '#0D1117', border: '1px solid rgba(110,231,183,0.2)', borderRadius: 8, fontSize: 13 }}
+                        contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(37,99,235,0.2)', borderRadius: 8, fontSize: 13 }}
                         formatter={(v, n) => [`${v} factures`, n]}
                       />
                     </PieChart>
@@ -476,10 +476,10 @@ export default function AdminDashboard() {
                           <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>{item.name}</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', gap: 1.5 }}>
-                          <Typography sx={{ color: '#64748B', fontSize: '0.75rem' }}>
+                          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.75rem' }}>
                             {total > 0 ? ((item.value / total) * 100).toFixed(1) : 0}%
                           </Typography>
-                          <Typography sx={{ color: '#F1F5F9', fontSize: '0.8rem', fontWeight: 600, minWidth: 20, textAlign: 'right' }}>
+                          <Typography sx={{ color: 'var(--app-text-primary)', fontSize: '0.8rem', fontWeight: 600, minWidth: 20, textAlign: 'right' }}>
                             {item.value}
                           </Typography>
                         </Box>
@@ -496,13 +496,13 @@ export default function AdminDashboard() {
       {/* ── BarChart : en attente vs total ─────────────────────────────────────── */}
       <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: { xs: 2, md: 3 } }}>
         <Grid item xs={12}>
-          <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: { xs: 2, sm: 2.5 } }}>
-            <Typography sx={{ color: '#F1F5F9', mb: 2, fontWeight: 700, fontSize: '0.95rem' }}>
+          <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: { xs: 2, sm: 2.5 } }}>
+            <Typography sx={{ color: 'var(--app-text-primary)', mb: 2, fontWeight: 700, fontSize: '0.95rem' }}>
               Factures en attente vs Total par mois
             </Typography>
             {loading ? <ChartSkeleton height={260} /> : monthlyChartData.length === 0 ? (
               <Box sx={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography sx={{ color: '#64748B' }}>Aucune donnée disponible</Typography>
+                <Typography sx={{ color: 'var(--app-text-secondary)' }}>Aucune donnée disponible</Typography>
               </Box>
             ) : (
               <Box sx={{ width: '100%', height: 260 }}>
@@ -526,10 +526,10 @@ export default function AdminDashboard() {
       {/* ── Factures récentes ──────────────────────────────────────────────────── */}
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: { xs: 2, sm: 2.5 }, overflow: 'hidden' }}>
+          <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: { xs: 2, sm: 2.5 }, overflow: 'hidden' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '0.95rem' }}>Factures récentes</Typography>
-              {!loading && <Chip label={`${recentInvoices.length} dernières`} size="small" sx={{ bgcolor: 'rgba(110,231,183,0.1)', color: '#6EE7B7', fontSize: '0.7rem', height: 22 }} />}
+              <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '0.95rem' }}>Factures récentes</Typography>
+              {!loading && <Chip label={`${recentInvoices.length} dernières`} size="small" sx={{ bgcolor: 'rgba(37,99,235,0.1)', color: '#2563EB', fontSize: '0.7rem', height: 22 }} />}
             </Box>
             {loading ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -537,8 +537,8 @@ export default function AdminDashboard() {
               </Box>
             ) : recentInvoices.length === 0 ? (
               <Box sx={{ py: 5, textAlign: 'center' }}>
-                <ReceiptLong sx={{ color: '#1E293B', fontSize: 44, mb: 1 }} />
-                <Typography sx={{ color: '#64748B' }}>Aucune facture récente</Typography>
+                <ReceiptLong sx={{ color: 'var(--app-text-primary)', fontSize: 44, mb: 1 }} />
+                <Typography sx={{ color: 'var(--app-text-secondary)' }}>Aucune facture récente</Typography>
               </Box>
             ) : (
               <Box sx={{ overflowX: 'auto' }}>
@@ -546,7 +546,7 @@ export default function AdminDashboard() {
                   <thead>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                       {['N° Facture', 'Date', 'Devise', 'Montant TTC', 'Statut', 'Validation'].map(h => (
-                        <th key={h} style={{ textAlign: 'left', padding: '9px 12px', color: '#64748B', fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+                        <th key={h} style={{ textAlign: 'left', padding: '9px 12px', color: 'var(--app-text-secondary)', fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                           {h}
                         </th>
                       ))}
@@ -557,20 +557,20 @@ export default function AdminDashboard() {
                       const s = getStatusStyle(invoice.statut);
                       return (
                         <tr key={invoice.id || idx}
-                          style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.15s', cursor: 'default' }}
+                          style={{ borderBottom: '1px solid #E5E7EB', transition: 'background 0.15s', cursor: 'default' }}
                           onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
-                          <td style={{ padding: '11px 12px', color: '#6EE7B7', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'monospace' }}>
+                          <td style={{ padding: '11px 12px', color: '#2563EB', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'monospace' }}>
                             {invoice.numero || `#${String(idx + 1).padStart(4, '0')}`}
                           </td>
-                          <td style={{ padding: '11px 12px', color: '#64748B', fontSize: '0.8rem' }}>
+                          <td style={{ padding: '11px 12px', color: 'var(--app-text-secondary)', fontSize: '0.8rem' }}>
                             {invoice.date_creation ? new Date(invoice.date_creation).toLocaleDateString('fr-FR') : '—'}
                           </td>
-                          <td style={{ padding: '11px 12px', color: '#64748B', fontSize: '0.8rem' }}>
+                          <td style={{ padding: '11px 12px', color: 'var(--app-text-secondary)', fontSize: '0.8rem' }}>
                             {invoice.currency || 'MAD'}
                           </td>
-                          <td style={{ padding: '11px 12px', color: '#F1F5F9', fontSize: '0.8rem', fontWeight: 600 }}>
+                          <td style={{ padding: '11px 12px', color: 'var(--app-text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
                             {formatMoney(invoice.total_ttc, invoice.currency)}
                           </td>
                           <td style={{ padding: '11px 12px' }}>

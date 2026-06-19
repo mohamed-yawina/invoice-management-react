@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { CircularProgress, Box } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useThemeMode } from '../../contexts/ThemeModeContext';
 
 /**
  * Garde de route générique.
@@ -14,15 +15,16 @@ import { useAuth } from '../../contexts/AuthContext';
  *  - mauvais rôle -> son dashboard naturel
  */
 export default function ProtectedRoute({ children, requireRole }) {
+  const { palette } = useThemeMode();
   const { user, isAdmin, loading } = useAuth();
 
   if (loading) {
     return (
       <Box sx={{
         display: 'flex', justifyContent: 'center', alignItems: 'center',
-        minHeight: '100vh', bgcolor: '#0D0F14',
+        minHeight: '100vh', bgcolor: palette.bg.page,
       }}>
-        <CircularProgress sx={{ color: '#6EE7B7' }} />
+        <CircularProgress sx={{ color: palette.accent.blue }} />
       </Box>
     );
   }

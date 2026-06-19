@@ -18,16 +18,16 @@ export default function CompanySwitcher({ collapsed = false }) {
     return (
       <Tooltip title={activeCompany?.nom || 'Société'} placement="right">
         <Box sx={{ display: 'flex', justifyContent: 'center', px: 1, pb: 1 }}>
-          <Business sx={{ color: '#6EE7B7', fontSize: 20 }} />
+          <Business sx={{ color: '#2563EB', fontSize: 20 }} />
         </Box>
       </Tooltip>
     );
   }
 
   return (
-    <Box sx={{ px: 1.5, pb: 1.5, borderBottom: '1px solid rgba(110,231,183,0.06)' }}>
+    <Box sx={{ px: 1.5, pb: 1.5, borderBottom: '1px solid rgba(37,99,235,0.08)' }}>
       <Typography sx={{
-        color: '#64748B', fontSize: '0.62rem', fontWeight: 700,
+        color: 'var(--app-text-secondary)', fontSize: '0.62rem', fontWeight: 700,
         textTransform: 'uppercase', letterSpacing: '0.08em', mb: 0.8, px: 0.5,
       }}>
         Société active
@@ -43,17 +43,17 @@ export default function CompanySwitcher({ collapsed = false }) {
             }
           }}
           sx={{
-            color: '#F1F5F9', bgcolor: '#080C14', borderRadius: '10px', fontSize: '0.82rem',
-            '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(110,231,183,0.15)' },
-            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(110,231,183,0.35)' },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6EE7B7' },
-            '& .MuiSvgIcon-root': { color: '#64748B' },
+            color: 'var(--app-text-primary)', bgcolor: 'var(--app-bg-deep)', borderRadius: '10px', fontSize: '0.82rem',
+            '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(37,99,235,0.15)' },
+            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(37,99,235,0.3)' },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563EB' },
+            '& .MuiSvgIcon-root': { color: 'var(--app-text-secondary)' },
           }}
           MenuProps={{
             PaperProps: {
               sx: {
-                bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.12)',
-                '& .MuiMenuItem-root': { color: '#F1F5F9', fontSize: '0.85rem' },
+                bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.12)',
+                '& .MuiMenuItem-root': { color: 'var(--app-text-primary)', fontSize: '0.85rem' },
               },
             },
           }}
@@ -66,7 +66,7 @@ export default function CompanySwitcher({ collapsed = false }) {
           {companies.map((c) => (
             <MenuItem key={c.id} value={c.id}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Business sx={{ fontSize: 16, color: '#6EE7B7' }} />
+                <Business sx={{ fontSize: 16, color: '#2563EB' }} />
                 <Typography sx={{ fontWeight: 600 }}>{c.nom}</Typography>
                 {c.isDefault && (
                   <Chip label="Défaut" size="small" sx={{ height: 18, fontSize: '0.62rem', ml: 0.5 }} />
@@ -77,7 +77,7 @@ export default function CompanySwitcher({ collapsed = false }) {
         </Select>
       </FormControl>
       {showAllCompanies && isAdmin && (
-        <Typography sx={{ color: '#64748B', fontSize: '0.68rem', mt: 0.8, px: 0.5 }}>
+        <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.68rem', mt: 0.8, px: 0.5 }}>
           Affichage consolidé de toutes les sociétés
         </Typography>
       )}

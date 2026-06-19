@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import {
   Grid, Card, CardContent, Typography, Box, LinearProgress, Paper, Chip, Avatar,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, IconButton,
@@ -13,7 +13,7 @@ import { db, ref, get, getAllFacturesFlat, auth } from '../../services/firebaseS
 import { generateInvoicePDF } from '../../services/pdfService';
 import Layout from '../../components/common/Layout';
 import { useCompany } from '../../contexts/CompanyContext';
-import { palette, gradients } from '../../theme/darkTheme';
+import { useThemeMode } from '../../contexts/ThemeModeContext';
 import { formatMoney, getInvoiceAmountMad } from '../../utils/currency';
 
 const STATUT_STYLES = {
@@ -27,7 +27,7 @@ const fmtInv = (n, inv) => formatMoney(n, inv?.currency);
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—');
 
 // Sparkline SVG léger (sans dépendance)
-function Sparkline({ values = [], color = '#6EE7B7', height = 40, width = 120 }) {
+function Sparkline({ values = [], color = '#2563EB', height = 40, width = 120 }) {
   if (!values || values.length === 0) return null;
   const max = Math.max(...values, 1);
   const min = Math.min(...values, 0);
@@ -51,6 +51,7 @@ function Sparkline({ values = [], color = '#6EE7B7', height = 40, width = 120 })
 }
 
 export default function UserDashboard() {
+  const { palette, gradients } = useThemeMode();
   const navigate = useNavigate();
   const { filterItems } = useCompany();
   const [loading, setLoading] = useState(true);
@@ -173,10 +174,10 @@ export default function UserDashboard() {
       sub: `Moyenne: ${fmtMoney(stats.moyenne)}`,
       icon: <Insights />,
       gradient: gradients.brand,
-      iconBg: 'rgba(110,231,183,0.2)',
-      iconColor: '#6EE7B7',
+      iconBg: 'rgba(37,99,235,0.2)',
+      iconColor: '#2563EB',
       spark: stats.monthly,
-      sparkColor: '#6EE7B7',
+      sparkColor: '#2563EB',
     },
   ];
 
@@ -204,11 +205,11 @@ export default function UserDashboard() {
           p: { xs: 3, md: 4 },
           mb: 3,
           background: gradients.hero,
-          border: '1px solid rgba(110,231,183,0.15)',
+          border: '1px solid rgba(37,99,235,0.15)',
           '&::before': {
             content: '""', position: 'absolute', top: -80, right: -80,
             width: 260, height: 260, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(110,231,183,0.15), transparent 60%)',
+            background: 'radial-gradient(circle, rgba(37,99,235,0.15), transparent 60%)',
             filter: 'blur(20px)',
           },
           '&::after': {
@@ -251,7 +252,7 @@ export default function UserDashboard() {
                 sx={{
                   color: palette.text.primary,
                   borderColor: 'rgba(255,255,255,0.15)',
-                  '&:hover': { borderColor: palette.accent.mint, bgcolor: 'rgba(110,231,183,0.05)' },
+                  '&:hover': { borderColor: palette.accent.mint, bgcolor: 'rgba(37,99,235,0.06)' },
                 }}>
                 Mes clients
               </Button>
@@ -263,15 +264,15 @@ export default function UserDashboard() {
               p: 3, borderRadius: 3,
               background: 'rgba(13,17,23,0.4)',
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(110,231,183,0.15)',
+              border: '1px solid rgba(37,99,235,0.15)',
             }}>
               <Box sx={{
                 width: 64, height: 64, mx: 'auto', mb: 1.5, borderRadius: '50%',
                 background: gradients.brand,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 10px 30px rgba(110,231,183,0.4)',
+                boxShadow: '0 10px 30px rgba(37,99,235,0.35)',
               }}>
-                <Bolt sx={{ color: '#0D0F14', fontSize: 32 }} />
+                <Bolt sx={{ color: '#F8FAFC', fontSize: 32 }} />
               </Box>
               <Typography sx={{ color: palette.text.secondary, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 Activité du mois
@@ -297,7 +298,7 @@ export default function UserDashboard() {
                 background: gradients.card,
                 '&:hover': {
                   transform: 'translateY(-3px)',
-                  borderColor: 'rgba(110,231,183,0.4)',
+                  borderColor: 'rgba(37,99,235,0.35)',
                   boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
                 },
                 '&::before': {
@@ -340,7 +341,7 @@ export default function UserDashboard() {
             ) : (
               <Card sx={{
                 borderRadius: 3,
-                '&:hover': { borderColor: 'rgba(110,231,183,0.25)', transform: 'translateY(-2px)' },
+                '&:hover': { borderColor: 'rgba(37,99,235,0.25)', transform: 'translateY(-2px)' },
               }}>
                 <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
                   <Box>
@@ -366,7 +367,7 @@ export default function UserDashboard() {
         <Box sx={{
           p: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           borderBottom: `1px solid ${palette.line.subtle}`,
-          background: 'linear-gradient(90deg, rgba(110,231,183,0.05), transparent)',
+          background: 'linear-gradient(90deg, rgba(37,99,235,0.06), transparent)',
         }}>
           <Box>
             <Typography variant="h6" sx={{ color: palette.text.primary, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -388,7 +389,7 @@ export default function UserDashboard() {
           <Box sx={{ p: 6, textAlign: 'center' }}>
             <Box sx={{
               width: 80, height: 80, mx: 'auto', mb: 2,
-              borderRadius: '50%', bgcolor: 'rgba(110,231,183,0.08)',
+              borderRadius: '50%', bgcolor: 'rgba(37,99,235,0.08)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <Receipt sx={{ fontSize: 40, color: palette.accent.mint }} />
@@ -427,7 +428,7 @@ export default function UserDashboard() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Avatar sx={{
                             width: 28, height: 28, fontSize: 11, fontWeight: 700,
-                            bgcolor: 'rgba(110,231,183,0.15)', color: palette.accent.mint,
+                            bgcolor: 'rgba(37,99,235,0.15)', color: palette.accent.mint,
                           }}>{initials || 'C'}</Avatar>
                           <Typography sx={{ color: palette.text.primary, fontSize: 14 }}>
                             {getClientName(inv)}

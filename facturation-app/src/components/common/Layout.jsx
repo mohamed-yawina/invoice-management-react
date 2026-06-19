@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, useTheme, useMediaQuery } from '@mui/material';
 import { Dashboard, Receipt, People, Settings } from '@mui/icons-material';
+import { useThemeMode } from '../../contexts/ThemeModeContext';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 
@@ -22,6 +23,7 @@ const userBrand = {
 };
 
 export default function Layout({ children }) {
+  const { palette } = useThemeMode();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -30,7 +32,7 @@ export default function Layout({ children }) {
   const effectiveWidth = collapsed && !isMobile ? COLLAPSED_WIDTH : DRAWER_WIDTH;
 
   return (
-    <Box sx={{ display: 'flex', bgcolor: '#080C14', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', bgcolor: palette.bg.page, minHeight: '100vh' }}>
       <Navbar
         onMobileMenuOpen={() => setMobileOpen(true)}
         brand={userBrand}
@@ -54,7 +56,7 @@ export default function Layout({ children }) {
         width: { md: `calc(100% - ${effectiveWidth}px)` },
         ml: { md: `${effectiveWidth}px` },
         mt: { xs: '60px', md: 0 }, minHeight: '100vh',
-        bgcolor: '#080C14', overflowX: 'hidden',
+        bgcolor: palette.bg.page, overflowX: 'hidden',
         transition: 'margin-left 0.25s ease, width 0.25s ease',
       }}>
         {children}

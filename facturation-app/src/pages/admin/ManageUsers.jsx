@@ -26,7 +26,7 @@ const getInitials = (name, email) => {
 
 const getAvatarGradient = (role) =>
   role === 'admin'
-    ? 'linear-gradient(135deg, #6EE7B7, #3B82F6)'
+    ? 'linear-gradient(135deg, #2563EB, #475569)'
     : 'linear-gradient(135deg, #3B82F6, #8B5CF6)';
 
 // ─── Sous-composants ──────────────────────────────────────────────────────────
@@ -40,12 +40,12 @@ function RoleChip({ role }) {
         ? <AdminPanelSettings sx={{ fontSize: '14px !important' }} />
         : <Person sx={{ fontSize: '14px !important' }} />}
       sx={{
-        bgcolor: isAdmin ? 'rgba(110,231,183,0.12)' : 'rgba(59,130,246,0.12)',
-        color: isAdmin ? '#6EE7B7' : '#3B82F6',
+        bgcolor: isAdmin ? 'rgba(37,99,235,0.12)' : 'rgba(59,130,246,0.12)',
+        color: isAdmin ? '#2563EB' : '#3B82F6',
         fontWeight: 600,
         fontSize: '0.72rem',
-        border: `1px solid ${isAdmin ? 'rgba(110,231,183,0.2)' : 'rgba(59,130,246,0.2)'}`,
-        '& .MuiChip-icon': { color: isAdmin ? '#6EE7B7' : '#3B82F6' },
+        border: `1px solid ${isAdmin ? 'rgba(37,99,235,0.2)' : 'rgba(59,130,246,0.2)'}`,
+        '& .MuiChip-icon': { color: isAdmin ? '#2563EB' : '#3B82F6' },
       }}
     />
   );
@@ -54,8 +54,8 @@ function RoleChip({ role }) {
 function StatCard({ icon, label, value, color, bg }) {
   return (
     <Card sx={{
-      bgcolor: '#0F1623',
-      border: '1px solid rgba(110,231,183,0.08)',
+      bgcolor: 'var(--app-bg-card)',
+      border: '1px solid rgba(37,99,235,0.08)',
       borderRadius: 3,
       transition: 'transform 0.2s, box-shadow 0.2s',
       '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 8px 32px ${color}18` },
@@ -65,10 +65,10 @@ function StatCard({ icon, label, value, color, bg }) {
           {icon}
         </Box>
         <Box>
-          <Typography sx={{ color: '#64748B', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {label}
           </Typography>
-          <Typography sx={{ fontWeight: 700, color: '#F1F5F9', fontSize: '1.75rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+          <Typography sx={{ fontWeight: 700, color: 'var(--app-text-primary)', fontSize: '1.75rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
             {value}
           </Typography>
         </Box>
@@ -97,31 +97,31 @@ function TableRowSkeleton() {
 // ─── Styles formulaire ────────────────────────────────────────────────────────
 const fieldSx = {
   mb: 2,
-  '& .MuiInputLabel-root': { color: '#64748B' },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#6EE7B7' },
+  '& .MuiInputLabel-root': { color: 'var(--app-text-secondary)' },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#2563EB' },
   '& .MuiOutlinedInput-root': {
-    color: '#F1F5F9',
-    bgcolor: '#080C14',
+    color: 'var(--app-text-primary)',
+    bgcolor: 'var(--app-bg-deep)',
     borderRadius: '10px',
     '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-    '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
-    '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
+    '&:hover fieldset': { borderColor: 'rgba(37,99,235,0.3)' },
+    '&.Mui-focused fieldset': { borderColor: '#2563EB' },
   },
 };
 
 const selectSx = {
-  color: '#F1F5F9',
-  bgcolor: '#080C14',
+  color: 'var(--app-text-primary)',
+  bgcolor: 'var(--app-bg-deep)',
   borderRadius: '10px',
   '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.08)' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(110,231,183,0.3)' },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6EE7B7' },
-  '& .MuiSvgIcon-root': { color: '#64748B' },
+  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(37,99,235,0.3)' },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563EB' },
+  '& .MuiSvgIcon-root': { color: 'var(--app-text-secondary)' },
 };
 
 const menuPaperSx = {
   PaperProps: {
-    sx: { bgcolor: '#0F1623', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', backgroundImage: 'none' },
+    sx: { bgcolor: 'var(--app-bg-card)', border: '1px solid #E5E7EB', borderRadius: '10px', backgroundImage: 'none' },
   },
 };
 
@@ -279,13 +279,13 @@ export default function ManageUsers() {
       <Box sx={{ mb: { xs: 3, md: 4 }, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography sx={{
-            fontWeight: 800, color: '#F1F5F9', mb: 0.5,
+            fontWeight: 800, color: 'var(--app-text-primary)', mb: 0.5,
             fontFamily: "'Syne', sans-serif", letterSpacing: '-0.03em',
             fontSize: { xs: '1.4rem', md: '1.9rem' },
           }}>
             Gestion des utilisateurs
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>
+          <Typography variant="body2" sx={{ color: 'var(--app-text-secondary)' }}>
             Gérez les rôles et les permissions de votre équipe
           </Typography>
         </Box>
@@ -296,9 +296,9 @@ export default function ManageUsers() {
                 onClick={() => loadUsers()}
                 disabled={loading}
                 sx={{
-                  color: '#6EE7B7', bgcolor: 'rgba(110,231,183,0.08)',
-                  border: '1px solid rgba(110,231,183,0.2)', borderRadius: '10px',
-                  '&:hover': { bgcolor: 'rgba(110,231,183,0.16)' },
+                  color: '#2563EB', bgcolor: 'rgba(37,99,235,0.08)',
+                  border: '1px solid rgba(37,99,235,0.2)', borderRadius: '10px',
+                  '&:hover': { bgcolor: 'rgba(37,99,235,0.12)' },
                   '&:disabled': { color: '#475569', border: '1px solid rgba(255,255,255,0.06)' },
                 }}
               >
@@ -311,10 +311,10 @@ export default function ManageUsers() {
             startIcon={<Add />}
             onClick={() => setAddDialog({ open: true, loading: false })}
             sx={{
-              bgcolor: '#6EE7B7', color: '#080C14', fontWeight: 700,
+              bgcolor: '#2563EB', color: '#F8FAFC', fontWeight: 700,
               borderRadius: '10px', textTransform: 'none', fontSize: '0.875rem',
-              px: 2.5, boxShadow: '0 0 20px rgba(110,231,183,0.25)',
-              '&:hover': { bgcolor: '#4ADE80', boxShadow: '0 0 28px rgba(110,231,183,0.4)' },
+              px: 2.5, boxShadow: '0 0 20px rgba(37,99,235,0.25)',
+              '&:hover': { bgcolor: '#1D4ED8', boxShadow: '0 0 28px rgba(37,99,235,0.35)' },
             }}
           >
             Ajouter
@@ -325,10 +325,10 @@ export default function ManageUsers() {
       {/* Cartes stats */}
       <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: { xs: 2, md: 3 } }}>
         <Grid item xs={12} sm={4}>
-          <StatCard icon={<Person sx={{ fontSize: 26 }} />} label="Total utilisateurs" value={loading ? '—' : stats.total} color="#6EE7B7" bg="rgba(110,231,183,0.1)" />
+          <StatCard icon={<Person sx={{ fontSize: 26 }} />} label="Total utilisateurs" value={loading ? '—' : stats.total} color="#2563EB" bg="rgba(37,99,235,0.1)" />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <StatCard icon={<AdminPanelSettings sx={{ fontSize: 26 }} />} label="Administrateurs" value={loading ? '—' : stats.admins} color="#6EE7B7" bg="rgba(110,231,183,0.1)" />
+          <StatCard icon={<AdminPanelSettings sx={{ fontSize: 26 }} />} label="Administrateurs" value={loading ? '—' : stats.admins} color="#2563EB" bg="rgba(37,99,235,0.1)" />
         </Grid>
         <Grid item xs={12} sm={4}>
           <StatCard icon={<Person sx={{ fontSize: 26 }} />} label="Utilisateurs standards" value={loading ? '—' : stats.users} color="#3B82F6" bg="rgba(59,130,246,0.1)" />
@@ -336,7 +336,7 @@ export default function ManageUsers() {
       </Grid>
 
       {/* Barre de recherche */}
-      <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, p: 2, mb: 2 }}>
+      <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, p: 2, mb: 2 }}>
         <TextField
           fullWidth
           placeholder="Rechercher par email, nom ou ID…"
@@ -346,44 +346,44 @@ export default function ManageUsers() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search sx={{ color: '#64748B', fontSize: 20 }} />
+                <Search sx={{ color: 'var(--app-text-secondary)', fontSize: 20 }} />
               </InputAdornment>
             ),
             endAdornment: searchTerm ? (
               <InputAdornment position="end">
-                <IconButton size="small" onClick={() => setSearchTerm('')} sx={{ color: '#64748B', '&:hover': { color: '#6EE7B7' } }}>
+                <IconButton size="small" onClick={() => setSearchTerm('')} sx={{ color: 'var(--app-text-secondary)', '&:hover': { color: '#2563EB' } }}>
                   <Close sx={{ fontSize: 16 }} />
                 </IconButton>
               </InputAdornment>
             ) : null,
             sx: {
-              color: '#F1F5F9',
-              bgcolor: '#080C14',
+              color: 'var(--app-text-primary)',
+              bgcolor: 'var(--app-bg-deep)',
               borderRadius: '10px',
               '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-              '&:hover fieldset': { borderColor: 'rgba(110,231,183,0.3)' },
-              '&.Mui-focused fieldset': { borderColor: '#6EE7B7' },
-              '& input': { color: '#F1F5F9' },
+              '&:hover fieldset': { borderColor: 'rgba(37,99,235,0.3)' },
+              '&.Mui-focused fieldset': { borderColor: '#2563EB' },
+              '& input': { color: 'var(--app-text-primary)' },
               '& input::placeholder': { color: '#475569', opacity: 1 },
             },
           }}
         />
         {searchTerm && !loading && (
-          <Typography sx={{ color: '#64748B', fontSize: '0.78rem', mt: 1 }}>
+          <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.78rem', mt: 1 }}>
             {filteredUsers.length} résultat{filteredUsers.length !== 1 ? 's' : ''} pour « {searchTerm} »
           </Typography>
         )}
       </Paper>
 
       {/* Tableau */}
-      <Paper sx={{ bgcolor: '#0F1623', border: '1px solid rgba(110,231,183,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+      <Paper sx={{ bgcolor: 'var(--app-bg-card)', border: '1px solid rgba(37,99,235,0.08)', borderRadius: 3, overflow: 'hidden' }}>
         <TableContainer sx={{ overflowX: 'auto' }}>
           <Table sx={{ minWidth: 680 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
                 {['Utilisateur', 'Email', 'Rôle', 'ID', "Date d'inscription", 'Actions'].map(h => (
                   <TableCell key={h} sx={{
-                    color: '#64748B', fontWeight: 600, fontSize: '0.72rem',
+                    color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem',
                     textTransform: 'uppercase', letterSpacing: '0.05em',
                     borderBottom: '1px solid rgba(255,255,255,0.05)', py: 1.5,
                     whiteSpace: 'nowrap',
@@ -406,9 +406,9 @@ export default function ManageUsers() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         mx: 'auto', mb: 2,
                       }}>
-                        <Person sx={{ color: '#1E293B', fontSize: 26 }} />
+                        <Person sx={{ color: 'var(--app-text-primary)', fontSize: 26 }} />
                       </Box>
-                      <Typography sx={{ color: '#64748B', fontWeight: 500 }}>
+                      <Typography sx={{ color: 'var(--app-text-secondary)', fontWeight: 500 }}>
                         {searchTerm
                           ? 'Aucun utilisateur ne correspond à votre recherche'
                           : 'Aucun utilisateur dans la base de données'}
@@ -428,9 +428,9 @@ export default function ManageUsers() {
                   <TableRow
                     key={user.id}
                     sx={{
-                      borderBottom: '1px solid rgba(255,255,255,0.03)',
+                      borderBottom: '1px solid #E5E7EB',
                       transition: 'background 0.15s',
-                      '&:hover': { bgcolor: 'rgba(110,231,183,0.03)' },
+                      '&:hover': { bgcolor: 'rgba(37,99,235,0.04)' },
                       '&:last-child td': { borderBottom: 'none' },
                     }}
                   >
@@ -444,7 +444,7 @@ export default function ManageUsers() {
                           {getInitials(user.displayName, user.email)}
                         </Avatar>
                         <Box>
-                          <Typography sx={{ color: '#F1F5F9', fontWeight: 600, fontSize: '0.875rem', lineHeight: 1.3 }}>
+                          <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 600, fontSize: '0.875rem', lineHeight: 1.3 }}>
                             {user.displayName || <span style={{ color: '#475569', fontStyle: 'italic' }}>Non renseigné</span>}
                           </Typography>
                           <Typography sx={{ color: '#475569', fontSize: '0.7rem', fontFamily: 'monospace' }}>
@@ -469,7 +469,7 @@ export default function ManageUsers() {
                     </TableCell>
 
                     <TableCell sx={{ py: 1.5 }}>
-                      <Typography sx={{ color: '#64748B', fontSize: '0.8rem' }}>
+                      <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.8rem' }}>
                         {user.createdAt
                           ? new Date(user.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
                           : '—'}
@@ -487,7 +487,7 @@ export default function ManageUsers() {
                               newRole: user.role || 'user',
                               societeIds: Array.isArray(user.societe_ids) ? user.societe_ids : [],
                             })}
-                            sx={{ color: '#6EE7B7', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(110,231,183,0.12)' } }}
+                            sx={{ color: '#2563EB', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(37,99,235,0.12)' } }}
                           >
                             <Edit sx={{ fontSize: 17 }} />
                           </IconButton>
@@ -517,7 +517,7 @@ export default function ManageUsers() {
             </Typography>
             {searchTerm && (
               <Button size="small" onClick={() => setSearchTerm('')}
-                sx={{ color: '#6EE7B7', fontSize: '0.75rem', textTransform: 'none', p: 0 }}>
+                sx={{ color: '#2563EB', fontSize: '0.75rem', textTransform: 'none', p: 0 }}>
                 Effacer le filtre
               </Button>
             )}
@@ -530,28 +530,28 @@ export default function ManageUsers() {
         open={roleDialog.open}
         onClose={() => setRoleDialog({ open: false, user: null, newRole: 'user' })}
         maxWidth="xs" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: '1px solid rgba(110,231,183,0.15)', backgroundImage: 'none' } }}
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: '16px', border: '1px solid rgba(37,99,235,0.15)', backgroundImage: 'none' } }}
       >
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, fontFamily: "'Syne', sans-serif" }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, fontFamily: "'Syne', sans-serif" }}>
           Modifier le rôle
         </DialogTitle>
         <DialogContent sx={{ pt: '20px !important' }}>
           {roleDialog.user && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: '#080C14', borderRadius: '12px', mb: 3, border: '1px solid rgba(255,255,255,0.05)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: 'var(--app-bg-deep)', borderRadius: '12px', mb: 3, border: '1px solid rgba(255,255,255,0.05)' }}>
               <Avatar sx={{ width: 44, height: 44, background: getAvatarGradient(roleDialog.user.role), color: '#fff', fontWeight: 700 }}>
                 {getInitials(roleDialog.user.displayName, roleDialog.user.email)}
               </Avatar>
               <Box>
-                <Typography sx={{ color: '#F1F5F9', fontWeight: 600, fontSize: '0.9rem' }}>
+                <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 600, fontSize: '0.9rem' }}>
                   {roleDialog.user.displayName || 'Utilisateur'}
                 </Typography>
-                <Typography sx={{ color: '#64748B', fontSize: '0.78rem' }}>{roleDialog.user.email}</Typography>
+                <Typography sx={{ color: 'var(--app-text-secondary)', fontSize: '0.78rem' }}>{roleDialog.user.email}</Typography>
               </Box>
             </Box>
           )}
 
           <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel sx={{ color: '#64748B', '&.Mui-focused': { color: '#6EE7B7' } }}>Rôle</InputLabel>
+            <InputLabel sx={{ color: 'var(--app-text-secondary)', '&.Mui-focused': { color: '#2563EB' } }}>Rôle</InputLabel>
             <Select
               value={roleDialog.newRole}
               onChange={(e) => setRoleDialog(d => ({ ...d, newRole: e.target.value }))}
@@ -559,25 +559,25 @@ export default function ManageUsers() {
               sx={selectSx}
               MenuProps={menuPaperSx}
             >
-              <MenuItem value="user" sx={{ color: '#F1F5F9', '&:hover': { bgcolor: 'rgba(59,130,246,0.1)' } }}>
+              <MenuItem value="user" sx={{ color: 'var(--app-text-primary)', '&:hover': { bgcolor: 'rgba(59,130,246,0.1)' } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Box sx={{ width: 28, height: 28, borderRadius: '7px', bgcolor: 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Person sx={{ fontSize: 16, color: '#3B82F6' }} />
                   </Box>
                   <Box>
                     <Typography sx={{ fontSize: '0.875rem', fontWeight: 500 }}>Utilisateur standard</Typography>
-                    <Typography sx={{ fontSize: '0.7rem', color: '#64748B' }}>Accès aux fonctionnalités de base</Typography>
+                    <Typography sx={{ fontSize: '0.7rem', color: 'var(--app-text-secondary)' }}>Accès aux fonctionnalités de base</Typography>
                   </Box>
                 </Box>
               </MenuItem>
-              <MenuItem value="admin" sx={{ color: '#F1F5F9', '&:hover': { bgcolor: 'rgba(110,231,183,0.1)' } }}>
+              <MenuItem value="admin" sx={{ color: 'var(--app-text-primary)', '&:hover': { bgcolor: 'rgba(37,99,235,0.1)' } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Box sx={{ width: 28, height: 28, borderRadius: '7px', bgcolor: 'rgba(110,231,183,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <AdminPanelSettings sx={{ fontSize: 16, color: '#6EE7B7' }} />
+                  <Box sx={{ width: 28, height: 28, borderRadius: '7px', bgcolor: 'rgba(37,99,235,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AdminPanelSettings sx={{ fontSize: 16, color: '#2563EB' }} />
                   </Box>
                   <Box>
                     <Typography sx={{ fontSize: '0.875rem', fontWeight: 500 }}>Administrateur</Typography>
-                    <Typography sx={{ fontSize: '0.7rem', color: '#64748B' }}>Accès complet à l'administration</Typography>
+                    <Typography sx={{ fontSize: '0.7rem', color: 'var(--app-text-secondary)' }}>Accès complet à l'administration</Typography>
                   </Box>
                 </Box>
               </MenuItem>
@@ -586,7 +586,7 @@ export default function ManageUsers() {
 
           {roleDialog.newRole !== 'admin' && (
             <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel sx={{ color: '#64748B', '&.Mui-focused': { color: '#6EE7B7' } }}>Sociétés autorisées</InputLabel>
+              <InputLabel sx={{ color: 'var(--app-text-secondary)', '&.Mui-focused': { color: '#2563EB' } }}>Sociétés autorisées</InputLabel>
               <Select
                 multiple
                 value={roleDialog.societeIds || []}
@@ -597,8 +597,8 @@ export default function ManageUsers() {
                 MenuProps={menuPaperSx}
               >
                 {allCompanies.map((c) => (
-                  <MenuItem key={c.id} value={c.id} sx={{ color: '#F1F5F9' }}>
-                    <Checkbox checked={(roleDialog.societeIds || []).includes(c.id)} sx={{ color: '#6EE7B7' }} />
+                  <MenuItem key={c.id} value={c.id} sx={{ color: 'var(--app-text-primary)' }}>
+                    <Checkbox checked={(roleDialog.societeIds || []).includes(c.id)} sx={{ color: '#2563EB' }} />
                     <ListItemText primary={c.nom} />
                   </MenuItem>
                 ))}
@@ -624,14 +624,14 @@ export default function ManageUsers() {
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', p: 2, gap: 1 }}>
           <Button onClick={() => setRoleDialog({ open: false, user: null, newRole: 'user' })}
-            sx={{ color: '#64748B', textTransform: 'none', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
+            sx={{ color: 'var(--app-text-secondary)', textTransform: 'none', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
             Annuler
           </Button>
           <Button
             onClick={handleRoleChange}
             variant="contained"
             disabled={roleDialog.user?.role === roleDialog.newRole}
-            sx={{ bgcolor: '#6EE7B7', color: '#080C14', fontWeight: 700, textTransform: 'none', borderRadius: '8px', px: 3, '&:hover': { bgcolor: '#4ADE80' }, '&:disabled': { bgcolor: 'rgba(110,231,183,0.2)', color: '#475569' } }}
+            sx={{ bgcolor: '#2563EB', color: '#F8FAFC', fontWeight: 700, textTransform: 'none', borderRadius: '8px', px: 3, '&:hover': { bgcolor: '#1D4ED8' }, '&:disabled': { bgcolor: 'rgba(37,99,235,0.2)', color: '#475569' } }}
           >
             Enregistrer
           </Button>
@@ -643,9 +643,9 @@ export default function ManageUsers() {
         open={addDialog.open}
         onClose={() => !addDialog.loading && setAddDialog({ open: false, loading: false })}
         maxWidth="xs" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: '1px solid rgba(110,231,183,0.15)', backgroundImage: 'none' } }}
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: '16px', border: '1px solid rgba(37,99,235,0.15)', backgroundImage: 'none' } }}
       >
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, fontFamily: "'Syne', sans-serif" }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, fontFamily: "'Syne', sans-serif" }}>
           Ajouter un utilisateur
         </DialogTitle>
         <DialogContent sx={{ pt: '20px !important' }}>
@@ -662,7 +662,7 @@ export default function ManageUsers() {
             sx={fieldSx} placeholder="Prénom Nom"
           />
           <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel sx={{ color: '#64748B', '&.Mui-focused': { color: '#6EE7B7' } }}>Rôle</InputLabel>
+            <InputLabel sx={{ color: 'var(--app-text-secondary)', '&.Mui-focused': { color: '#2563EB' } }}>Rôle</InputLabel>
             <Select
               value={newUser.role}
               onChange={(e) => setNewUser(u => ({ ...u, role: e.target.value }))}
@@ -670,14 +670,14 @@ export default function ManageUsers() {
               sx={selectSx}
               MenuProps={menuPaperSx}
             >
-              <MenuItem value="user" sx={{ color: '#F1F5F9', '&:hover': { bgcolor: 'rgba(59,130,246,0.1)' } }}>
+              <MenuItem value="user" sx={{ color: 'var(--app-text-primary)', '&:hover': { bgcolor: 'rgba(59,130,246,0.1)' } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Person sx={{ fontSize: 18, color: '#3B82F6' }} /> Utilisateur standard
                 </Box>
               </MenuItem>
-              <MenuItem value="admin" sx={{ color: '#F1F5F9', '&:hover': { bgcolor: 'rgba(110,231,183,0.1)' } }}>
+              <MenuItem value="admin" sx={{ color: 'var(--app-text-primary)', '&:hover': { bgcolor: 'rgba(37,99,235,0.1)' } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <AdminPanelSettings sx={{ fontSize: 18, color: '#6EE7B7' }} /> Administrateur
+                  <AdminPanelSettings sx={{ fontSize: 18, color: '#2563EB' }} /> Administrateur
                 </Box>
               </MenuItem>
             </Select>
@@ -688,14 +688,14 @@ export default function ManageUsers() {
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', p: 2, gap: 1 }}>
           <Button onClick={() => setAddDialog({ open: false, loading: false })} disabled={addDialog.loading}
-            sx={{ color: '#64748B', textTransform: 'none', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
+            sx={{ color: 'var(--app-text-secondary)', textTransform: 'none', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
             Annuler
           </Button>
           <Button
             onClick={handleAddUser}
             variant="contained"
             disabled={addDialog.loading || !newUser.email || !newUser.displayName}
-            sx={{ bgcolor: '#6EE7B7', color: '#080C14', fontWeight: 700, textTransform: 'none', borderRadius: '8px', px: 3, '&:hover': { bgcolor: '#4ADE80' }, '&:disabled': { bgcolor: 'rgba(110,231,183,0.2)', color: '#475569' } }}
+            sx={{ bgcolor: '#2563EB', color: '#F8FAFC', fontWeight: 700, textTransform: 'none', borderRadius: '8px', px: 3, '&:hover': { bgcolor: '#1D4ED8' }, '&:disabled': { bgcolor: 'rgba(37,99,235,0.2)', color: '#475569' } }}
           >
             {addDialog.loading ? 'Ajout en cours…' : 'Ajouter'}
           </Button>
@@ -707,9 +707,9 @@ export default function ManageUsers() {
         open={deleteDialog.open}
         onClose={() => !deleteDialog.loading && setDeleteDialog({ open: false, user: null, loading: false })}
         maxWidth="xs" fullWidth
-        PaperProps={{ sx: { bgcolor: '#0F1623', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.2)', backgroundImage: 'none' } }}
+        PaperProps={{ sx: { bgcolor: 'var(--app-bg-card)', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.2)', backgroundImage: 'none' } }}
       >
-        <DialogTitle sx={{ color: '#F1F5F9', fontWeight: 700, fontSize: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, fontFamily: "'Syne', sans-serif" }}>
+        <DialogTitle sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, fontFamily: "'Syne', sans-serif" }}>
           Confirmer la suppression
         </DialogTitle>
         <DialogContent sx={{ pt: '20px !important' }}>
@@ -718,7 +718,7 @@ export default function ManageUsers() {
               {getInitials(deleteDialog.user?.displayName, deleteDialog.user?.email)}
             </Avatar>
             <Box>
-              <Typography sx={{ color: '#F1F5F9', fontWeight: 600, fontSize: '0.875rem' }}>
+              <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 600, fontSize: '0.875rem' }}>
                 {deleteDialog.user?.displayName || 'Utilisateur'}
               </Typography>
               <Typography sx={{ color: '#94A3B8', fontSize: '0.78rem' }}>{deleteDialog.user?.email}</Typography>
@@ -730,7 +730,7 @@ export default function ManageUsers() {
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', p: 2, gap: 1 }}>
           <Button onClick={() => setDeleteDialog({ open: false, user: null, loading: false })} disabled={deleteDialog.loading}
-            sx={{ color: '#64748B', textTransform: 'none', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
+            sx={{ color: 'var(--app-text-secondary)', textTransform: 'none', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
             Annuler
           </Button>
           <Button

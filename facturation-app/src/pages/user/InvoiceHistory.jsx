@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Chip, IconButton, Button, LinearProgress, Grid, Card, CardContent, TextField, MenuItem,
@@ -19,7 +19,7 @@ import { useCompany } from '../../contexts/CompanyContext';
 import { generateInvoicePDF } from '../../services/pdfService';
 import { exportInvoicesToExcel } from '../../services/excelService';
 import { getPublicAppOrigin, isLocalhostOrigin } from '../../utils/appOrigin';
-import { palette, gradients } from '../../theme/darkTheme';
+import { useThemeMode } from '../../contexts/ThemeModeContext';
 import { formatMoney, getInvoiceAmountMad } from '../../utils/currency';
 
 const STATUT_STYLES = {
@@ -34,6 +34,7 @@ const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—');
 const fmtInv = (n, inv) => formatMoney(n, inv?.currency);
 
 export default function InvoiceHistory() {
+  const { palette, gradients } = useThemeMode();
   const navigate = useNavigate();
   const { filterItems } = useCompany();
   const [loading, setLoading] = useState(true);
@@ -247,11 +248,11 @@ export default function InvoiceHistory() {
         sx={{
           position: 'relative', overflow: 'hidden', borderRadius: 4, p: { xs: 3, md: 4 }, mb: 3,
           background: gradients.hero,
-          border: '1px solid rgba(110,231,183,0.15)',
+          border: '1px solid rgba(37,99,235,0.15)',
           '&::before': {
             content: '""', position: 'absolute', top: -60, right: -40,
             width: 200, height: 200, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(110,231,183,0.12), transparent 60%)',
+            background: 'radial-gradient(circle, rgba(37,99,235,0.12), transparent 60%)',
           },
         }}
       >
@@ -261,9 +262,9 @@ export default function InvoiceHistory() {
               <Box sx={{
                 width: 44, height: 44, borderRadius: 2,
                 background: gradients.brand, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 8px 20px rgba(110,231,183,0.3)',
+                boxShadow: '0 8px 20px rgba(37,99,235,0.3)',
               }}>
-                <Description sx={{ color: '#0D0F14', fontSize: 22 }} />
+                <Description sx={{ color: '#F8FAFC', fontSize: 22 }} />
               </Box>
               <Box>
                 <Typography variant="h4" sx={{ color: palette.text.primary, fontWeight: 800, lineHeight: 1.1 }}>
@@ -291,7 +292,7 @@ export default function InvoiceHistory() {
             <Card sx={{
               position: 'relative', overflow: 'hidden', borderRadius: 3,
               background: gradients.card,
-              '&:hover': { transform: 'translateY(-3px)', borderColor: 'rgba(110,231,183,0.3)' },
+              '&:hover': { transform: 'translateY(-3px)', borderColor: 'rgba(37,99,235,0.3)' },
               '&::before': {
                 content: '""', position: 'absolute', top: 0, left: 0, right: 0, height: 3,
                 background: k.gradient,
@@ -320,7 +321,7 @@ export default function InvoiceHistory() {
         <Box sx={{
           p: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center',
           borderBottom: `1px solid ${palette.line.subtle}`,
-          background: 'linear-gradient(90deg, rgba(110,231,183,0.04), transparent)',
+          background: 'linear-gradient(90deg, rgba(37,99,235,0.06), transparent)',
         }}>
           <TextField
             size="small" placeholder="Rechercher n°, client, montant…"
@@ -332,9 +333,9 @@ export default function InvoiceHistory() {
             variant="outlined" size="small" startIcon={<TableView />}
             onClick={handleExportExcel} disabled={loading || filtered.length === 0}
             sx={{
-              color: palette.accent.mint, borderColor: 'rgba(110,231,183,0.4)',
+              color: palette.accent.mint, borderColor: 'rgba(37,99,235,0.35)',
               textTransform: 'none', fontWeight: 600, whiteSpace: 'nowrap',
-              '&:hover': { borderColor: palette.accent.mint, bgcolor: 'rgba(110,231,183,0.08)' },
+              '&:hover': { borderColor: palette.accent.mint, bgcolor: 'rgba(37,99,235,0.08)' },
             }}
           >
             Export Excel
@@ -360,7 +361,7 @@ export default function InvoiceHistory() {
           <Box sx={{ p: 6, textAlign: 'center' }}>
             <Box sx={{
               width: 80, height: 80, mx: 'auto', mb: 2,
-              borderRadius: '50%', bgcolor: 'rgba(110,231,183,0.08)',
+              borderRadius: '50%', bgcolor: 'rgba(37,99,235,0.08)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <ReceiptIcon sx={{ fontSize: 40, color: palette.accent.mint }} />
@@ -394,7 +395,7 @@ export default function InvoiceHistory() {
               <TableBody>
                 {filtered.map((inv) => (
                   <TableRow key={inv._path || inv.id} hover
-                    sx={{ '&:hover': { bgcolor: 'rgba(110,231,183,0.04)' } }}>
+                    sx={{ '&:hover': { bgcolor: 'rgba(37,99,235,0.06)' } }}>
                     <TableCell sx={{ color: palette.accent.mint, fontWeight: 700, fontSize: 14 }}>
                       {inv.numero || '—'}
                     </TableCell>
@@ -402,7 +403,7 @@ export default function InvoiceHistory() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Avatar sx={{
                           width: 28, height: 28, fontSize: 11, fontWeight: 700,
-                          bgcolor: 'rgba(110,231,183,0.15)', color: palette.accent.mint,
+                          bgcolor: 'rgba(37,99,235,0.15)', color: palette.accent.mint,
                         }}>{clientInitials(getClientName(inv))}</Avatar>
                         <Typography sx={{ color: palette.text.primary, fontSize: 14 }}>
                           {getClientName(inv)}
@@ -466,7 +467,7 @@ export default function InvoiceHistory() {
               width: 40, height: 40, borderRadius: 2, background: gradients.brand,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <Description sx={{ color: '#0D0F14', fontSize: 20 }} />
+              <Description sx={{ color: '#F8FAFC', fontSize: 20 }} />
             </Box>
             <Box>
               <Typography sx={{ color: palette.text.primary, fontWeight: 700 }}>
@@ -493,7 +494,7 @@ export default function InvoiceHistory() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                       <Avatar sx={{
                         width: 40, height: 40, fontWeight: 700,
-                        bgcolor: 'rgba(110,231,183,0.15)', color: palette.accent.mint,
+                        bgcolor: 'rgba(37,99,235,0.15)', color: palette.accent.mint,
                       }}>{clientInitials(getClientName(detailInv))}</Avatar>
                       <Box>
                         <Typography sx={{ color: palette.text.primary, fontWeight: 600 }}>
@@ -621,7 +622,7 @@ export default function InvoiceHistory() {
               background: gradients.warning,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <TrackChanges sx={{ color: '#0D0F14', fontSize: 20 }} />
+              <TrackChanges sx={{ color: '#F8FAFC', fontSize: 20 }} />
             </Box>
             <Box>
               <Typography sx={{ color: palette.text.primary, fontWeight: 700 }}>

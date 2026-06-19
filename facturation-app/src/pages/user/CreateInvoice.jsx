@@ -19,7 +19,7 @@ import {
   calculateWithGlobalDiscount, calculateWithCategoryVAT,
 } from '../../utils/calculations';
 import { generateInvoicePDF } from '../../services/pdfService';
-import { palette, gradients } from '../../theme/darkTheme';
+import { useThemeMode } from '../../contexts/ThemeModeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { getUserSignature } from '../../services/signatureService';
@@ -35,7 +35,7 @@ import { formatMoney, enrichInvoiceCurrency, DEFAULT_CURRENCY, convertToMad, con
 const TYPE_VIREMENTS = ['Virement bancaire', 'Chèque', 'Espèces', 'Carte bancaire', 'Prélèvement', 'Autre'];
 
 // Badge de section illustrée
-const SectionHeader = ({ icon, title, subtitle, color = palette.accent.mint }) => (
+const SectionHeader = ({ icon, title, subtitle, color = 'var(--app-accent)' }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
     <Box sx={{
       width: 42, height: 42, borderRadius: 2,
@@ -47,10 +47,10 @@ const SectionHeader = ({ icon, title, subtitle, color = palette.accent.mint }) =
       {icon}
     </Box>
     <Box>
-      <Typography sx={{ color: palette.text.primary, fontWeight: 700, fontSize: 15, lineHeight: 1.1 }}>
+      <Typography sx={{ color: 'var(--app-text-primary)', fontWeight: 700, fontSize: 15, lineHeight: 1.1 }}>
         {title}
       </Typography>
-      <Typography sx={{ color: palette.text.muted, fontSize: 12 }}>
+      <Typography sx={{ color: 'var(--app-text-muted)', fontSize: 12 }}>
         {subtitle}
       </Typography>
     </Box>
@@ -58,6 +58,7 @@ const SectionHeader = ({ icon, title, subtitle, color = palette.accent.mint }) =
 );
 
 export default function CreateInvoice() {
+  const { palette, gradients } = useThemeMode();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast: notifyToast } = useNotifications();
@@ -324,11 +325,11 @@ export default function CreateInvoice() {
           position: 'relative', overflow: 'hidden', borderRadius: 4,
           p: { xs: 2.5, md: 3.5 }, mb: 3,
           background: gradients.hero,
-          border: '1px solid rgba(110,231,183,0.15)',
+          border: '1px solid rgba(37,99,235,0.15)',
           '&::before': {
             content: '""', position: 'absolute', top: -50, right: -30,
             width: 180, height: 180, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(110,231,183,0.12), transparent 60%)',
+            background: 'radial-gradient(circle, rgba(37,99,235,0.12), transparent 60%)',
           },
         }}
       >
@@ -340,9 +341,9 @@ export default function CreateInvoice() {
           <Box sx={{
             width: 48, height: 48, borderRadius: 2,
             background: gradients.brand, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 20px rgba(110,231,183,0.3)',
+            boxShadow: '0 8px 20px rgba(37,99,235,0.3)',
           }}>
-            <Description sx={{ color: '#0D0F14', fontSize: 24 }} />
+            <Description sx={{ color: '#F8FAFC', fontSize: 24 }} />
           </Box>
           <Box sx={{ flex: 1, minWidth: 200 }}>
             <Typography variant="h4" sx={{ color: palette.text.primary, fontWeight: 800, lineHeight: 1.1 }}>
@@ -353,9 +354,9 @@ export default function CreateInvoice() {
             </Typography>
           </Box>
           <Chip label={`N° ${form.numero}`} sx={{
-            background: 'rgba(110,231,183,0.1)',
+            background: 'rgba(37,99,235,0.1)',
             color: palette.accent.mint,
-            border: '1px solid rgba(110,231,183,0.2)',
+            border: '1px solid rgba(37,99,235,0.2)',
             fontFamily: 'monospace', fontWeight: 700,
           }} />
         </Box>
@@ -384,7 +385,7 @@ export default function CreateInvoice() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                         <Box sx={{
                           width: 26, height: 26, borderRadius: '50%',
-                          bgcolor: 'rgba(110,231,183,0.15)', color: palette.accent.mint,
+                          bgcolor: 'rgba(37,99,235,0.15)', color: palette.accent.mint,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 11, fontWeight: 700,
                         }}>
@@ -483,8 +484,8 @@ export default function CreateInvoice() {
               <Button startIcon={<Add />} onClick={addItem}
                 variant="outlined"
                 sx={{
-                  color: palette.accent.mint, borderColor: 'rgba(110,231,183,0.3)',
-                  '&:hover': { bgcolor: 'rgba(110,231,183,0.08)', borderColor: palette.accent.mint },
+                  color: palette.accent.mint, borderColor: 'rgba(37,99,235,0.3)',
+                  '&:hover': { bgcolor: 'rgba(37,99,235,0.08)', borderColor: palette.accent.mint },
                 }}>
                 Ajouter
               </Button>
@@ -502,17 +503,17 @@ export default function CreateInvoice() {
                   sx={{
                     bgcolor: palette.bg.card, borderRadius: 2, p: 2, mb: 2,
                     border: `1px solid ${palette.line.subtle}`,
-                    '&:hover': { borderColor: 'rgba(110,231,183,0.2)' },
+                    '&:hover': { borderColor: 'rgba(37,99,235,0.2)' },
                     transition: 'border-color 0.2s',
                     position: 'relative',
                   }}>
                   <Box sx={{
                     position: 'absolute', top: 10, left: -10,
                     width: 24, height: 24, borderRadius: '50%',
-                    background: gradients.brand, color: '#0D0F14',
+                    background: gradients.brand, color: '#F8FAFC',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 12, fontWeight: 800,
-                    boxShadow: '0 4px 10px rgba(110,231,183,0.3)',
+                    boxShadow: '0 4px 10px rgba(37,99,235,0.3)',
                   }}>
                     {idx + 1}
                   </Box>
@@ -595,7 +596,7 @@ export default function CreateInvoice() {
                     {form.method === 'categoryVAT' && category && (
                       <Grid item xs={12}>
                         <Chip size="small" label={`Catégorie : ${category.nom}`}
-                          sx={{ bgcolor: 'rgba(110,231,183,0.1)', color: palette.accent.mint }} />
+                          sx={{ bgcolor: 'rgba(37,99,235,0.1)', color: palette.accent.mint }} />
                       </Grid>
                     )}
                   </Grid>
@@ -606,9 +607,9 @@ export default function CreateInvoice() {
             <Button fullWidth startIcon={<Add />} onClick={addItem}
               sx={{
                 mt: 1, color: palette.accent.mint,
-                border: `1px dashed rgba(110,231,183,0.3)`, borderRadius: 2,
+                border: `1px dashed rgba(37,99,235,0.3)`, borderRadius: 2,
                 py: 1.5,
-                '&:hover': { bgcolor: 'rgba(110,231,183,0.05)', borderColor: palette.accent.mint },
+                '&:hover': { bgcolor: 'rgba(37,99,235,0.06)', borderColor: palette.accent.mint },
               }}>
               Ajouter un autre article
             </Button>
@@ -628,7 +629,7 @@ export default function CreateInvoice() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Box sx={{
                       width: 40, height: 40, borderRadius: '50%',
-                      bgcolor: 'rgba(110,231,183,0.15)', color: palette.accent.mint,
+                      bgcolor: 'rgba(37,99,235,0.15)', color: palette.accent.mint,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontWeight: 700, fontSize: 16,
                     }}>
@@ -651,7 +652,7 @@ export default function CreateInvoice() {
             <Card sx={{
               borderRadius: 3, mb: 2,
               background: gradients.card,
-              border: '1px solid rgba(110,231,183,0.2)',
+              border: '1px solid rgba(37,99,235,0.2)',
               overflow: 'hidden',
               position: 'relative',
               '&::before': {
@@ -678,7 +679,7 @@ export default function CreateInvoice() {
                 <Divider sx={{ my: 1.5 }} />
                 <Box sx={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  p: 1.5, bgcolor: 'rgba(110,231,183,0.08)', borderRadius: 2,
+                  p: 1.5, bgcolor: 'rgba(37,99,235,0.08)', borderRadius: 2,
                 }}>
                   <Typography sx={{ color: palette.text.primary, fontWeight: 700 }}>Total TTC</Typography>
                   <Typography sx={{
@@ -703,7 +704,7 @@ export default function CreateInvoice() {
             </Card>
 
             {/* Signature numérique */}
-            <Card sx={{ borderRadius: 3, mb: 2, background: gradients.card, border: '1px solid rgba(110,231,183,0.12)' }}>
+            <Card sx={{ borderRadius: 3, mb: 2, background: gradients.card, border: '1px solid rgba(37,99,235,0.12)' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
                   <Draw sx={{ color: palette.accent.mint, fontSize: 18 }} />
@@ -714,7 +715,7 @@ export default function CreateInvoice() {
                 {signature ? (
                   <Box>
                     <Box sx={{
-                      bgcolor: '#FFFFFF', p: 1.5, borderRadius: 2,
+                      bgcolor: 'var(--app-bg-card)', p: 1.5, borderRadius: 2,
                       display: 'flex', justifyContent: 'center', alignItems: 'center',
                       minHeight: 80, mb: 1.2,
                     }}>
@@ -742,9 +743,9 @@ export default function CreateInvoice() {
                   <Box>
                     <Button fullWidth variant="outlined" startIcon={<Draw />} onClick={() => setSigPadOpen(true)}
                       sx={{
-                        color: palette.accent.mint, borderColor: 'rgba(110,231,183,0.3)', borderStyle: 'dashed',
+                        color: palette.accent.mint, borderColor: 'rgba(37,99,235,0.3)', borderStyle: 'dashed',
                         py: 1.2,
-                        '&:hover': { bgcolor: 'rgba(110,231,183,0.06)', borderColor: palette.accent.mint },
+                        '&:hover': { bgcolor: 'rgba(37,99,235,0.08)', borderColor: palette.accent.mint },
                       }}>
                       Ajouter une signature
                     </Button>
@@ -781,7 +782,7 @@ export default function CreateInvoice() {
         PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}>
         <Box sx={{
           position: 'relative', p: 4, textAlign: 'center',
-          background: 'linear-gradient(135deg, rgba(34,197,94,0.15), rgba(110,231,183,0.1))',
+          background: 'linear-gradient(135deg, rgba(34,197,94,0.15), rgba(37,99,235,0.1))',
           borderBottom: `1px solid ${palette.line.subtle}`,
         }}>
           <Box sx={{
