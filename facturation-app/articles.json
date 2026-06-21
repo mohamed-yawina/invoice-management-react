@@ -90,96 +90,7 @@
       "stock": 25,
       "description": "SSD externe USB-C, vitesse de lecture 1000MB/s"
     },
-    {
-      "id": "11",
-      "designation": "Service Conseil en Digitalisation",
-      "prix_unitaire": 5000,
-      "categorie_id": "2",
-      "reference": "SERV-DIGIT",
-      "stock": null,
-      "description": "Accompagnement à la transformation digitale des entreprises"
-    },
-    {
-      "id": "12",
-      "designation": "Service Maintenance Informatique",
-      "prix_unitaire": 1500,
-      "categorie_id": "2",
-      "reference": "SERV-MAINT",
-      "stock": null,
-      "description": "Contrat de maintenance annuelle pour parc informatique"
-    },
-    {
-      "id": "13",
-      "designation": "Service Hébergement Cloud",
-      "prix_unitaire": 800,
-      "categorie_id": "2",
-      "reference": "SERV-CLOUD",
-      "stock": null,
-      "description": "Hébergement cloud sécurisé avec support 24/7"
-    },
-    {
-      "id": "14",
-      "designation": "Service Audit Sécurité",
-      "prix_unitaire": 3500,
-      "categorie_id": "2",
-      "reference": "SERV-AUDIT",
-      "stock": null,
-      "description": "Audit complet de sécurité informatique"
-    },
-    {
-      "id": "15",
-      "designation": "Service Support Technique",
-      "prix_unitaire": 600,
-      "categorie_id": "2",
-      "reference": "SERV-SUPPORT",
-      "stock": null,
-      "description": "Support technique par téléphone et email"
-    },
-    {
-      "id": "16",
-      "designation": "Formation React.js",
-      "prix_unitaire": 2500,
-      "categorie_id": "3",
-      "reference": "FORM-REACT",
-      "stock": null,
-      "description": "Formation intensive React.js (5 jours)"
-    },
-    {
-      "id": "17",
-      "designation": "Formation Node.js",
-      "prix_unitaire": 2500,
-      "categorie_id": "3",
-      "reference": "FORM-NODE",
-      "stock": null,
-      "description": "Formation Node.js et Express (5 jours)"
-    },
-    {
-      "id": "18",
-      "designation": "Formation Firebase",
-      "prix_unitaire": 1800,
-      "categorie_id": "3",
-      "reference": "FORM-FIRE",
-      "stock": null,
-      "description": "Formation Firebase Realtime Database et Auth (3 jours)"
-    },
-    {
-      "id": "19",
-      "designation": "Formation Python",
-      "prix_unitaire": 2000,
-      "categorie_id": "3",
-      "reference": "FORM-PYTHON",
-      "stock": null,
-      "description": "Formation Python pour débutants (4 jours)"
-    },
-    {
-      "id": "20",
-      "designation": "Formation Data Science",
-      "prix_unitaire": 4500,
-      "categorie_id": "3",
-      "reference": "FORM-DATA",
-      "stock": null,
-      "description": "Formation complète Data Science (10 jours)"
-    },
+    
     {
       "id": "21",
       "designation": "Tablette Samsung Galaxy Tab",
@@ -241,18 +152,7 @@
       "nom": "Informatique",
       "description": "Matériel informatique, périphériques et accessoires",
       "icon": "computer"
-    },
-    {
-      "id": "2",
-      "nom": "Services",
-      "description": "Prestations de services professionnels",
-      "icon": "build"
-    },
-    {
-      "id": "3",
-      "nom": "Formation",
-      "description": "Formations professionnelles en informatique",
-      "icon": "school"
     }
+    
   ]
 }

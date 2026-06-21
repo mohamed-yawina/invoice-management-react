@@ -54,7 +54,7 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = '#111827';
     ctx.font = "italic 60px 'Brush Script MT', cursive, serif";
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -118,11 +118,11 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
           <Box>
             <Box sx={{
               border: '2px dashed rgba(37,99,235,0.3)', borderRadius: 2,
-              bgcolor: 'var(--app-bg-card)', position: 'relative', overflow: 'hidden',
+              bgcolor: '#FFFFFF', position: 'relative', overflow: 'hidden',
             }}>
               <SignatureCanvas
                 ref={sigRef}
-                penColor="#FFFFFF"
+                penColor="#111827"
                 canvasProps={{
                   width: 500, height: 180,
                   style: { display: 'block', width: '100%', height: 180 },
@@ -133,7 +133,7 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
                 <Typography sx={{
                   position: 'absolute', top: '50%', left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  color: '#CBD5E1', pointerEvents: 'none', fontSize: '0.85rem',
+                  color: '#64748B', pointerEvents: 'none', fontSize: '0.85rem',
                   fontStyle: 'italic',
                 }}>
                   Dessinez votre signature ici
@@ -162,13 +162,13 @@ export default function SignaturePad({ open, onClose, onSave, initialValue, titl
             />
             {typedName.trim() && (
               <Box sx={{
-                mt: 2, p: 3, bgcolor: 'var(--app-bg-card)', borderRadius: 2,
+                mt: 2, p: 3, bgcolor: '#FFFFFF', borderRadius: 2,
                 textAlign: 'center', minHeight: 120,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <Typography sx={{
                   fontFamily: "'Brush Script MT', cursive, serif",
-                  fontSize: '2.5rem', color: '#FFFFFF', fontStyle: 'italic',
+                  fontSize: '2.5rem', color: '#111827', fontStyle: 'italic',
                 }}>
                   {typedName.trim()}
                 </Typography>

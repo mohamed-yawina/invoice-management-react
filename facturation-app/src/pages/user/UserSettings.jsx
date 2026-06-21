@@ -174,7 +174,7 @@ export default function UserSettings() {
             {signature ? (
               <Box>
                 <Box sx={{
-                  bgcolor: 'var(--app-bg-card)', p: 2, borderRadius: 2,
+                  bgcolor: '#FFFFFF', p: 2, borderRadius: 2,
                   border: '1px solid rgba(255,255,255,0.06)',
                   display: 'flex', justifyContent: 'center', alignItems: 'center',
                   minHeight: 140, mb: 2,

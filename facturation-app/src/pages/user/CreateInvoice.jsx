@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/common/Layout';
 import SignaturePad from '../../components/common/SignaturePad';
+import PdfPreviewDialog from '../../components/common/PdfPreviewDialog';
 import { db, ref, get, push } from '../../services/firebaseService';
 import { jsonService } from '../../services/jsonService';
 import {
@@ -116,6 +117,7 @@ export default function CreateInvoice() {
   const [toast, setToast] = useState({ open: false, msg: '', severity: 'success' });
   const [successOpen, setSuccessOpen] = useState(false);
   const [createdInvoice, setCreatedInvoice] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => { loadData(); }, []);
   useEffect(() => {
@@ -715,7 +717,7 @@ export default function CreateInvoice() {
                 {signature ? (
                   <Box>
                     <Box sx={{
-                      bgcolor: 'var(--app-bg-card)', p: 1.5, borderRadius: 2,
+                      bgcolor: '#FFFFFF', p: 1.5, borderRadius: 2,
                       display: 'flex', justifyContent: 'center', alignItems: 'center',
                       minHeight: 80, mb: 1.2,
                     }}>
@@ -834,6 +836,9 @@ export default function CreateInvoice() {
           }} sx={{ color: palette.accent.mint }}>
             Créer une autre
           </Button>
+          <Button variant="outlined" startIcon={<Description />} onClick={() => setPreviewOpen(true)}>
+            Aperçu PDF
+          </Button>
           <Button variant="contained" startIcon={<PictureAsPdf />} onClick={handleDownloadCreatedPDF}
             sx={{ background: gradients.danger, color: '#FFF', '&:hover': { opacity: 0.9 } }}>
             Télécharger PDF
@@ -854,6 +859,14 @@ export default function CreateInvoice() {
         onSave={(dataUrl) => setSignature(dataUrl)}
         initialValue={signature}
         title="Signature pour cette facture"
+      />
+
+      <PdfPreviewDialog
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        facture={createdInvoice?.invoice || null}
+        client={createdInvoice?.client || null}
+        title="Aperçu de la facture"
       />
     </Layout>
   );

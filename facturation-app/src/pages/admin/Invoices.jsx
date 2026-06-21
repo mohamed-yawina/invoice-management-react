@@ -12,6 +12,8 @@ import {
   TaskAlt, HourglassEmpty, DoNotDisturb, Download, Close, TableView,
 } from '@mui/icons-material';
 import AdminLayout from '../../components/common/AdminLayout';
+import EmailStatusChip from '../../components/common/EmailStatusChip';
+import PdfPreviewDialog from '../../components/common/PdfPreviewDialog';
 import { useCompany } from '../../contexts/CompanyContext';
 import { getCompanyDisplayName } from '../../services/companyService';
 import {
@@ -21,11 +23,10 @@ import {
 import { generateInvoicePDF, generateInvoicesReportPDF } from '../../services/pdfService';
 import { exportInvoicesToExcel } from '../../services/excelService';
 import { postValidateInvoiceActions } from '../../services/invoiceValidationService';
-import { formatMoney, getInvoiceAmountMad, normalizeCurrency } from '../../utils/currency';
+import { formatMoney, normalizeCurrency } from '../../utils/currency';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—');
-const fmtMoney = (n) => (Number(n) || 0).toLocaleString('fr-FR');
 const fmtInv = (n, f) => formatMoney(n, f?.currency);
 
 const STATUS_META = {
@@ -75,6 +76,7 @@ export default function Invoices() {
 
   const [detailDialog, setDetailDialog] = useState({ open: false, facture: null });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, facture: null, action: null });
+  const [previewFacture, setPreviewFacture] = useState(null);
 
   // ── Chargement ────────────────────────────────────────────────────
   const loadData = useCallback(async () => {
@@ -152,6 +154,13 @@ export default function Invoices() {
       setSnackbar({ open: true, message: 'Erreur génération PDF', severity: 'error' });
     }
   };
+
+  const getInvoiceClient = (facture) => ({
+    nom: facture?.client_nom,
+    email: facture?.client_email,
+    tel: facture?.client_tel,
+    adresse: facture?.client_adresse,
+  });
 
   const handleExportAll = () => {
     if (filtered.length === 0) {
@@ -408,7 +417,7 @@ export default function Invoices() {
               <Table sx={{ minWidth: 900 }}>
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
-                    {['N° Facture', 'Date', 'Client', 'Société', 'Devise', 'Montant TTC', 'Statut', 'Validation', 'Actions'].map(h => (
+                    {['N° Facture', 'Date', 'Client', 'Société', 'Devise', 'Montant TTC', 'Statut', 'Validation', 'Email', 'Actions'].map(h => (
                       <TableCell key={h} sx={{ color: 'var(--app-text-secondary)', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</TableCell>
                     ))}
                   </TableRow>
@@ -416,7 +425,7 @@ export default function Invoices() {
                 <TableBody>
                   {paginated.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} sx={{ py: 7, textAlign: 'center', borderBottom: 'none' }}>
+                      <TableCell colSpan={10} sx={{ py: 7, textAlign: 'center', borderBottom: 'none' }}>
                         <Receipt sx={{ color: 'var(--app-text-primary)', fontSize: 48, mb: 1 }} />
                         <Typography sx={{ color: 'var(--app-text-secondary)' }}>Aucune facture trouvée</Typography>
                       </TableCell>
@@ -461,10 +470,18 @@ export default function Invoices() {
                           )}
                         </TableCell>
                         <TableCell>
+                          <EmailStatusChip facture={f} />
+                        </TableCell>
+                        <TableCell>
                           <Box sx={{ display: 'flex', gap: 0.3 }}>
                             <Tooltip title="Détails">
                               <IconButton size="small" onClick={() => setDetailDialog({ open: true, facture: f })} sx={{ color: '#3B82F6' }}>
                                 <Visibility fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Aperçu PDF">
+                              <IconButton size="small" onClick={() => setPreviewFacture(f)} sx={{ color: '#3B82F6' }}>
+                                <Receipt fontSize="small" />
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Télécharger PDF">
@@ -538,6 +555,7 @@ export default function Invoices() {
                 }}
               />
             )}
+            {detailDialog.facture && <EmailStatusChip facture={detailDialog.facture} />}
           </Box>
           <IconButton onClick={() => setDetailDialog({ open: false, facture: null })} sx={{ color: 'var(--app-text-secondary)' }}>
             <Close />
@@ -626,6 +644,7 @@ export default function Invoices() {
           )}
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.05)', p: 2, gap: 1 }}>
+          <Button startIcon={<Receipt />} onClick={() => setPreviewFacture(detailDialog.facture)} sx={{ color: '#3B82F6' }}>Aperçu PDF</Button>
           <Button startIcon={<PictureAsPdf />} onClick={() => handlePdf(detailDialog.facture)} sx={{ color: '#EF4444' }}>PDF</Button>
           <Box sx={{ flex: 1 }} />
           <Button onClick={() => setDetailDialog({ open: false, facture: null })} sx={{ color: 'var(--app-text-secondary)' }}>Fermer</Button>
@@ -685,6 +704,14 @@ export default function Invoices() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      <PdfPreviewDialog
+        open={Boolean(previewFacture)}
+        onClose={() => setPreviewFacture(null)}
+        facture={previewFacture}
+        client={previewFacture ? getInvoiceClient(previewFacture) : null}
+        title="Aperçu de la facture"
+      />
 
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </AdminLayout>

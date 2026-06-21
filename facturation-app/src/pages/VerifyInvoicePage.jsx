@@ -11,7 +11,7 @@ import {
 import {
   getInvoiceById, getPublicVerifyRecord, subscribePublicVerify, db, ref, get,
 } from '../services/firebaseService';
-import { formatMoney, normalizeCurrency } from '../utils/currency';
+import { formatMoney } from '../utils/currency';
 
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—');
 

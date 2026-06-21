@@ -15,6 +15,8 @@ import {
   db, ref, get, getAllFacturesFlat, updateFactureByPath, deleteFactureByPath,
 } from '../../services/firebaseService';
 import Layout from '../../components/common/Layout';
+import EmailStatusChip from '../../components/common/EmailStatusChip';
+import PdfPreviewDialog from '../../components/common/PdfPreviewDialog';
 import { useCompany } from '../../contexts/CompanyContext';
 import { generateInvoicePDF } from '../../services/pdfService';
 import { exportInvoicesToExcel } from '../../services/excelService';
@@ -46,6 +48,7 @@ export default function InvoiceHistory() {
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailInv, setDetailInv] = useState(null);
+  const [previewInv, setPreviewInv] = useState(null);
 
   const [trackOpen, setTrackOpen] = useState(false);
   const [trackInv, setTrackInv] = useState(null);
@@ -174,6 +177,10 @@ export default function InvoiceHistory() {
       console.error(error);
       setToast({ open: true, msg: 'Erreur génération PDF', severity: 'error' });
     }
+  };
+
+  const handlePreviewPDF = (inv) => {
+    setPreviewInv(inv);
   };
 
   const handleExportExcel = () => {
@@ -389,6 +396,7 @@ export default function InvoiceHistory() {
                   <TableCell>Type virement</TableCell>
                   <TableCell align="right">Montant TTC</TableCell>
                   <TableCell>Statut</TableCell>
+                  <TableCell>Email</TableCell>
                   <TableCell align="center">Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -418,6 +426,7 @@ export default function InvoiceHistory() {
                       {fmtInv(inv.total_ttc, inv)}
                     </TableCell>
                     <TableCell>{getStatusChip(inv.statut)}</TableCell>
+                    <TableCell><EmailStatusChip facture={inv} /></TableCell>
                     <TableCell align="center">
                       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
                         <Tooltip title="Voir détail">
@@ -432,7 +441,13 @@ export default function InvoiceHistory() {
                             <TrackChanges fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="PDF">
+                        <Tooltip title="Aperçu PDF">
+                          <IconButton size="small" onClick={() => handlePreviewPDF(inv)}
+                            sx={{ color: '#3B82F6', bgcolor: 'rgba(59,130,246,0.08)', '&:hover': { bgcolor: 'rgba(59,130,246,0.18)' } }}>
+                            <Description fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Télécharger PDF">
                           <IconButton size="small" onClick={() => handleDownloadPDF(inv)}
                             sx={{ color: '#EF4444', bgcolor: 'rgba(239,68,68,0.08)', '&:hover': { bgcolor: 'rgba(239,68,68,0.18)' } }}>
                             <PictureAsPdf fontSize="small" />
@@ -515,6 +530,19 @@ export default function InvoiceHistory() {
                       Statut
                     </Typography>
                     <Box>{getStatusChip(detailInv.statut)}</Box>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ p: 2, bgcolor: palette.bg.card, borderRadius: 2, border: `1px solid ${palette.line.subtle}` }}>
+                    <Typography sx={{ color: palette.text.muted, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1 }}>
+                      Email client
+                    </Typography>
+                    <EmailStatusChip facture={detailInv} />
+                    {detailInv.email_sent_to && (
+                      <Typography sx={{ color: palette.text.secondary, fontSize: 12, mt: 1 }}>
+                        Destinataire : {detailInv.email_sent_to}
+                      </Typography>
+                    )}
                   </Box>
                 </Grid>
                 <Grid item xs={6} md={3}>
@@ -601,6 +629,9 @@ export default function InvoiceHistory() {
             onClick={() => { setDetailOpen(false); handleOpenTrack(detailInv); }}
             sx={{ color: '#EAB308', borderColor: '#EAB308', '&:hover': { borderColor: '#FDE68A', bgcolor: 'rgba(234,179,8,0.1)' } }}>
             Suivi
+          </Button>
+          <Button variant="outlined" startIcon={<Description />} onClick={() => handlePreviewPDF(detailInv)}>
+            Aperçu PDF
           </Button>
           <Button variant="contained" startIcon={<PictureAsPdf />} onClick={() => handleDownloadPDF(detailInv)}
             sx={{ background: gradients.danger, color: '#FFF', '&:hover': { opacity: 0.9 } }}>
@@ -722,6 +753,14 @@ export default function InvoiceHistory() {
           {toast.msg}
         </Alert>
       </Snackbar>
+
+      <PdfPreviewDialog
+        open={Boolean(previewInv)}
+        onClose={() => setPreviewInv(null)}
+        facture={previewInv}
+        client={previewInv ? clientsMap[previewInv.client_id] || previewInv.client_snapshot || null : null}
+        title="Aperçu de la facture"
+      />
     </Layout>
   );
 }

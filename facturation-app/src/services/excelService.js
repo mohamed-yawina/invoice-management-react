@@ -23,6 +23,9 @@ const invoiceToRow = (f) => ({
   'Date dépôt': fmtDate(f.date_depot),
   'Date encaissement': fmtDate(f.date_encaissement),
   'Type virement': f.type_virement || '',
+  'Statut email': f.email_status || (f.email_sent_at ? 'sent' : ''),
+  'Email envoyé à': f.email_sent_to || '',
+  'Date email': fmtDate(f.email_sent_at || f.email_attempted_at),
   'Archivée': f.archived ? 'Oui' : 'Non',
   'Année archive': f.archive_year || '',
 });
@@ -35,7 +38,8 @@ export function exportInvoicesToExcel(factures = [], filename = 'factures.xlsx',
   ws['!cols'] = [
     { wch: 14 }, { wch: 12 }, { wch: 22 }, { wch: 24 }, { wch: 8 },
     { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 10 },
-    { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 16 }, { wch: 8 }, { wch: 10 },
+    { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 16 }, { wch: 14 }, { wch: 24 },
+    { wch: 12 }, { wch: 8 }, { wch: 10 },
   ];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
